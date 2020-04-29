@@ -5,7 +5,7 @@ const filestream = require("fs");
 const client = new Discord.Client();
 const DICE = 6;
 
-var BOT_TOKEN = readTextFile('bot_token.txt');
+const BOT_TOKEN = readTextFile('bot_token.txt');
 
 /* bot online */
 client.on("ready", () => {
