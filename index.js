@@ -2,8 +2,10 @@ const PREFIX = ">>";
 //const ytdl = require("ytdl-core");
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const TOKEN = process.env.BOT_TOKEN;
 const DICE = 6;
+
+// set up envrionment token for heroku deployment website.
+const TOKEN = process.env.BOT_TOKEN;
 
 /* bot online */
 client.on("ready", () => {
