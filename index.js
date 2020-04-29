@@ -176,7 +176,7 @@ function vSens(message, gameCode, sens) {
         console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached UNDEFINED arguments.`);
         console.log(`\n    gameCode = ${gameCode}, sensitivity = ${sens}\n\n`);
         return message.channel.send(`${message.author}.`
-            +"\nThis command converts your CSGO sensitivity to Valorant."
+            +"\nThis command converts other FPS-Game sensitivities to Valorant."
             +"\n\nUsage: " + "Valorant [GameCode] [Sensitivity]"
             +"\n\nGameCode:\n"
                 +"\t\t[A]: APEX LEGEND\n"
@@ -231,6 +231,7 @@ function userHelp(message) {
             +"\n\nUsage: " + `${PREFIX}`+"[function]"
                 +"\n\nFunctions:"
                     +"\n\tHelp"
+                    +`\n\tMention ${client.user}`
                     +"\n\tKill"
                     +"\n\tReboot"
                     +"\n\tRoll"
