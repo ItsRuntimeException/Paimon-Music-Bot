@@ -35,9 +35,13 @@ Give the user my maplestory guild page.
 Convert the user's game sensitivity to Valorant game sensitivity.
 
 Supported GameCode:
+
 **\[A\]: APEX LEGEND**
+
 **\[B\]: RAINBOW SIX**
+
 **\[C\]: CSGO**
+
 **\[O\]: OVERWATCH**
 
-*** Personal Project; Last Updated: April 29, 2020 ***
+**Personal Project; Last Updated: April 29, 2020**
