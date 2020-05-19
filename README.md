@@ -2,7 +2,7 @@
 A Discord bot with various random functionalities.
 
 **Command Usage**
-- $\[function\]
+- >>\[function\]
 
 **Bot Functions**
 - [Help](#Help)
