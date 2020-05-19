@@ -11,7 +11,7 @@ A Discord bot with various random functionalities.
 - [Kill](#Kill)
 - [Roll](#Roll)
 - [MapleStory](#MapleStory)
-- [ValorantSens] <GameCode> <Sensitivity> (#ValorantSensitivity)
+- [ValorantSens](#ValorantSensitivity)
 
 # Help #
 Display a list of functions and its usage.
