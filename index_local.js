@@ -77,6 +77,12 @@ client.on("message", async message => {
         case "valorant":
             vSens(message, args[0], args[1]);
             break;
+        case "create":
+            create_genshin_table(message);
+            break;
+        case "showtable":
+            showtable(message);
+            break;
         default:
             message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
     }
@@ -144,7 +150,7 @@ async function leave(message) {
 
 function readTextFile(file)
 {
-    var text = filestream.readFileSync(file).toString('utf8'); 
+    var text = filestream.readFileSync(file).toString('utf-8');
     return text;
 }
 
@@ -233,6 +239,67 @@ function vSens(message, gameCode, sens) {
     }
 }
 
+function create_genshin_table(message) {
+    var text = readTextFile('genshin_wishes.json');
+    var arrayObj = JSON.parse(text);
+
+    // this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates.
+    for (var i = 0; i < length(arrayObj.users); i++) {
+        // if this user does does not have an existing table, create a default table for this user.
+        if (!(arrayObj.users[i].username === message.member.user.tag)) {
+            arrayObj.users.push({
+                username: message.member.user.tag,
+                banners: {event:0, weapon:0, perm:0}
+            });
+            break;
+        }
+        // this user table already exist.
+        else {
+            console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] already EXIST!');
+            message.channel.send(`${message.author}. Your Genshin Gacha Table aready exist!`);
+            return;
+        }
+    }
+    if (length(arrayObj.users) == 0) {
+        arrayObj.users.push({
+            username: message.member.user.tag,
+            banners: {event:0, weapon:0, perm:0}
+        });
+    }
+
+    var tableString = JSON.stringify(arrayObj);
+    filestream.writeFile('genshin_wishes.json', tableString, 'utf-8', function(err) {
+        if (err) throw err;
+        console.log(arrayObj);
+    })
+    console.log('Finished creating Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
+    message.channel.send(`${message.author}. Your Genshin Gacha Table has been created!`);
+}
+
+function showtable(message) {
+    var text = readTextFile('genshin_wishes.json');
+    var arrayObj = JSON.parse(text);
+
+    for (var i = 0; i < length(arrayObj.users); i++) {
+        // if this user does does not have an existing table, create a default table for this user.
+        if (!(arrayObj.users[i].username === message.member.user.tag)) {
+            message.channel.send(`${message.author}. Your Genshin Gacha Table is not initialized!`);
+            break;
+        }
+        // this user table already exist.
+        else {
+            console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+            console.log(arrayObj.users[i]);
+            message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users[i])}`);
+            
+            return;
+        }
+    }
+}
+function length(obj) {
+    return Object.keys(obj).length;
+}
+
 function userHelp(message) {
     message.channel.send(`${message.author}.`
             +`\n[Currently Hosting via Heroku]\n"Music Support deprecated."`
@@ -243,6 +310,8 @@ function userHelp(message) {
                     +"\n\tReboot"
                     +"\n\tRoll"
                     +"\n\tMapleStory"
+                    +"\n\tCreate"
+                    +"\n\tShowtable"
                     +"\n\tValorant [GameCode] [Sensitivity]\n")
     .then(console.log(`${message.member.user.tag} requested for bot functions.`)).catch(console.error);
 }

@@ -1,6 +1,11 @@
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
+Step 1: Make sure to have npm and nodeJS installed.
+Step 2: Run 'install_dependencies.bat'.
+Step 3: Replace the text in 'bot_token.txt' with your own bot token.
+Step 4: Run 'local_startup.bat' or you can host it online with heroku/other servers.
+
 **Command Usage**
 - \>>\[function\]
 
@@ -11,6 +16,8 @@ A Discord bot with various random functionalities.
 - [Kill](#Kill)
 - [Roll](#Roll)
 - [MapleStory](#MapleStory)
+- [Create](#Create)
+- [Showtable](#Showtable)
 - [ValorantSens](#ValorantSensitivity)
 
 # Help #
@@ -30,6 +37,14 @@ Roll a random number from 1-6 (Dice Function).
 
 # MapleStory #
 Give the user my maplestory guild page.
+
+# Create #
+Create a default Genshin Impact Gacha Table that initializes all banner counts to 0.
+Usage: >>create
+
+# Showtable #
+Show the user their current Genshin Impact Gacha Table.
+Usage: >>showtable
 
 # ValorantSensitivity #
 Convert the user's game sensitivity to Valorant game sensitivity.
