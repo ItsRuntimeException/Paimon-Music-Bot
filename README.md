@@ -1,10 +1,10 @@
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
-Step 1: Make sure to have npm and nodeJS installed.
-Step 2: Run 'install_dependencies.bat'.
-Step 3: Replace the text in 'bot_token.txt' with your own bot token.
-Step 4: Run 'local_startup.bat' or you can host it online with heroku/other servers.
+Step 1: Make sure to have npm and nodeJS installed.</br>
+Step 2: Run 'install_dependencies.bat'.</br>
+Step 3: Replace the text in 'bot_token.txt' with your own bot token.</br>
+Step 4: Run 'local_startup.bat' or you can host it online with heroku/other servers.</br>
 
 **Command Usage**
 - \>>\[function\]
