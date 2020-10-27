@@ -406,18 +406,18 @@ function wishReset(message, bannerType) {
     }
     bannerType = bannerType.toLowerCase();
 
-    var bannerType = "";
+    var bannerString = "";
     switch (bannerType) {
         case "c":
-            bannerType = "Character Event Banner";
+            bannerString = "Character Event Banner";
             arrayObj.users[i].event = 0;
             break;
         case "w":
-            bannerType = "Weapon Banner";
+            bannerString = "Weapon Banner";
             arrayObj.users[i].weapon = 0;
             break;
         case "p":
-            bannerType = "Permanent Wish Banner";
+            bannerString = "Permanent Wish Banner";
             arrayObj.users[i].perm = 0;
             break;
         default: 
@@ -432,7 +432,7 @@ function wishReset(message, bannerType) {
     // display message
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
     console.log(arrayObj.users[i]);
-    message.channel.send(`${message.author}. Your GGT-${bannerType} is now reset...\n${JSON.stringify(arrayObj.users[i])}`);
+    message.channel.send(`${message.author}. Your GGT-${bannerString} is now reset...\n${JSON.stringify(arrayObj.users[i])}`);
 }
 
 function length(obj) {
