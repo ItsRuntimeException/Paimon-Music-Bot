@@ -405,20 +405,33 @@ function wishReset(message, bannerType) {
     }
     bannerType = bannerType.toLowerCase();
 
+    var bannerType = "";
     switch (bannerType) {
         case "c":
+            bannerType = "Character Event Banner";
             arrayObj.users[i].event = 0;
             break;
         case "w":
+            bannerType = "Weapon Banner";
             arrayObj.users[i].weapon = 0;
             break;
         case "p":
+            bannerType = "Permanent Wish Banner";
             arrayObj.users[i].perm = 0;
             break;
         default: 
             return message.channel.send(`${message.author}. Unsupported BannerType, cannot reset your gacha data.`)
             .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
     }
+    // save data back to json
+    var tableString = JSON.stringify(arrayObj);
+    filestream.writeFile('genshin_wishes.json', tableString, 'utf-8', function(err) {
+        if (err) throw err;
+    })
+    // display message
+    console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
+    console.log(arrayObj.users[i]);
+    message.channel.send(`${message.author}. Your GGT-${bannerType} is now reset...\n${JSON.stringify(arrayObj.users[i])}`);
 }
 
 function length(obj) {
