@@ -16,8 +16,10 @@ Step 4: Run 'local_startup.bat' or you can host it online with heroku/other serv
 - [Kill](#Kill)
 - [Roll](#Roll)
 - [MapleStory](#MapleStory)
-- [Create](#Create)
-- [Showtable](#Showtable)
+- [gCreate](#gCreate)
+- [gShowtable](#gShowtable)
+- [gWish](#gWish)
+- [gReset](#gReset)
 - [ValorantSens](#ValorantSensitivity)
 
 # Help #
@@ -38,13 +40,17 @@ Roll a random number from 1-6 (Dice Function).
 # MapleStory #
 Give the user my maplestory guild page.
 
-# Create #
+# gCreate #
 Create a default Genshin Impact Gacha Table that initializes all banner counts to 0.
-Usage: >>create
 
-# Showtable #
+# gShowtable #
 Show the user their current Genshin Impact Gacha Table.
-Usage: >>showtable
+
+# gWish #
+Modify the specified banner-count in the user's Genshin Gacha Table.
+
+# gReset #
+Reset the specified banner-count in the user's Genshin Gacha Table.
 
 # ValorantSensitivity #
 Convert the user's game sensitivity to Valorant game sensitivity.
