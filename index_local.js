@@ -404,6 +404,20 @@ function wishReset(message, bannerType) {
                 +"\t\t[P]: Permanent Banner");
     }
 
+    // find user
+    var text = readTextFile('genshin_wishes.json');
+    var arrayObj = JSON.parse(text);
+    for (var i = 0; i < length(arrayObj.users); i++) {
+        if (arrayObj.users[i].username === message.member.user.tag) {
+            console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+            break;
+        }
+    }
+    if (i == length(arrayObj.users)) {
+        // this user table already exist.
+        return message.channel.send(`${message.author}. Your Genshin Gacha Table is not initialized!`);
+    }
+    
     bannerType = bannerType.toLowerCase();
     var bannerString = "";
     switch (bannerType) {
