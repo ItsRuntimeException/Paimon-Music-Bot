@@ -90,6 +90,9 @@ client.on("message", async message => {
         case "greset":
             wishReset(message, args[0]);
             break;
+        case "gshowall":
+            showall(message);
+            break;
         default:
             message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
     }
@@ -277,7 +280,7 @@ function create_genshin_table(message) {
         });
     }
 
-    var tableString = JSON.stringify(arrayObj);
+    var tableString = JSON.stringify(arrayObj, undefined, 2);
     filestream.writeFile('genshin_wishes.json', tableString, 'utf-8', function(err) {
         if (err) throw err;
         console.log(arrayObj.users);
@@ -292,12 +295,26 @@ function showtable(message) {
     for (var i = 0; i < length(arrayObj.users); i++) {
         if (arrayObj.users[i].username === message.member.user.tag) {
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
-            message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users[i])}`);
+            console.log(arrayObj.users[i]);
+            message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
             return;
         }
     }
     // this user table already exist.
     message.channel.send(`${message.author}. Your Genshin Gacha Table is not initialized!`);
+}
+
+function showall(message) {
+    var text = readTextFile('genshin_wishes.json');
+    var arrayObj = JSON.parse(text);
+    for (var i = 0; i < length(arrayObj.users); i++) {
+        console.log('Genshin Gacha Table for all users requested by: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
+        console.log(arrayObj.users);
+        message.channel.send(`${message.author}. All Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users, undefined, 2)}`);
+        return;
+    }
+    // this user table already exist.
+    message.channel.send(`${message.author}. There are no Genshin Gacha Tables initialized!`);
 }
 
 function wishCount(message, bannerType, commandType, nInc) {
@@ -380,14 +397,14 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
 
         // save data back to json
-        var tableString = JSON.stringify(arrayObj);
+        var tableString = JSON.stringify(arrayObj, undefined, 2);
         filestream.writeFile('genshin_wishes.json', tableString, 'utf-8', function(err) {
             if (err) throw err;
         })
         // display message
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
         console.log(arrayObj.users[i]);
-        message.channel.send(`${message.author}. Your Genshin Gacha Table is now updated...\n${JSON.stringify(arrayObj.users[i])}`);
+        message.channel.send(`${message.author}. Your Genshin Gacha Table is now updated...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
         
     }
 }
@@ -439,14 +456,14 @@ function wishReset(message, bannerType) {
             .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
     }
     // save data back to json
-    var tableString = JSON.stringify(arrayObj);
+    var tableString = JSON.stringify(arrayObj, undefined, 2);
     filestream.writeFile('genshin_wishes.json', tableString, 'utf-8', function(err) {
         if (err) throw err;
     })
     // display message
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
     console.log(arrayObj.users[i]);
-    message.channel.send(`${message.author}. Your GGT-${bannerString} is now reset...\n${JSON.stringify(arrayObj.users[i])}`);
+    message.channel.send(`${message.author}. Your GGT-${bannerString} is now reset...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
 }
 
 function length(obj) {
