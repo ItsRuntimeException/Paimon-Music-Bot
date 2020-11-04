@@ -309,7 +309,7 @@ function showall(message) {
     for (var i = 0; i < length(arrayObj.users); i++) {
         console.log('Genshin Gacha Table for all users requested by: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
         console.log(arrayObj.users);
-        message.channel.send(`${message.author}. All Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users, undefined, 2)}`);
+        message.channel.send(`${message.author}. All Genshin Gacha Tables are being fetched...\n${JSON.stringify(arrayObj.users, undefined, 2)}`);
         return;
     }
     // this user table already exist.
