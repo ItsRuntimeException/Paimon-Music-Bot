@@ -1,0 +1,67 @@
+{
+   "users": [
+      {
+         "username": "Kocha#6839",
+         "bannerTypes": {
+            "event": 54,
+            "weapon": 0,
+            "standard": 38,
+            "novice": 20
+         }
+      },
+      {
+         "username": "Royal#8544",
+         "bannerTypes": {
+            "event": 0,
+            "weapon": 0,
+            "standard": 0,
+            "novice": "N/A"
+         }
+      },
+      {
+         "username": "dog noises#6520",
+         "bannerTypes": {
+            "event": 44,
+            "weapon": 0,
+            "standard": 25,
+            "novice": "N/A"
+         }
+      },
+      {
+         "username": "dog noises#4496",
+         "bannerTypes": {
+            "event": 0,
+            "weapon": 69696969696969,
+            "standard": 0,
+            "novice": "N/A"
+         }
+      },
+      {
+         "username": "Yeetzy#6237",
+         "bannerTypes": {
+            "event": 0,
+            "weapon": 0,
+            "standard": 0,
+            "novice": "N/A"
+         }
+      },
+      {
+         "username": "Mara#5036",
+         "bannerTypes": {
+            "event": 0,
+            "weapon": 0,
+            "standard": 0,
+            "novice": "N/A"
+         }
+      },
+      {
+         "username": "shadowstrider563#4635",
+         "bannerTypes": {
+            "event": 0,
+            "weapon": 0,
+            "standard": 0,
+            "novice": "N/A"
+         }
+      }
+   ]
+}
