@@ -1,1 +1,1 @@
-node index_local.js
+node index_native.js
