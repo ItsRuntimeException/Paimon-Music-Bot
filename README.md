@@ -3,7 +3,7 @@ A Discord bot with various random functionalities.
 
 Step 1: Make sure to have npm and nodeJS installed.</br>
 Step 2: Run 'install_dependencies.bat'.</br>
-Step 3: Replace the text in 'bot_token.txt' with your own bot token.</br>
+Step 3: Replace the text in './source/bot_token.txt' with your own bot token.</br>
 Step 4: Run 'NATIVE_BOOT.bat' or you can host it online with heroku/other servers.</br>
 
 **Command Usage**
