@@ -7,7 +7,7 @@ Step 3: Replace the text in 'bot_token.txt' with your own bot token.</br>
 Step 4: Run 'local_startup.bat' or you can host it online with heroku/other servers.</br>
 
 **Command Usage**
-- \>>\[function\]
+- \?\[function\]
 
 **Bot Functions**
 - [Help](#Help)
