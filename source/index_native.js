@@ -5,6 +5,7 @@ const filestream = require("fs");
 const client = new Discord.Client();
 const DICE = 6;
 
+// native token file
 const BOT_TOKEN = readTextFile('./source/bot_token.txt');
 
 /* bot online */
