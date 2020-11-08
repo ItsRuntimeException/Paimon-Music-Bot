@@ -9,6 +9,7 @@ const DICE = 6;
 // native token file
 const BOT_TOKEN = readTextFile('./source/bot_token.txt');
 const youtube = new YouTube(readTextFile('./source/youtube_api_key.txt')); // Personal Youtube-API key
+var audio_dispatcher = null;
 
 /* bot online */
 client.on("ready", () => {
@@ -56,6 +57,15 @@ client.on("message", async message => {
             break;
         case "sing":
             sing(message, args);
+            break;
+        case "pause":
+            pause_music();
+            break;
+        case "resume":
+            resume_music();
+            break;
+        case "stop":
+            stop_music();
             break;
         case "leave":
             leave(message);
@@ -141,10 +151,10 @@ async function sing(message, search_string) {
     console.log(video.url);
 
     // PLAY MUSIC
-    let info = await await ytdl.getInfo(url);
+    let info = await ytdl.getInfo(url);
     let connection = await message.member.voiceChannel.join();
     let stream = ytdl(url, { filter: 'audioonly' });
-    connection.playStream(stream);
+    audio_dispatcher = connection.playStream(stream);
 
     // channel reply
     /* https://discord.com/developers/docs/resources/channel#embed-object */
@@ -170,23 +180,48 @@ async function sing(message, search_string) {
     .then(console.log('music: ' + info.videoDetails.title + ' | requested by user: ' + message.member.user.tag)).catch(console.error);
 }
 
+function pause_music(message) {
+    if (audio_dispatcher != null) {
+        audio_dispatcher.pause();
+        message.channel.send('Music paused.')
+        .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] paused music.'));
+    }
+}
+
+function resume_music(message) {
+    if (audio_dispatcher != null) {
+        audio_dispatcher.resume();
+        message.channel.send('Music resume.')
+        .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] resumed music.'));
+    }
+}
+
+function stop_music(message) {
+    audio_dispatcher.destroy();
+    if (audio_dispatcher != null) {
+        message.channel.send('Music stopped.')
+        .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] stopped music.'));
+    }
+}
+
 async function leave(message) {
     let userVoiceChannel = message.member.voiceChannel;
-            let clientVoiceConnection = message.guild.voiceConnection;
-            // https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
-            // Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
-            
-            // no current connection or check for same current channel
-            if (clientVoiceConnection === null){
-                message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
-            }
-            // valid compare
-            else if (userVoiceChannel === clientVoiceConnection.channel) {
-                clientVoiceConnection.disconnect();
-            }
-            else {
-                message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
-            }
+    let clientVoiceConnection = message.guild.voiceConnection;
+    // https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
+    // Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
+    
+    // no current connection or check for same current channel
+    if (clientVoiceConnection == null){
+        message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
+    }
+    // valid compare
+    else if (userVoiceChannel == clientVoiceConnection.channel) {
+        stop_music();
+        clientVoiceConnection.disconnect();
+    }
+    else {
+        message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
+    }
 }
 
 function source_send(message) {
@@ -243,7 +278,8 @@ function reboot(message) {
 
 function emergency_food_time(message) {
     // channel leave
-    if (userVoiceChannel === clientVoiceConnection.channel)
+    let clientVoiceConnection = message.guild.voiceConnection;
+    if (clientVoiceConnection.channel != null)
         clientVoiceConnection.disconnect();
     // channel reply
     message.channel.send("Nooooooooooo! Paimon is turning into fooooooood!", {files:['moji/PaimonLunch.jpg']});
