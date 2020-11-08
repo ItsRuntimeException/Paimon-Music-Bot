@@ -162,7 +162,7 @@ async function sing(message, search_string) {
         let stream = ytdl(url, { filter: 'audioonly' });
         audio_dispatcher = connection.playStream(stream);
         console.log(`url: ${video.url}`);
-        console.log(`Now Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
+        console.log(`Now Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}\n`);
         message.channel.send({embed: {
             author: {
                 name: 'Paimon-chan\'s Embedded Info',
@@ -194,7 +194,7 @@ async function sing(message, search_string) {
         let stream = ytdl(original_string, { filter: 'audioonly' });
         audio_dispatcher = connection.playStream(stream);
         console.log(`url: ${original_string}`);
-        console.log(`Now Playing: ${info.videoDetails.title}, Duration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
+        console.log(`Now Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}\n`);
         message.channel.send({embed: {
             author: {
                 name: 'Paimon-chan\'s Embedded Info',
