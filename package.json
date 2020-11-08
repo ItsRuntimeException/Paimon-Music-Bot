@@ -10,7 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "@discordjs/uws": "^10.149.0",
+    "discord-youtube-api": "^0.1.0",
     "discord.js": "^11.5.0",
-    "npm": "^7.0.5"
+    "ffmpeg-binaries": "^3.2.2",
+    "node-opus": "^0.3.3",
+    "npm": "^7.0.5",
+    "ytdl-core": "^3.3.0"
   }
 }

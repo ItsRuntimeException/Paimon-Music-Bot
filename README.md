@@ -12,6 +12,8 @@ Step 4: Run 'NATIVE_BOOT.bat' or you can host it online with heroku/other server
 **Bot Functions**
 - [Help](#Help)
 - [Mention](#Mention)
+- [Sing](#Sing)
+- [Leave](#Leave)
 - [Reboot](#Reboot)
 - [Kill](#Kill)
 - [Roll](#Roll)
@@ -23,6 +25,13 @@ Step 4: Run 'NATIVE_BOOT.bat' or you can host it online with heroku/other server
 - [ValorantSens](#ValorantSensitivity)
 
 # Help #
+Display a list of functions and its usage.
+
+# Sing #
+Play audio from youtube.
+Example Usage: ?sing \[Youtube-Link or Keywords\] 
+
+# Leave #
 Display a list of functions and its usage.
 
 # Mention #

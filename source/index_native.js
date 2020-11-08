@@ -1,5 +1,6 @@
 const PREFIX = "?";
-//const ytdl = require("ytdl-core");
+const ytdl = require('ytdl-core');
+const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
 const filestream = require("fs");
 const client = new Discord.Client();
@@ -7,6 +8,7 @@ const DICE = 6;
 
 // native token file
 const BOT_TOKEN = readTextFile('./source/bot_token.txt');
+const youtube = new YouTube(readTextFile('./source/youtube_api_key.txt')); // Personal Youtube-API key
 
 /* bot online */
 client.on("ready", () => {
@@ -49,17 +51,15 @@ client.on("message", async message => {
         case "help":
             userHelp(message)
             break;
-        /*
         case "join":
             join(message);
             break;
-        case "play":
-            play(message, args[0]);
+        case "sing":
+            sing(message, args);
             break;
         case "leave":
             leave(message);
             break;
-        */
         case "source":
             source_send(message);
             break;
@@ -73,7 +73,7 @@ client.on("message", async message => {
             reboot(message)
             break;
         case "kill":
-            shutdown(message);
+            emergency_food_time(message);
             break;
         case "roll":
             roll(message);
@@ -105,7 +105,6 @@ client.on("message", async message => {
     }
 });
 
-/*
 async function join(message) {
     const { voiceChannel } = message.member;
     if (!voiceChannel) {
@@ -116,15 +115,17 @@ async function join(message) {
     }
 }
 
-async function play(message, play_string) {
+async function sing(message, search_string) {
+    // user search:
+    search_string = search_string.toString().replace(/,/g,' ');
+    console.log('[tag: ' + message.member.user.tag + ' | search_string: ' + search_string + ']');
     // VALIDATE ARG NOT NULL
     const { voiceChannel } = message.member;
-    if (play_string == undefined) {
+    if (search_string == undefined) {
         console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
-        console.log(`\n    play_string = ${play_string}\n\n`);
         return message.channel.send(`${message.author}.`
-            +"\nThis command plays your specified Youtube-link."
-            +"\n\nUsage: " + "play [Link]"
+            +"\nThis command plays your specified Youtube-link or keyword searched."
+            +"\n\nUsage: " + "play [Link | Keyword]"
             +"\n\nLink example:\n"
                 +"\t\tyoutube.com/watch?v=oHg5SJYRHA0");
     }
@@ -134,19 +135,39 @@ async function play(message, play_string) {
         return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
     }
 
-    // VALIDATE LINK AS PLAYABLE LINK
-    let url = await ytdl.validateURL(play_string);
-    if (!url) {
-            return message.channel.send('You need to supply a VALID youtube-link!', {files: ['./moji/PaimonCookies.gif']});
-    }
+    // PRELOAD
+    let video = await youtube.searchVideos(search_string);
+    let url = video.url.toString();
+    console.log(video.url);
 
     // PLAY MUSIC
-    let info = await ytdl.getInfo(play_string);
+    let info = await await ytdl.getInfo(url);
     let connection = await message.member.voiceChannel.join();
-    let stream = ytdl(play_string, { filter: 'audioonly' });
+    let stream = ytdl(url, { filter: 'audioonly' });
     connection.playStream(stream);
-    message.channel.send(`Now Playing: + ${info.title}`)
-    .then(console.log(`music: "${info.title}" | requested by user: ` + message.member.user.tag)).catch(console.error);
+
+    // channel reply
+    /* https://discord.com/developers/docs/resources/channel#embed-object */
+    message.channel.send({embed: {
+        author: {
+            name: 'Paimon-chan',
+            icon_url: client.user.avatarURL,
+            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+        },
+        title: info.videoDetails.title,
+        url: info.videoDetails.video_url,
+        fields: [{
+            name: "Link",
+            value: info.videoDetails.video_url,
+          }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }})
+    .then(console.log('music: ' + info.videoDetails.title + ' | requested by user: ' + message.member.user.tag)).catch(console.error);
 }
 
 async function leave(message) {
@@ -162,13 +183,12 @@ async function leave(message) {
             // valid compare
             else if (userVoiceChannel === clientVoiceConnection.channel) {
                 clientVoiceConnection.disconnect();
-                message.channel.send("Bye!");
             }
             else {
                 message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
             }
 }
-*/
+
 function source_send(message) {
     var paimon = 'https://github.com/ItsRuntimeException/SimpleDiscordBot';
     message.channel.send(`Paimon's delicious source code: ${paimon}`);
@@ -221,10 +241,13 @@ function reboot(message) {
     .then(client.login(BOT_TOKEN));
 }
 
-function shutdown(message) {
-    message.channel.send("Shutting down...")
-    //.then(leave(message))
-    .then(console.log(`${message.member.user.tag} shutdown the bot.`)).catch(console.error)
+function emergency_food_time(message) {
+    // channel leave
+    if (userVoiceChannel === clientVoiceConnection.channel)
+        clientVoiceConnection.disconnect();
+    // channel reply
+    message.channel.send("Nooooooooooo! Paimon is turning into fooooooood!", {files:['moji/PaimonLunch.jpg']});
+    console.log(`${message.member.user.tag} Paimon is Food Now~.`).catch(console.error)
     .then(client.destroy());
 }
 
@@ -562,20 +585,23 @@ function save_JSON_Data(arrayObj) {
 
 function userHelp(message) {
     message.channel.send(`${message.author}.`
-            +`\n[Currently Hosting via Heroku]\n"Music Support deprecated."`
+            +`\n[Currently Hosting Natively]\n"Music Support Enabled!."`
             +"\n\nUsage: " + `${PREFIX}`+"[function]"
                 +"\n\nFunctions:"
-                    +"\n\tHelp: General Functions"
-                    +"\n\tKill: Bot Shutdown"
-                    +"\n\tReboot: Bot Reboot"
-                    +"\n\tSource: Paimon is Paimon!"
-                    +"\n\tWipe: Sweep Channel Messages"
-                    +"\n\tRoll: Roll a pair of dice"
-                    +"\n\tMapleStory: Invitation to Guild Page"
-                    +"\n\tgCreate: Create your own Genshin Impact's Gacha Count-Table"
-                    +"\n\tgShowtable: Display your current Genshin Gacha Table"
-                    +"\n\tgWish: Manually record your Genshin Gacha Table"
-                    +"\n\tgReset: Manually reset your Genshin Gacha Table:\n\t\t(Please do so after you've hit a 5-Star Drop)"
+                    +"\n\tJoin"
+                    +"\n\tSing [Link | Keyword]"
+                    +"\n\tLeave"
+                    +"\n\tHelp"
+                    +"\n\tKill"
+                    +"\n\tReboot"
+                    +"\n\tSource"
+                    +"\n\tWipe"
+                    +"\n\tRoll"
+                    +"\n\tMapleStory"
+                    +"\n\tgCreate"
+                    +"\n\tgShowtable"
+                    +"\n\tgWish"
+                    +"\n\tgReset"
                     +"\n\tValorant [GameCode] [Sensitivity]\n")
     .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
 }
