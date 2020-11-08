@@ -59,13 +59,13 @@ client.on("message", async message => {
             sing(message, args);
             break;
         case "pause":
-            pause_music();
+            pause_music(message);
             break;
         case "resume":
-            resume_music();
+            resume_music(message);
             break;
         case "stop":
-            stop_music();
+            stop_music(message);
             break;
         case "leave":
             leave(message);
@@ -222,25 +222,34 @@ async function sing(message, search_string) {
 function pause_music(message) {
     if (audio_dispatcher != null) {
         audio_dispatcher.pause();
-        message.channel.send('Music paused.')
-        .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] paused music.'));
+        message.channel.send('Music paused.');
     }
+    else {
+        message.channel.send('There is nothing to pause.');
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to paused music.');
 }
 
 function resume_music(message) {
     if (audio_dispatcher != null) {
         audio_dispatcher.resume();
-        message.channel.send('Music resume.')
-        .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] resumed music.'));
+        message.channel.send('Music resume.');
     }
+    else {
+        message.channel.send('There is nothing to resume.')
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resumed music.');
 }
 
 function stop_music(message) {
     if (audio_dispatcher != null) {
         audio_dispatcher.destroy();
-        message.channel.send('Music stopped.')
-        .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] stopped music.'));
+        message.channel.send('Music stopped.');
     }
+    else {
+        message.channel.send('There is nothing to stop.')
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stopped music.');
 }
 
 async function leave(message) {
