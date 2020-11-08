@@ -127,7 +127,9 @@ async function join(message) {
 
 async function sing(message, search_string) {
     // user search:
-    search_string = search_string.toString().replace(/,/g,' ');
+    const original_string = search_string.toString();
+    let validate = ytdl.validateURL(original_string);
+    search_string = original_string.toString().replace(/,/g,' ');
     console.log('[tag: ' + message.member.user.tag + ' | search_string: ' + search_string + ']');
     // VALIDATE ARG NOT NULL
     const { voiceChannel } = message.member;
@@ -145,39 +147,75 @@ async function sing(message, search_string) {
         return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
     }
 
-    // PRELOAD
-    let video = await youtube.searchVideos(search_string);
-    let url = video.url.toString();
-    console.log(video.url);
-
-    // PLAY MUSIC
-    let info = await ytdl.getInfo(url);
-    let connection = await message.member.voiceChannel.join();
-    let stream = ytdl(url, { filter: 'audioonly' });
-    audio_dispatcher = connection.playStream(stream);
-
     // channel reply
     /* https://discord.com/developers/docs/resources/channel#embed-object */
-    message.channel.send({embed: {
-        author: {
-            name: 'Paimon-chan',
-            icon_url: client.user.avatarURL,
-            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-        },
-        title: info.videoDetails.title,
-        url: info.videoDetails.video_url,
-        fields: [{
-            name: "Link",
-            value: info.videoDetails.video_url,
-          }
-        ],
-        timestamp: new Date(),
-        footer: {
-            icon_url: client.user.avatarURL,
-            text: '© Rich Embedded Frameworks'
-        }
-    }})
-    .then(console.log('music: ' + info.videoDetails.title + ' | requested by user: ' + message.member.user.tag)).catch(console.error);
+    console.log('validate link?' + validate);
+    if (!validate) {
+        // PRELOAD
+        let video = await youtube.searchVideos(search_string);
+        let url = video.url.toString();
+
+        // PLAY MUSIC via keywords
+        let info = await ytdl.getInfo(url);
+        let connection = await message.member.voiceChannel.join();
+        let stream = ytdl(url, { filter: 'audioonly' });
+        audio_dispatcher = connection.playStream(stream);
+        console.log(`url: ${video.url} | requested by user: ${message.member.user.tag}`);
+        console.log(`Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
+        message.channel.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL,
+                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            },
+            title: info.videoDetails.title,
+            url: info.videoDetails.video_url,
+            fields: [{
+                name: "Link",
+                value: info.videoDetails.video_url,
+              },
+              {
+                  name: "Duration",
+                  value: sec_Convert(info.videoDetails.lengthSeconds)
+              }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }})
+    }
+    else {
+        // PLAY MUSIC via link
+        let info = await ytdl.getInfo(original_string);
+        let connection = await message.member.voiceChannel.join();
+        let stream = ytdl(original_string, { filter: 'audioonly' });
+        audio_dispatcher = connection.playStream(stream);
+        console.log(`url: ${original_string} | requested by user: ${message.member.user.tag}`);
+        console.log(`Playing: ${info.videoDetails.title}, Duration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
+        message.channel.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL,
+                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            },
+            fields: [{
+                name: "Title",
+                value: info.videoDetails.title,
+              },
+              {
+                  name: "Duration",
+                  value: sec_Convert(info.videoDetails.lengthSeconds)
+              }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }})
+    }
 }
 
 function pause_music(message) {
@@ -271,7 +309,7 @@ function readTextFile(file)
 
 function reboot(message) {
     message.channel.send("Rebooting...")
-    .then(console.log(`${message.member.user.tag} rebooted the bot.`)).catch(console.error)
+    .then(console.log(`${message.member.user.tag} rebooted the bot.`))
     .then(client.destroy())
     .then(client.login(BOT_TOKEN));
 }
@@ -283,7 +321,7 @@ function emergency_food_time(message) {
         clientVoiceConnection.disconnect();
     // channel reply
     message.channel.send("Nooooooooooo! Paimon is turning into fooooooood!", {files:['moji/PaimonLunch.jpg']});
-    console.log(`${message.member.user.tag} Paimon is Food Now~.`).catch(console.error)
+    console.log(`${message.member.user.tag} Paimon is Food Now~.`)
     .then(client.destroy());
 }
 
@@ -324,7 +362,7 @@ function vSens(message, gameCode, sens) {
     var sensitivity = parseFloat(sens);
     if (isNaN(sensitivity)) // is Not a Number
         return message.channel.send(`${message.author}. You need to supply a VALID sensitivity!`)
-        .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`)).catch(console.error);
+        .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`));
     else {
         var convertedSens = 0;
         var gameName = null;
@@ -347,7 +385,7 @@ function vSens(message, gameCode, sens) {
                 break;
             default: 
                 return message.channel.send(`${message.author}. Unsupported GameCode, cannot determine your sensitivity.`)
-                .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID GameCode.`)).catch(console.error);
+                .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID GameCode.`));
         }
 
         console.log(`\n${message.member.user.tag} requested for VALORANT sensitivity conversion.`);
@@ -458,7 +496,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 +"\t\t[Add]: Character Event Banner\n"
                 +"\t\t[Replace]: Weapon Banner"
             +"\n\nNumber:\n"
-                +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
+                +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
 
     bannerType = bannerType.toLowerCase();
@@ -467,7 +505,7 @@ function wishCount(message, bannerType, commandType, nInc) {
     if (isNaN(roll_count)) // is Not a Number
     {
         return message.channel.send(`${message.author}. You need to supply a VALID count!`)
-        .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`)).catch(console.error);
+        .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`));
     }
     else {
         // find user
@@ -490,7 +528,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         // edit GGachaTable
         if ( !(commandType === "add" || commandType === "replace") ) {
             return message.channel.send(`${message.author}. Unsupported CommandType, cannot edit your gacha data.`)
-            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`)).catch(console.error);
+            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`));
         }
         else if (commandType === "add") {
             switch (bannerType) {
@@ -505,7 +543,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`)
-                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
+                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
             }
         }
         else if (commandType === "replace") {
@@ -521,7 +559,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     return message.channel.send(`${message.author}. Unsupported BannerType, cannot fetch your gacha data.`)
-                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
+                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
             }
         }
 
@@ -545,7 +583,7 @@ function wishReset(message, bannerType) {
             +"\n\nBannerType:\n"
                 +"\t\t[C]: Character Event Banner\n"
                 +"\t\t[W]: Weapon Banner\n"
-                +"\t\t[S]: Standard Banner").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
+                +"\t\t[S]: Standard Banner").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
 
     // find user
@@ -582,7 +620,7 @@ function wishReset(message, bannerType) {
             break;
         default: 
             return message.channel.send(`${message.author}. Unsupported BannerType, cannot reset your gacha data.`)
-            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
+            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
     }
 
     // save data back to json
@@ -596,6 +634,22 @@ function wishReset(message, bannerType) {
 
 function length(obj) {
     return Object.keys(obj).length;
+}
+
+function sec_Convert(sec_string) {
+    var seconds = Math.floor(parseInt(sec_string));
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+
+    // re-factor minutes and seconds
+    for (var i = 0; i < hours; i++) {
+        minutes -= 60;
+        seconds -= 3600;
+    }
+    for (var i = 0; i < minutes; i++) {
+        seconds -= 60;
+    }
+    return `${hours} hrs : ${minutes} mins : ${seconds} secs`;
 }
 
 function update_genshin_userTag(arrayObj, cached_index) {
@@ -639,7 +693,7 @@ function userHelp(message) {
                     +"\n\tgWish"
                     +"\n\tgReset"
                     +"\n\tValorant [GameCode] [Sensitivity]\n")
-    .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
+    .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`));
 }
 
 client.login(BOT_TOKEN);
