@@ -652,7 +652,7 @@ function sec_Convert(sec_string) {
     }
 
     // string variable
-    var time_string = `${secs} secs`;
+    var time_string = `${seconds} secs`;
     if (minutes > 0)
         time_string = `${minutes} mins : ` + time_string;
     if (hours > 0) {
