@@ -222,10 +222,10 @@ async function sing(message, search_string) {
 function pause_music(message) {
     if (audio_dispatcher != null) {
         audio_dispatcher.pause();
-        message.channel.send('Music paused.');
+        message.channel.send('Music paused.').catch(console.error);
     }
     else {
-        message.channel.send('There is nothing to pause.');
+        message.channel.send('There is nothing to pause.').catch(console.error);
     }
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to paused music.');
 }
@@ -233,10 +233,10 @@ function pause_music(message) {
 function resume_music(message) {
     if (audio_dispatcher != null) {
         audio_dispatcher.resume();
-        message.channel.send('Music resume.');
+        message.channel.send('Music resume.').catch(console.error);
     }
     else {
-        message.channel.send('There is nothing to resume.')
+        message.channel.send('There is nothing to resume.').catch(console.error);
     }
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resumed music.');
 }
@@ -244,10 +244,10 @@ function resume_music(message) {
 function stop_music(message) {
     if (audio_dispatcher != null) {
         audio_dispatcher.destroy();
-        message.channel.send('Music stopped.');
+        message.channel.send('Music stopped.').catch(console.error);
     }
     else {
-        message.channel.send('There is nothing to stop.')
+        message.channel.send('There is nothing to stop.').catch(console.error);
     }
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stopped music.');
 }
@@ -319,20 +319,21 @@ function readTextFile(file)
 
 function reboot(message) {
     message.channel.send("Rebooting...")
-    .then(console.log(`${message.member.user.tag} rebooted the bot.`))
+    .then(console.log(`${message.member.user.tag} rebooted the bot.`)).catch(console.error)
     .then(client.destroy())
     .then(client.login(BOT_TOKEN));
 }
 
 function emergency_food_time(message) {
-    // channel leave
-    let clientVoiceConnection = message.guild.voiceConnection;
-    if (clientVoiceConnection.channel != null)
-        clientVoiceConnection.disconnect();
     // channel reply
-    message.channel.send("Nooooooooooo! Paimon is turning into fooooooood!", {files:['moji/PaimonLunch.jpg']});
-    console.log(`${message.member.user.tag} Paimon is Food Now~.`);
-    client.destroy();
+    message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
+    .then(console.log(`${message.member.user.tag} killed Paimon as food~`)).catch(console.error)
+    
+    /*fix error: 'Request to use token, but token was unavailable to the client' */
+    setTimeout(function(err) {
+        if (err) throw err;
+        client.destroy();
+    }, 3000);
 }
 
 function rand(length) {
@@ -372,7 +373,7 @@ function vSens(message, gameCode, sens) {
     var sensitivity = parseFloat(sens);
     if (isNaN(sensitivity)) // is Not a Number
         return message.channel.send(`${message.author}. You need to supply a VALID sensitivity!`)
-        .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`));
+        .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`)).catch(console.error);
     else {
         var convertedSens = 0;
         var gameName = null;
@@ -395,7 +396,7 @@ function vSens(message, gameCode, sens) {
                 break;
             default: 
                 return message.channel.send(`${message.author}. Unsupported GameCode, cannot determine your sensitivity.`)
-                .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID GameCode.`));
+                .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID GameCode.`)).catch(console.error);
         }
 
         console.log(`\n${message.member.user.tag} requested for VALORANT sensitivity conversion.`);
@@ -506,7 +507,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 +"\t\t[Add]: Character Event Banner\n"
                 +"\t\t[Replace]: Weapon Banner"
             +"\n\nNumber:\n"
-                +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+                +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
     }
 
     bannerType = bannerType.toLowerCase();
@@ -515,7 +516,7 @@ function wishCount(message, bannerType, commandType, nInc) {
     if (isNaN(roll_count)) // is Not a Number
     {
         return message.channel.send(`${message.author}. You need to supply a VALID count!`)
-        .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`));
+        .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`)).catch(console.error);
     }
     else {
         // find user
@@ -538,7 +539,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         // edit GGachaTable
         if ( !(commandType === "add" || commandType === "replace") ) {
             return message.channel.send(`${message.author}. Unsupported CommandType, cannot edit your gacha data.`)
-            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`));
+            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`)).catch(console.error);
         }
         else if (commandType === "add") {
             switch (bannerType) {
@@ -553,7 +554,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`)
-                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
+                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
             }
         }
         else if (commandType === "replace") {
@@ -569,7 +570,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     return message.channel.send(`${message.author}. Unsupported BannerType, cannot fetch your gacha data.`)
-                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
+                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
             }
         }
 
@@ -593,7 +594,7 @@ function wishReset(message, bannerType) {
             +"\n\nBannerType:\n"
                 +"\t\t[C]: Character Event Banner\n"
                 +"\t\t[W]: Weapon Banner\n"
-                +"\t\t[S]: Standard Banner").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+                +"\t\t[S]: Standard Banner").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
     }
 
     // find user
@@ -630,7 +631,7 @@ function wishReset(message, bannerType) {
             break;
         default: 
             return message.channel.send(`${message.author}. Unsupported BannerType, cannot reset your gacha data.`)
-            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
+            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
     }
 
     // save data back to json
@@ -712,7 +713,7 @@ function userHelp(message) {
                     +"\n\tgWish"
                     +"\n\tgReset"
                     +"\n\tValorant [GameCode] [Sensitivity]\n")
-    .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`));
+    .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
 }
 
 client.login(BOT_TOKEN);
