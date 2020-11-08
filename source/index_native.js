@@ -236,8 +236,8 @@ function resume_music(message) {
 }
 
 function stop_music(message) {
-    audio_dispatcher.destroy();
     if (audio_dispatcher != null) {
+        audio_dispatcher.destroy();
         message.channel.send('Music stopped.')
         .then(console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] stopped music.'));
     }
