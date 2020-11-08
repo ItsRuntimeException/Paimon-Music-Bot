@@ -637,6 +637,7 @@ function length(obj) {
 }
 
 function sec_Convert(sec_string) {
+    // time variable decl
     var seconds = Math.floor(parseInt(sec_string));
     var minutes = Math.floor(seconds / 60);
     var hours = Math.floor(minutes / 60);
@@ -649,7 +650,15 @@ function sec_Convert(sec_string) {
     for (var i = 0; i < minutes; i++) {
         seconds -= 60;
     }
-    return `${hours} hrs : ${minutes} mins : ${seconds} secs`;
+
+    // string variable
+    var time_string = `${secs} secs`;
+    if (minutes > 0)
+        time_string = `${minutes} mins : ` + time_string;
+    if (hours > 0) {
+        time_string = `${hours} hrs : ` + time_string;
+    }
+    return time_string;
 }
 
 function update_genshin_userTag(arrayObj, cached_index) {
