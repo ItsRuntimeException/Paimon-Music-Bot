@@ -12,8 +12,6 @@ Step 4: Run 'NATIVE_BOOT.bat' or you can host it online with heroku/other server
 **Bot Functions**
 - [Help](#Help)
 - [Mention](#Mention)
-- [Sing](#Sing)
-- [Leave](#Leave)
 - [Reboot](#Reboot)
 - [Kill](#Kill)
 - [Roll](#Roll)
@@ -25,13 +23,6 @@ Step 4: Run 'NATIVE_BOOT.bat' or you can host it online with heroku/other server
 - [ValorantSens](#ValorantSensitivity)
 
 # Help #
-Display a list of functions and its usage.
-
-# Sing #
-Play audio from youtube.
-Example Usage: ?sing \[Youtube-Link or Keywords\] 
-
-# Leave #
 Display a list of functions and its usage.
 
 # Mention #
@@ -74,4 +65,4 @@ Supported GameCode:
 
 **\[O\]: OVERWATCH**
 
-**Personal Project; Last Updated: October 25, 2020**
+***Personal Project; Last Updated: November 8, 2020***
