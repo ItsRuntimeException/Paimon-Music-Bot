@@ -162,7 +162,7 @@ async function sing(message, search_string) {
         let stream = ytdl(url, { filter: 'audioonly' });
         audio_dispatcher = connection.playStream(stream);
         console.log(`url: ${video.url}`);
-        console.log(`Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
+        console.log(`Now Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
         message.channel.send({embed: {
             author: {
                 name: 'Paimon-chan\'s Embedded Info',
@@ -194,7 +194,7 @@ async function sing(message, search_string) {
         let stream = ytdl(original_string, { filter: 'audioonly' });
         audio_dispatcher = connection.playStream(stream);
         console.log(`url: ${original_string}`);
-        console.log(`Playing: ${info.videoDetails.title}, Duration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
+        console.log(`Now Playing: ${info.videoDetails.title}, Duration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
         message.channel.send({embed: {
             author: {
                 name: 'Paimon-chan\'s Embedded Info',
@@ -322,8 +322,8 @@ function emergency_food_time(message) {
         clientVoiceConnection.disconnect();
     // channel reply
     message.channel.send("Nooooooooooo! Paimon is turning into fooooooood!", {files:['moji/PaimonLunch.jpg']});
-    console.log(`${message.member.user.tag} Paimon is Food Now~.`)
-    .then(client.destroy());
+    console.log(`${message.member.user.tag} Paimon is Food Now~.`);
+    client.destroy();
 }
 
 function rand(length) {
