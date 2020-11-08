@@ -130,16 +130,18 @@ async function sing(message, search_string) {
     const original_string = search_string.toString();
     let validate = ytdl.validateURL(original_string);
     search_string = original_string.toString().replace(/,/g,' ');
-    console.log('[tag: ' + message.member.user.tag + ' | search_string: ' + search_string + ']');
+    console.log('[tag: ' + message.member.user.tag + ' | search_string: ' + search_string + '] search-mode? ' + !validate);
     // VALIDATE ARG NOT NULL
     const { voiceChannel } = message.member;
     if (search_string == undefined) {
         console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
         return message.channel.send(`${message.author}.`
             +"\nThis command plays your specified Youtube-link or keyword searched."
-            +"\n\nUsage: " + "play [Link | Keyword]"
+            +"\n\nUsage: " + "play [Link | Keywords]"
             +"\n\nLink example:\n"
-                +"\t\tyoutube.com/watch?v=oHg5SJYRHA0");
+                +"\t\tyoutube.com/watch?v=oHg5SJYRHA0"
+            +"\n\nKeywords example:\n"
+                +"\t\tPekora bgm music 1 hour");
     }
     
     // IN-CHANNEL CHECK
@@ -149,7 +151,6 @@ async function sing(message, search_string) {
 
     // channel reply
     /* https://discord.com/developers/docs/resources/channel#embed-object */
-    console.log('validate link?' + validate);
     if (!validate) {
         // PRELOAD
         let video = await youtube.searchVideos(search_string);
@@ -160,7 +161,7 @@ async function sing(message, search_string) {
         let connection = await message.member.voiceChannel.join();
         let stream = ytdl(url, { filter: 'audioonly' });
         audio_dispatcher = connection.playStream(stream);
-        console.log(`url: ${video.url} | requested by user: ${message.member.user.tag}`);
+        console.log(`url: ${video.url}`);
         console.log(`Playing: ${info.videoDetails.title}\nDuration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
         message.channel.send({embed: {
             author: {
@@ -192,7 +193,7 @@ async function sing(message, search_string) {
         let connection = await message.member.voiceChannel.join();
         let stream = ytdl(original_string, { filter: 'audioonly' });
         audio_dispatcher = connection.playStream(stream);
-        console.log(`url: ${original_string} | requested by user: ${message.member.user.tag}`);
+        console.log(`url: ${original_string}`);
         console.log(`Playing: ${info.videoDetails.title}, Duration: ${sec_Convert(info.videoDetails.lengthSeconds)}`);
         message.channel.send({embed: {
             author: {
