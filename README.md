@@ -1,3 +1,4 @@
+***Personal Project; Last Updated: November 8, 2020***
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
@@ -64,5 +65,3 @@ Supported GameCode:
 **\[C\]: CSGO**
 
 **\[O\]: OVERWATCH**
-
-***Personal Project; Last Updated: November 8, 2020***
