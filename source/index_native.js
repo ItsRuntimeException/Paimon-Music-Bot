@@ -264,7 +264,7 @@ async function leave(message) {
     }
     // valid compare
     else if (userVoiceChannel == clientVoiceConnection.channel) {
-        stop_music();
+        stop_music(message);
         clientVoiceConnection.disconnect();
     }
     else {
