@@ -306,6 +306,7 @@ function stop_music(message) {
         for (let i = 0; i < server.queue.length; i++) {
             servers.queue.shift();
         }
+	server.dispatcher.pause();
         server.dispatcher.end();
         message.channel.send('Music stopped.').catch(console.error);
     }
