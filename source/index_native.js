@@ -545,7 +545,9 @@ function genshin_pity_calculation(message) {
                 standard: normal_pity_goal - arrayObj.users[i].bannerTypes.standard
             }
             // channel reply
-            message.channel.send({embed: {
+            console.log(pity_table);
+            console.log('\n');
+            return message.channel.send({embed: {
                 author: {
                     name: message.member.user.tag,
                     icon_url: message.member.user.avatarURL,
@@ -572,8 +574,6 @@ function genshin_pity_calculation(message) {
                     text: '© Rich Embedded Frameworks'
                 }
             }});
-            console.log(pity_table);
-            return;
         }
     }
     // this user table already exist.

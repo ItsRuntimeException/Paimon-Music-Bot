@@ -1,5 +1,6 @@
 const PREFIX = "?";
-//const ytdl = require("ytdl-core");
+const ytdl = require('ytdl-core');
+const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
 const filestream = require("fs");
 const client = new Discord.Client();
@@ -7,6 +8,8 @@ const DICE = 6;
 
 // set up envrionment token for heroku deployment website.
 const TOKEN = process.env.BOT_TOKEN;
+const youtube = new YouTube(process.env.YOUTUBE_API_KEY); // Personal Youtube-API key
+var servers = {};
 
 /* bot online */
 client.on("ready", () => {
@@ -49,22 +52,69 @@ client.on("message", async message => {
         case "help":
             userHelp(message)
             break;
-        /*
         case "join":
             join(message);
             break;
         case "play":
-            play(message, args[0]);
+            // initialize queue
+            if (!servers[message.guild.id]) {
+                servers[message.guild.id] = {
+                    queue:[]
+                }
+            }
+            var server = servers[message.guild.id];
+            // string logic:
+            var search_string = args.toString().replace(/,/g,' ');
+            // VALIDATE ARG NOT NULL
+            if (search_string == undefined) {
+                console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
+                return message.channel.send(`${message.author}.`
+                    +"\nThis command plays your specified Youtube-link or keyword searched."
+                    +"\n\nUsage: " + "play [Link | Keywords]"
+                    +"\n\nLink example:\n"
+                        +"\t\tyoutube.com/watch?v=oHg5SJYRHA0"
+                    +"\n\nKeywords example:\n"
+                        +"\t\tPekora bgm music 1 hour");
+            }
+
+            // IN-CHANNEL CHECK
+            if (!message.member.voiceChannel) {
+                message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+                return;
+            }
+
+            /** Queue Logic
+             *    0  = no song; queue then play
+             *    1  = playing; queue
+             *    1+ = queue
+             */
+            if (server.queue.length == 0) {
+                queueSong(message,search_string);
+            }
+            else if (server.queue.length >= 1) {
+                queueSong(message,search_string);
+                return;
+            }
+            play_music(message, search_string);
+            console.log(server.queue);
+            break;
+        case "pause":
+            pause_music(message);
+            break;
+        case "resume":
+            resume_music(message);
+            break;
+        case "skip":
+            skip_music(message);
+            break;
+        case "stop":
+            stop_music(message);
             break;
         case "leave":
             leave(message);
             break;
-        */
         case "source":
             source_send(message);
-            break;
-        case "wipe":
-            clear_messages(message, args[0]);
             break;
         case "mention":
             mention(message)
@@ -73,7 +123,7 @@ client.on("message", async message => {
             reboot(message)
             break;
         case "kill":
-            shutdown(message);
+            emergency_food_time(message);
             break;
         case "roll":
             roll(message);
@@ -89,6 +139,8 @@ client.on("message", async message => {
             break;
         case "gshowtable":
             showtable(message);
+        case "gpity":
+            genshin_pity_calculation(message);
             break;
         case "gwish":
             wishCount(message, args[0], args[1], args[2]);
@@ -100,12 +152,15 @@ client.on("message", async message => {
         case "gshowall":
             showall(message);
             break;
+        case "wipe":
+            clear_messages(message, args[0]);
+            break;
         default:
             message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
+            break;
     }
 });
 
-/*
 async function join(message) {
     const { voiceChannel } = message.member;
     if (!voiceChannel) {
@@ -116,59 +171,166 @@ async function join(message) {
     }
 }
 
-async function play(message, play_string) {
-    // VALIDATE ARG NOT NULL
-    const { voiceChannel } = message.member;
-    if (play_string == undefined) {
-        console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
-        console.log(`\n    play_string = ${play_string}\n\n`);
-        return message.channel.send(`${message.author}.`
-            +"\nThis command plays your specified Youtube-link."
-            +"\n\nUsage: " + "play [Link]"
-            +"\n\nLink example:\n"
-                +"\t\tyoutube.com/watch?v=oHg5SJYRHA0");
+async function queueSong(message, search_string) {
+    var server = servers[message.guild.id];
+    // queue the search_string only, only fetch metadata upon playing
+    server.queue.push(search_string);
+    if (server.queue.length > 1) {
+        message.channel.send(`Your query: '${search_string}' has been queued.\n`);
     }
-    
-    // IN-CHANNEL CHECK
-    if (!voiceChannel) {
-        return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+}
+
+async function play_music(message, search_string) {
+    var server = servers[message.guild.id];
+    var connection = await message.member.voiceChannel.join();
+    let validate = ytdl.validateURL(search_string);
+    console.log('validate-mode? ' + validate);
+    if (!validate) {
+        // PRELOAD
+        var video = await youtube.searchVideos(search_string);
+        // PLAY MUSIC via keywords
+        var stream = ytdl(video.url, { filter: 'audioonly' });
+        server.dispatcher = connection.playStream(stream);
+        console.log(`url: ${video.url}`);
+        console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+        message.channel.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL,
+                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            },
+            thumbnail: video.thumbnail,
+            title: video.title,
+            url: video.url,
+            fields: [{
+                name: "Link",
+                value: video.url
+              },
+              {
+                  name: "Duration",
+                  value: sec_Convert(video.durationSeconds)
+              }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }})
+    }
+    else if (validate) {
+        // PLAY MUSIC via link
+        var video = await youtube.getVideo(search_string);
+        var stream = ytdl(video.url, { filter: 'audioonly' });
+        server.dispatcher = connection.playStream(stream);
+        console.log(`url: ${video.url}`);
+        console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+        message.channel.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL,
+                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            },
+            fields: [{
+                name: "Title",
+                value: video.title
+              },
+              {
+                  name: "Duration",
+                  value: sec_Convert(video.durationSeconds)
+              }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }})
     }
 
-    // VALIDATE LINK AS PLAYABLE LINK
-    let url = await ytdl.validateURL(play_string);
-    if (!url) {
-            return message.channel.send('You need to supply a VALID youtube-link!', {files: ['./moji/PaimonCookies.gif']});
-    }
+    server.dispatcher.on('end', function() {
+        server.queue.shift();
+        if (server.queue.length > 0) {
+            play_music(message, server.queue[0]);
+        }
+        if (server.queue.length == 0) {
+            server.dispatcher = undefined;
+        }
+    })
+}
 
-    // PLAY MUSIC
-    let info = await ytdl.getInfo(play_string);
-    let connection = await message.member.voiceChannel.join();
-    let stream = ytdl(play_string, { filter: 'audioonly' });
-    connection.playStream(stream);
-    message.channel.send(`Now Playing: + ${info.title}`)
-    .then(console.log(`music: "${info.title}" | requested by user: ` + message.member.user.tag)).catch(console.error);
+function pause_music(message) {
+    let server = servers[message.guild.id];
+    if (server.dispatcher != null) {
+        server.dispatcher.pause();
+        message.channel.send('Music paused.').catch(console.error);
+    }
+    else {
+        message.channel.send('There is nothing to pause.').catch(console.error);
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to pause music.');
+}
+
+function resume_music(message) {
+    let server = servers[message.guild.id];
+    if (server.dispatcher != null) {
+        server.dispatcher.resume();
+        message.channel.send('Music resume.').catch(console.error);
+    }
+    else {
+        message.channel.send('There is nothing to resume.').catch(console.error);
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resume music.');
+}
+
+function skip_music(message) {
+    let server = servers[message.guild.id];
+    if (server.dispatcher != null) {
+        server.dispatcher.end();
+        message.channel.send('Music skipped.').catch(console.error);
+    }
+    else {
+        message.channel.send('There is nothing to skip.').catch(console.error);
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
+}
+
+function stop_music(message) {
+    let server = servers[message.guild.id];
+    if (server.dispatcher != null) {
+        // clear queue
+        for (let i = 0; i < server.queue.length; i++) {
+            servers.queue.shift();
+        }
+        server.dispatcher.destroy();
+        message.channel.send('Music stopped.').catch(console.error);
+    }
+    else {
+        message.channel.send('There is nothing to stop.').catch(console.error);
+    }
+    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
 }
 
 async function leave(message) {
     let userVoiceChannel = message.member.voiceChannel;
-            let clientVoiceConnection = message.guild.voiceConnection;
-            // https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
-            // Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
-            
-            // no current connection or check for same current channel
-            if (clientVoiceConnection === null){
-                message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
-            }
-            // valid compare
-            else if (userVoiceChannel === clientVoiceConnection.channel) {
-                clientVoiceConnection.disconnect();
-                message.channel.send("Bye!");
-            }
-            else {
-                message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
-            }
+    let clientVoiceConnection = message.guild.voiceConnection;
+    // https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
+    // Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
+    
+    // no current connection or check for same current channel
+    if (clientVoiceConnection == null){
+        message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
+    }
+    // valid compare
+    else if (userVoiceChannel == clientVoiceConnection.channel) {
+        stop_music(message);
+        clientVoiceConnection.disconnect();
+    }
+    else {
+        message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
+    }
 }
-*/
+
 function source_send(message) {
     var paimon = 'https://github.com/ItsRuntimeException/SimpleDiscordBot';
     message.channel.send(`Paimon's delicious source code: ${paimon}`);
@@ -221,11 +383,16 @@ function reboot(message) {
     .then(client.login(BOT_TOKEN));
 }
 
-function shutdown(message) {
-    message.channel.send("Shutting down...")
-    //.then(leave(message))
-    .then(console.log(`${message.member.user.tag} shutdown the bot.`)).catch(console.error)
-    .then(client.destroy());
+function emergency_food_time(message) {
+    // channel reply
+    message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
+    .then(console.log(`${message.member.user.tag} killed Paimon as food~`)).catch(console.error)
+    
+    /*fix error: 'Request to use token, but token was unavailable to the client' */
+    setTimeout(function(err) {
+        if (err) throw err;
+        client.destroy();
+    }, 3000);
 }
 
 function rand(length) {
@@ -355,7 +522,62 @@ function showtable(message) {
         }
     }
     // this user table already exist.
-    message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
+    message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function!`);
+}
+
+function genshin_pity_calculation(message) {
+    var text = readTextFile('./genshin_data/genshin_wish_tables.json');
+    var arrayObj = JSON.parse(text);
+    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
+    for (var i = 0; i < length(arrayObj.users); i++) {
+        if (arrayObj.users[i].uid === message.author.id) {
+            // check if this user has recently changed his/her userTag.
+            update_genshin_userTag(arrayObj, i);
+            // terminal logging
+            console.log('Genshin Pity Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+            console.log('Pity Calculation: ');
+            const normal_pity_goal = 90;
+            const weapon_pity_goal = normal_pity_goal - 10;
+            const primogem_value = 160;
+            let pity_table = {
+                event: normal_pity_goal- arrayObj.users[i].bannerTypes.event, 
+                weapon: weapon_pity_goal - arrayObj.users[i].bannerTypes.weapon, 
+                standard: normal_pity_goal - arrayObj.users[i].bannerTypes.standard
+            }
+            // channel reply
+            console.log(pity_table);
+            console.log('\n');
+            return message.channel.send({embed: {
+                author: {
+                    name: message.member.user.tag,
+                    icon_url: message.member.user.avatarURL,
+                },
+                fields: [{
+                    name: "Character Event Banner",
+                    value: `${pity_table.event} ${((pity_table.event > 1) ? 'wishes' : 'wish')} until pity goal.
+                    (${pity_table.event*primogem_value} primo-gems)`
+                  },
+                  {
+                    name: "Weapon Banner",
+                    value: `${pity_table.weapon} ${((pity_table.weapon > 1) ? 'wishes' : 'wish')} until pity goal.
+                    (${pity_table.weapon*primogem_value} primo-gems)`
+                  },
+                  {
+                    name: "Standard Permanent Banner",
+                    value: `${pity_table.standard} ${((pity_table.standard > 1) ? 'wishes' : 'wish')} until pity goal.
+                    (${pity_table.standard*primogem_value} primo-gems)`
+                  }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }});
+        }
+    }
+    // this user table already exist.
+    message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function!`);
 }
 
 function showall(message) {
@@ -392,9 +614,9 @@ function wishCount(message, bannerType, commandType, nInc) {
             +"\nThis command adds the number of rolls to your current Genshin Gacha Table."
             +"\n\nUsage: " + "gwish [BannerType] [CommandType] [Number]"
             +"\n\nBannerType:\n"
-                +"\t\t[C]: Character Event Banner\n"
-                +"\t\t[W]: Weapon Banner\n"
-                +"\t\t[S]: Standard Banner"
+                +"\t\t[c]: Character Event Banner\n"
+                +"\t\t[w]: Weapon Banner\n"
+                +"\t\t[s]: Standard Permanent Banner"
             +"\n\nCommandType:\n"
                 +"\t\t[Add]: Character Event Banner\n"
                 +"\t\t[Replace]: Weapon Banner"
@@ -435,13 +657,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
         else if (commandType === "add") {
             switch (bannerType) {
-                case "c":
+                case "event" || "c":
                     arrayObj.users[i].bannerTypes.event += roll_count;
                     break;
-                case "w":
+                case "weapon" || "w":
                     arrayObj.users[i].bannerTypes.weapon += roll_count;
                     break;
-                case "s":
+                case "standard" || "s":
                     arrayObj.users[i].bannerTypes.standard += roll_count;
                     break;
                 default: 
@@ -451,13 +673,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
         else if (commandType === "replace") {
             switch (bannerType) {
-                case "c":
+                case "event" || "c":
                     arrayObj.users[i].bannerTypes.event = roll_count;
                     break;
-                case "w":
+                case "weapon" || "w":
                     arrayObj.users[i].bannerTypes.weapon = roll_count;
                     break;
-                case "s":
+                case "standard" || "s":
                     arrayObj.users[i].bannerTypes.standard = roll_count;
                     break;
                 default: 
@@ -484,9 +706,10 @@ function wishReset(message, bannerType) {
             +"\nThis command resets the specified Genshin Gacha BannerType back to 0."
             +"\n\nUsage: " + "gReset [BannerType]"
             +"\n\nBannerType:\n"
-                +"\t\t[C]: Character Event Banner\n"
-                +"\t\t[W]: Weapon Banner\n"
-                +"\t\t[S]: Standard Banner").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
+                +"\t\t[c]: Character Event Banner\n"
+                +"\t\t[w]: Weapon Banner\n"
+                +"\t\t[s]: Standard Permanent Banner")
+                .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
     }
 
     // find user
@@ -509,15 +732,15 @@ function wishReset(message, bannerType) {
     bannerType = bannerType.toLowerCase();
     var bannerString = "";
     switch (bannerType) {
-        case "c":
+        case "event" || "c":
             bannerString = "Character Event Banner";
             arrayObj.users[i].bannerTypes.event = 0;
             break;
-        case "w":
+        case "weapon" || "w":
             bannerString = "Weapon Banner";
             arrayObj.users[i].bannerTypes.weapon = 0;
             break;
-        case "s":
+        case "standard" || "s":
             bannerString = "Standard Wish Banner";
             arrayObj.users[i].bannerTypes.standard = 0;
             break;
@@ -537,6 +760,31 @@ function wishReset(message, bannerType) {
 
 function length(obj) {
     return Object.keys(obj).length;
+}
+
+function sec_Convert(sec_string) {
+    // time variable decl
+    var seconds = Math.floor(parseInt(sec_string));
+    var minutes = Math.floor(seconds / 60);
+    var hours = Math.floor(minutes / 60);
+
+    // re-factor minutes and seconds
+    for (var i = 0; i < hours; i++) {
+        minutes -= 60;
+        seconds -= 3600;
+    }
+    for (var i = 0; i < minutes; i++) {
+        seconds -= 60;
+    }
+
+    // string variable
+    var time_string = `${seconds} secs`;
+    if (minutes > 0)
+        time_string = `${minutes} mins : ` + time_string;
+    if (hours > 0) {
+        time_string = `${hours} hrs : ` + time_string;
+    }
+    return time_string;
 }
 
 function update_genshin_userTag(arrayObj, cached_index) {
@@ -562,20 +810,24 @@ function save_JSON_Data(arrayObj) {
 
 function userHelp(message) {
     message.channel.send(`${message.author}.`
-            +`\n[Currently Hosting via Heroku]\n"Music Support deprecated."`
+            +`\n[Currently Hosting Natively]\n"Music Support Enabled!."`
             +"\n\nUsage: " + `${PREFIX}`+"[function]"
                 +"\n\nFunctions:"
-                    +"\n\tHelp: General Functions"
-                    +"\n\tKill: Bot Shutdown"
-                    +"\n\tReboot: Bot Reboot"
-                    +"\n\tSource: Paimon is Paimon!"
-                    +"\n\tWipe: Sweep Channel Messages"
-                    +"\n\tRoll: Roll a pair of dice"
-                    +"\n\tMapleStory: Invitation to Guild Page"
-                    +"\n\tgCreate: Create your own Genshin Impact's Gacha Count-Table"
-                    +"\n\tgShowtable: Display your current Genshin Gacha Table"
-                    +"\n\tgWish: Manually record your Genshin Gacha Table"
-                    +"\n\tgReset: Manually reset your Genshin Gacha Table:\n\t\t(Please do so after you've hit a 5-Star Drop)"
+                    +"\n\tJoin"
+                    +"\n\tPlay [Link | Keyword] | Pause/Resume"
+                    +"\n\tLeave"
+                    +"\n\tHelp"
+                    +"\n\tKill"
+                    +"\n\tReboot"
+                    +"\n\tSource"
+                    +"\n\tWipe"
+                    +"\n\tRoll"
+                    +"\n\tMapleStory"
+                    +"\n\tgCreate"
+                    +"\n\tgShowtable"
+                    +"\n\tgPity"
+                    +"\n\tgWish"
+                    +"\n\tgReset"
                     +"\n\tValorant [GameCode] [Sensitivity]\n")
     .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
 }
