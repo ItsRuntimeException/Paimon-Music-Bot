@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: November 8, 2020***
+***Personal Project; Last Updated: November 10, 2020***
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
