@@ -257,9 +257,9 @@ async function play_music(message, search_string) {
         if (server.queue.length > 0) {
             play_music(message, server.queue[0]);
         }
-        if (server.queue.length == 0) {
-            server.dispatcher = undefined;
-        }
+	if (server.queue.length == 0) {
+	    server.dispatcher = undefined;
+	}
     })
 }
 
@@ -306,7 +306,7 @@ function stop_music(message) {
         for (let i = 0; i < server.queue.length; i++) {
             servers.queue.shift();
         }
-        server.dispatcher.destroy();
+        server.dispatcher.end();
         message.channel.send('Music stopped.').catch(console.error);
     }
     else {
