@@ -328,7 +328,7 @@ function stop_music(message) {
     if (server.dispatcher != null) {
         // clear queue
         for (let i = 0; i < server.queue.length; i++) {
-            servers.queue.shift();
+            server.queue.shift();
         }
 	server.dispatcher.pause();
         server.dispatcher.end();
