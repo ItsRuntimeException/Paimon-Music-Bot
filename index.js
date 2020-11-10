@@ -139,6 +139,7 @@ client.on("message", async message => {
             break;
         case "gshowtable":
             showtable(message);
+	    break;
         case "gpity":
             genshin_pity_calculation(message);
             break;
@@ -538,6 +539,7 @@ function create_genshin_table(message) {
 function showtable(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
+    message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
     for (var i = 0; i < length(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
             // check if this user has recently changed his/her userTag.
@@ -546,7 +548,31 @@ function showtable(message) {
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             console.log(arrayObj.users[i]);
             // channel reply
-            message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
+	    var bannerObj = arrayObj.users[i].bannerTypes;
+	    return message.channel.send({embed: {
+                author: {
+                    name: message.member.user.tag,
+                    icon_url: message.member.user.avatarURL,
+                },
+                fields: [{
+                    name: "Character Event Banner",
+                    value: `Currently at: ${bannerObj.event} ${((bannerObj.event > 1) ? 'wishes' : 'wish')}`
+                  },
+                  {
+                    name: "Weapon Banner",
+                    value: `Currently at: ${bannerObj.weapon} ${((bannerObj.weapon > 1) ? 'wishes' : 'wish')}`
+                  },
+                  {
+                    name: "Standard Permanent Banner",
+                    value: `Currently at: ${bannerObj.standard} ${((bannerObj.standard > 1) ? 'wishes' : 'wish')}`
+                  }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }});
             return;
         }
     }
