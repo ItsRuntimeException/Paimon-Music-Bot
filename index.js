@@ -385,7 +385,7 @@ function reboot(message) {
     message.channel.send("Rebooting...")
     .then(console.log(`${message.member.user.tag} rebooted the bot.`)).catch(console.error)
     .then(client.destroy())
-    .then(client.login(BOT_TOKEN));
+    .then(client.login(TOKEN));
 }
 
 function emergency_food_time(message) {
