@@ -264,6 +264,12 @@ async function play_music(message, search_string) {
 }
 
 function pause_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.pause();
@@ -276,6 +282,12 @@ function pause_music(message) {
 }
 
 function resume_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+	servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.resume();
@@ -288,6 +300,12 @@ function resume_music(message) {
 }
 
 function skip_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.end();
@@ -300,6 +318,12 @@ function skip_music(message) {
 }
 
 function stop_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // clear queue
