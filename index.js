@@ -814,7 +814,7 @@ function save_JSON_Data(arrayObj) {
 
 function userHelp(message) {
     message.channel.send(`${message.author}.`
-            +`\n[Currently Hosting Natively]\n"Music Support Enabled!."`
+            +`\n[Currently Hosting via Heroku]\n"Music Support Enabled!."`
             +"\n\nUsage: " + `${PREFIX}`+"[function]"
                 +"\n\nFunctions:"
                     +"\n\tJoin"
