@@ -539,9 +539,9 @@ function create_genshin_table(message) {
 function showtable(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
-    message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
     for (var i = 0; i < length(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
+	    message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
             // check if this user has recently changed his/her userTag.
             update_genshin_userTag(arrayObj, i);
             // terminal logging
@@ -583,9 +583,9 @@ function showtable(message) {
 function genshin_pity_calculation(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
-    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
     for (var i = 0; i < length(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
+	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
             // check if this user has recently changed his/her userTag.
             update_genshin_userTag(arrayObj, i);
             // terminal logging
