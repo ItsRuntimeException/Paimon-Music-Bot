@@ -174,9 +174,13 @@ async function join(message) {
 async function queueSong(message, search_string) {
     var server = servers[message.guild.id];
     // queue the search_string only, only fetch metadata upon playing
+    let validate = ytdl.validateURL(search_string);
     server.queue.push(search_string);
     if (server.queue.length > 1) {
-        message.channel.send(`Your query: '${search_string}' has been queued.\n`);
+        if (!validate)
+            message.channel.send(`Your query: '${search_string}' have been queued.\n`);
+        else
+            message.channel.send(`Your link have been queued.\n`);
     }
 }
 
