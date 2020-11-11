@@ -114,11 +114,8 @@ client.on("message", async message => {
         case "source":
             source_send(message);
             break;
-        case "mention":
-            mention(message)
-            break;
         case "reboot":
-            reboot(message)
+            reboot(message);
             break;
         case "kill":
             emergency_food_time(message);
