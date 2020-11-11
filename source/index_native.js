@@ -191,7 +191,8 @@ async function play_music(message, search_string) {
         var video = await youtube.searchVideos(search_string);
         // PLAY MUSIC via keywords
         var stream = ytdl(video.url, { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream).setVolume(volume_float);
+        server.dispatcher = connection.playStream(stream);
+        server.dispatcher.setVolume(volume_float);
         console.log(`url: ${video.url}`);
         console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
         message.channel.send({embed: {
@@ -223,7 +224,8 @@ async function play_music(message, search_string) {
         // PLAY MUSIC via link
         var video = await youtube.getVideo(search_string);
         var stream = ytdl(video.url, { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream).setVolume(volume_float);;
+        server.dispatcher = connection.playStream(stream);
+        server.dispatcher.setVolume(volume_float);
         console.log(`url: ${video.url}`);
         console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
         message.channel.send({embed: {
