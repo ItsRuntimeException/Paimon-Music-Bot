@@ -276,8 +276,8 @@ function vol_music(message, num) {
         var floatnum = percentage / 100;
         if (floatnum <= 1) {
             server.dispatcher.setVolume(floatnum);
-            message.channel.send(`Volume set to ${floatnum}%`);
-            console.log(`Volume set to ${floatnum}%`);
+            message.channel.send(`Volume set to ${percentage}%`);
+            console.log(`Volume set to ${percentage}%`);
         }
         else {
             message.channel.send(`Cannot set volume greater than ${percentage}%`);
