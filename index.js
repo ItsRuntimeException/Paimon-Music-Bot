@@ -612,18 +612,15 @@ function genshin_pity_calculation(message) {
                 },
                 fields: [{
                     name: "Character Event Banner",
-                    value: `${pity_table.event} ${((pity_table.event > 1) ? 'wishes' : 'wish')} until pity goal.
-                    (${pity_table.event*primogem_value} primo-gems)`
+                    value: `${pity_table.event} ${((pity_table.event > 1) ? 'wishes' : 'wish')} until pity goal.\n(${pity_table.event*primogem_value} primo-gems)`
                   },
                   {
                     name: "Weapon Banner",
-                    value: `${pity_table.weapon} ${((pity_table.weapon > 1) ? 'wishes' : 'wish')} until pity goal.
-                    (${pity_table.weapon*primogem_value} primo-gems)`
+                    value: `${pity_table.weapon} ${((pity_table.weapon > 1) ? 'wishes' : 'wish')} until pity goal.\n(${pity_table.weapon*primogem_value} primo-gems)`
                   },
                   {
                     name: "Standard Permanent Banner",
-                    value: `${pity_table.standard} ${((pity_table.standard > 1) ? 'wishes' : 'wish')} until pity goal.
-                    (${pity_table.standard*primogem_value} primo-gems)`
+                    value: `${pity_table.standard} ${((pity_table.standard > 1) ? 'wishes' : 'wish')} until pity goal.\n(${pity_table.standard*primogem_value} primo-gems)`
                   }
                 ],
                 timestamp: new Date(),
