@@ -897,26 +897,55 @@ function userHelp(message) {
             icon_url: client.user.avatarURL,
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
+        title: "Fuctions",
+        description: "[Currently Hosting via Heroku]\nMusic Support Enabled!",
         fields: [{
-            name: "Functions",
-            value: "[Currently Hosting via Heroku]\nMusic Support Enabled!"
-                    +"\n\nUsage: " + `${PREFIX}`+"[function]"
-                        +"\n\tHelp"
-                        +"\n\tJoin"
-                        +"\n\tPlay [Link | Keyword] | Pause|Resume|Skip|Stop"
-                        +"\n\tLeave"
-                        +"\n\tKill"
-                        +"\n\tReboot"
-                        +"\n\tSource"
-                        +"\n\tWipe"
-                        +"\n\tRoll"
-                        +"\n\tMapleStory"
-                        +"\n\tgCreate"
-                        +"\n\tgShowtable"
-                        +"\n\tgPity"
-                        +"\n\tgWish"
-                        +"\n\tgReset"
-                        +"\n\tValorant [GameCode] [Sensitivity]"
+            name: "Help",
+            value: "Display a general list of commands."
+          },
+          {
+            name: "Join|Leave",
+            value: "Paimon will join/leave your voice channel!"
+          },
+          {
+            name: "Play [YouTube-Link|Keyword]",
+            value: "1: Play audio from the user's provided link\n2: Perform a search on the user's provided keyword"
+          },
+          {
+            name: "Pause|Resume|Skip|Stop",
+            value: "Music Control Logic."
+          },
+          {
+            name: "Kill",
+            value: "Paimon shall be served as food T^T"
+          },
+          {
+            name: "Reboot",
+            value: "Paimon shall take a nap!"
+          },
+          {
+            name: "Source",
+            value: "Paimon's delicious sauce code~"
+          },
+          {
+            name: "Wipe",
+            value: "Paimon will clean up your mess!"
+          },
+          {
+            name: "Roll",
+            value: "Random Number between 1-6."
+          },
+          {
+            name: "MapleStory",
+            value: "MapleStory guild page."
+          },
+          {
+            name: "gCreate|gShowtable|gPity|gWish|gReset",
+            value: "Genshin Impact's manual \'Gacha Count-Table\'."
+          },
+          {
+            name: "Valorant [GameCode] [Sensitivity]",
+            value: "Convert other games' sensitivity ↦ Valorant's."
           }
         ],
         timestamp: new Date(),
