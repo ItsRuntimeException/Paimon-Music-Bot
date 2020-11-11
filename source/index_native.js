@@ -96,6 +96,9 @@ client.on("message", async message => {
             play_music(message, search_string);
             console.log(server.queue);
             break;
+        case "vol":
+            vol_music(message, args[0]);
+            break;
         case "pause":
             pause_music(message);
             break;
@@ -254,6 +257,36 @@ async function play_music(message, search_string) {
             server.dispatcher = undefined;
         }
     })
+}
+
+function vol_music(message, num) {
+    var percentage = parseFloat(num);
+    if (isNaN(percentage)) // is Not a Number
+        return message.channel.send(`${message.author}. You need to supply a VALID number!`)
+        .then(console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`)).catch(console.error);
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
+    let server = servers[message.guild.id];
+    if (server.dispatcher != null) {
+        // Sets the volume relative to the input stream - i.e. 1 is normal, 0.5 is half, 2 is double.
+        var floatnum = percentage / 100;
+        if (floatnum <= 1) {
+            server.dispatcher.setVolume(floatnum);
+            message.channel.send(`Volume set to ${floatnum}%`);
+            console.log(`Volume set to ${floatnum}%`);
+        }
+        else {
+            message.channel.send(`Cannot set volume greater than ${percentage}%`);
+            console.log(`Cannot set volume greater than ${percentage}%`);
+        }
+    }
+    else {
+        message.channel.send('Music is not playing.');
+    }
 }
 
 function pause_music(message) {
@@ -894,16 +927,20 @@ function userHelp(message) {
         title: "Fuctions",
         description: "[Currently Hosting via Heroku]\nMusic Support Enabled!",
         fields: [{
-            name: "Help",
+            name: "?Help",
             value: "Display a general list of commands."
           },
           {
-            name: "Join|Leave",
+            name: "?Join|Leave",
             value: "Paimon will join/leave your voice channel!"
           },
           {
-            name: "Play [YouTube-Link|Keyword]",
-            value: "1: Play audio from the user's provided link\n2: Perform a search on the user's provided keyword"
+            name: "?Play [YouTube-Link|Keyword]",
+            value: "1: Play audio from the user's provided link.\n2: Perform a search on the user's provided keyword."
+          },
+          {
+            name: "?vol [percent]",
+            value:"Set the current music volume."
           },
           {
             name: "Pause|Resume|Skip|Stop",
