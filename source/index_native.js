@@ -66,7 +66,7 @@ client.on("message", async message => {
             // string logic:
             var search_string = args.toString().replace(/,/g,' ');
             // VALIDATE ARG NOT NULL
-            if (search_string == undefined) {
+            if (search_string == '') {
                 console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
                 return message.channel.send(`${message.author}.`
                     +"\nThis command plays your specified Youtube-link or keyword searched."
@@ -79,8 +79,7 @@ client.on("message", async message => {
 
             // IN-CHANNEL CHECK
             if (!message.member.voiceChannel) {
-                message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
-                return;
+                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
 
             /** Queue Logic
@@ -92,8 +91,7 @@ client.on("message", async message => {
                 queueSong(message,search_string);
             }
             else if (server.queue.length >= 1) {
-                queueSong(message,search_string);
-                return;
+                return queueSong(message,search_string);
             }
             play_music(message, search_string);
             console.log(server.queue);
@@ -139,6 +137,7 @@ client.on("message", async message => {
             break;
         case "gshowtable":
             showtable(message);
+            break;
         case "gpity":
             genshin_pity_calculation(message);
             break;
@@ -149,9 +148,6 @@ client.on("message", async message => {
             wishReset(message, args[0]);
             break;
         /* Owner Commands */
-        case "gshowall":
-            showall(message);
-            break;
         case "wipe":
             clear_messages(message, args[0]);
             break;
@@ -257,13 +253,19 @@ async function play_music(message, search_string) {
         if (server.queue.length > 0) {
             play_music(message, server.queue[0]);
         }
-	if (server.queue.length == 0) {
-	    server.dispatcher = undefined;
-	}
+        if (server.queue.length == 0) {
+            server.dispatcher = undefined;
+        }
     })
 }
 
 function pause_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.pause();
@@ -276,6 +278,12 @@ function pause_music(message) {
 }
 
 function resume_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+	servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.resume();
@@ -288,6 +296,12 @@ function resume_music(message) {
 }
 
 function skip_music(message) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.end();
@@ -299,20 +313,36 @@ function skip_music(message) {
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
 }
 
-function stop_music(message) {
+function stop_music(message, fcode) {
+    // initialize queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // clear queue
         for (let i = 0; i < server.queue.length; i++) {
-            servers.queue.shift();
+            server.queue.shift();
         }
+	    server.dispatcher.pause();
         server.dispatcher.end();
-        message.channel.send('Music stopped.').catch(console.error);
+        if (fcode == 0) {
+            message.channel.send('Music stopped.');
+            console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
+        }
+        else if (fcode == 1)
+            message.channel.send("I have left the voice channel.");
     }
     else {
-        message.channel.send('There is nothing to stop.').catch(console.error);
+        if (fcode == 0) {
+            message.channel.send('There is nothing to stop.');
+            console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
+        }
+        else if (fcode == 1)
+            message.channel.send("I have left the voice channel.");
     }
-    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
 }
 
 async function leave(message) {
@@ -327,7 +357,7 @@ async function leave(message) {
     }
     // valid compare
     else if (userVoiceChannel == clientVoiceConnection.channel) {
-        stop_music(message);
+        stop_music(message, 1);
         clientVoiceConnection.disconnect();
     }
     else {
@@ -515,14 +545,38 @@ function showtable(message) {
     var arrayObj = JSON.parse(text);
     for (var i = 0; i < length(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
+	        message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
             // check if this user has recently changed his/her userTag.
             update_genshin_userTag(arrayObj, i);
             // terminal logging
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             console.log(arrayObj.users[i]);
             // channel reply
-            message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
-            return;
+            var bannerObj = arrayObj.users[i].bannerTypes;
+            return message.channel.send({embed: {
+                    author: {
+                        name: message.member.user.tag,
+                        icon_url: message.member.user.avatarURL,
+                    },
+                    fields: [{
+                        name: "Character Event Banner",
+                        value: `Currently at: ${bannerObj.event} ${((bannerObj.event > 1) ? 'wishes' : 'wish')}`
+                    },
+                    {
+                        name: "Weapon Banner",
+                        value: `Currently at: ${bannerObj.weapon} ${((bannerObj.weapon > 1) ? 'wishes' : 'wish')}`
+                    },
+                    {
+                        name: "Standard Permanent Banner",
+                        value: `Currently at: ${bannerObj.standard} ${((bannerObj.standard > 1) ? 'wishes' : 'wish')}`
+                    }
+                    ],
+                    timestamp: new Date(),
+                    footer: {
+                        icon_url: client.user.avatarURL,
+                        text: '© Rich Embedded Frameworks'
+                    }
+            }});
         }
     }
     // this user table already exist.
@@ -532,9 +586,9 @@ function showtable(message) {
 function genshin_pity_calculation(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
-    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
     for (var i = 0; i < length(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
+	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
             // check if this user has recently changed his/her userTag.
             update_genshin_userTag(arrayObj, i);
             // terminal logging
@@ -582,32 +636,6 @@ function genshin_pity_calculation(message) {
     }
     // this user table already exist.
     message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function!`);
-}
-
-function showall(message) {
-    /* Hard-coded OwnerID */
-    var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
-    var rand = Math.floor(Math.random() * Math.floor(length(moji_array)));
-    if (message.author.id !== "190588852769914880"){
-        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
-        message.channel.send(`${message.author}. Only Paimon's master may access this command!`, {files: [ moji_array[rand] ]});
-        return;
-    }
-
-    var text = readTextFile('./genshin_data/genshin_wish_tables.json');
-    var arrayObj = JSON.parse(text);
-    for (var i = 0; i < length(arrayObj.users); i++) {
-        // check if this user has recently changed his/her userTag.
-        update_genshin_userTag(arrayObj, i);
-        // terminal logging
-        console.log('Genshin Gacha Table for all users requested by: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
-        console.log(arrayObj.users);
-        // channel reply
-        message.channel.send(`${message.author}. All Genshin Gacha Tables are being fetched...\n${JSON.stringify(arrayObj.users, undefined, 2)}`);
-        return;
-    }
-    // this user table already exist.
-    message.channel.send(`${message.author}. There are no Genshin Gacha Tables in the database!`);
 }
 
 function wishCount(message, bannerType, commandType, nInc) {
@@ -698,7 +726,32 @@ function wishCount(message, bannerType, commandType, nInc) {
         // display message
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
         console.log(arrayObj.users[i]);
-        message.channel.send(`${message.author}. Your Genshin Gacha Table is now updated...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
+        message.channel.send(`${message.author}. Your Genshin Gacha Table has been updated!`);
+        var bannerObj = arrayObj.users[i].bannerTypes;
+        return message.channel.send({embed: {
+            author: {
+                name: message.member.user.tag,
+                icon_url: message.member.user.avatarURL,
+            },
+            fields: [{
+                name: "Character Event Banner",
+                value: `Currently at: ${bannerObj.event} ${((bannerObj.event > 1) ? 'wishes' : 'wish')}`
+            },
+            {
+                name: "Weapon Banner",
+                value: `Currently at: ${bannerObj.weapon} ${((bannerObj.weapon > 1) ? 'wishes' : 'wish')}`
+            },
+            {
+                name: "Standard Permanent Banner",
+                value: `Currently at: ${bannerObj.standard} ${((bannerObj.standard > 1) ? 'wishes' : 'wish')}`
+            }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }});
     }
 }
 
@@ -759,7 +812,32 @@ function wishReset(message, bannerType) {
     // display message
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
     console.log(arrayObj.users[i]);
-    message.channel.send(`${message.author}. Your GGT-${bannerString} has now been reset...\n${JSON.stringify(arrayObj.users[i], undefined, 2)}`);
+    message.channel.send(`${message.author}. Your GGT:${bannerString} has been reset...`);
+    var bannerObj = arrayObj.users[i].bannerTypes;
+    return message.channel.send({embed: {
+        author: {
+            name: message.member.user.tag,
+            icon_url: message.member.user.avatarURL,
+        },
+        fields: [{
+            name: "Character Event Banner",
+            value: `Currently at: ${bannerObj.event} ${((bannerObj.event > 1) ? 'wishes' : 'wish')}`
+        },
+        {
+            name: "Weapon Banner",
+            value: `Currently at: ${bannerObj.weapon} ${((bannerObj.weapon > 1) ? 'wishes' : 'wish')}`
+        },
+        {
+            name: "Standard Permanent Banner",
+            value: `Currently at: ${bannerObj.standard} ${((bannerObj.standard > 1) ? 'wishes' : 'wish')}`
+        }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }});
 }
 
 function length(obj) {
@@ -813,27 +891,40 @@ function save_JSON_Data(arrayObj) {
 }
 
 function userHelp(message) {
-    message.channel.send(`${message.author}.`
-            +`\n[Currently Hosting Natively]\n"Music Support Enabled!"`
-            +"\n\nUsage: " + `${PREFIX}`+"[function]"
-                +"\n\nFunctions:"
-                    +"\n\tJoin"
-                    +"\n\tPlay [Link | Keyword] | Pause/Resume"
-                    +"\n\tLeave"
-                    +"\n\tHelp"
-                    +"\n\tKill"
-                    +"\n\tReboot"
-                    +"\n\tSource"
-                    +"\n\tWipe"
-                    +"\n\tRoll"
-                    +"\n\tMapleStory"
-                    +"\n\tgCreate"
-                    +"\n\tgShowtable"
-                    +"\n\tgPity"
-                    +"\n\tgWish"
-                    +"\n\tgReset"
-                    +"\n\tValorant [GameCode] [Sensitivity]\n")
-    .then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
+    message.channel.send({embed: {
+        author: {
+            name: 'Paimon-chan\'s Embedded Info',
+            icon_url: client.user.avatarURL,
+            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+        },
+        fields: [{
+            name: "Functions",
+            value: "[Currently Hosting via Heroku]\nMusic Support Enabled!"
+                    +"\n\nUsage: " + `${PREFIX}`+"[function]"
+                        +"\n\tHelp"
+                        +"\n\tJoin"
+                        +"\n\tPlay [Link | Keyword] | Pause|Resume|Skip|Stop"
+                        +"\n\tLeave"
+                        +"\n\tKill"
+                        +"\n\tReboot"
+                        +"\n\tSource"
+                        +"\n\tWipe"
+                        +"\n\tRoll"
+                        +"\n\tMapleStory"
+                        +"\n\tgCreate"
+                        +"\n\tgShowtable"
+                        +"\n\tgPity"
+                        +"\n\tgWish"
+                        +"\n\tgReset"
+                        +"\n\tValorant [GameCode] [Sensitivity]"
+          }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }}).then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
 }
 
 client.login(BOT_TOKEN);
