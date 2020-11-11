@@ -106,7 +106,7 @@ client.on("message", async message => {
             skip_music(message);
             break;
         case "stop":
-            stop_music(message);
+            stop_music(message, 0);
             break;
         case "leave":
             leave(message);
