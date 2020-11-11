@@ -10,6 +10,7 @@ const DICE = 6;
 const BOT_TOKEN = readTextFile('./source/bot_token.txt');
 const youtube = new YouTube(readTextFile('./source/youtube_api_key.txt')); // Personal Youtube-API key
 var servers = {};
+var volume_float = 1;
 
 /* bot online */
 client.on("ready", () => {
@@ -190,7 +191,7 @@ async function play_music(message, search_string) {
         var video = await youtube.searchVideos(search_string);
         // PLAY MUSIC via keywords
         var stream = ytdl(video.url, { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream);
+        server.dispatcher = connection.playStream(stream).setVolume(volume_float);
         console.log(`url: ${video.url}`);
         console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
         message.channel.send({embed: {
@@ -222,7 +223,7 @@ async function play_music(message, search_string) {
         // PLAY MUSIC via link
         var video = await youtube.getVideo(search_string);
         var stream = ytdl(video.url, { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream);
+        server.dispatcher = connection.playStream(stream).setVolume(volume_float);;
         console.log(`url: ${video.url}`);
         console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
         message.channel.send({embed: {
@@ -260,10 +261,17 @@ async function play_music(message, search_string) {
 }
 
 function vol_music(message, num) {
+    if (num == undefined) {
+        message.channel.send(`Current volume: ${volume_float*100}%`)
+        .then(console.log(`Current volume: ${volume_float*100}%`)).catch(console.error);
+        return;
+    }
     var percentage = parseFloat(num);
-    if (isNaN(percentage)) // is Not a Number
-        return message.channel.send(`${message.author}. You need to supply a VALID number!`)
+    if (isNaN(percentage)) {
+        message.channel.send(`${message.author}. You need to supply a VALID number!`)
         .then(console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`)).catch(console.error);
+        return;
+    }
     // initialize queue
     if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
@@ -273,9 +281,9 @@ function vol_music(message, num) {
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // Sets the volume relative to the input stream - i.e. 1 is normal, 0.5 is half, 2 is double.
-        var floatnum = percentage / 100;
-        if (floatnum <= 1) {
-            server.dispatcher.setVolume(floatnum);
+        volume_float = percentage / 100;
+        if (volume_float <= 1) {
+            server.dispatcher.setVolume(volume_float);
             message.channel.send(`Volume set to ${percentage}%`);
             console.log(`Volume set to ${percentage}%`);
         }
