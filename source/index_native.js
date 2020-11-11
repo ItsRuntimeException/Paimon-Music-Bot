@@ -547,7 +547,7 @@ function create_genshin_table(message) {
     var new_userdata = {
         uid: message.author.id,
         username: message.member.user.tag,
-        bannerTypes: { event:0, weapon:0, standard:0, novice:'N/A' }
+        bannerTypes: { event:0, weapon:0, standard:0 }
     };
 
     if (length(arrayObj.users) == 0) {

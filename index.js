@@ -10,6 +10,7 @@ const DICE = 6;
 const TOKEN = process.env.BOT_TOKEN;
 const youtube = new YouTube(process.env.YOUTUBE_API_KEY); // Personal Youtube-API key
 var servers = {};
+var volume_float = process.env.GLOBAL_VOLUME;
 
 /* bot online */
 client.on("ready", () => {
@@ -546,7 +547,7 @@ function create_genshin_table(message) {
     var new_userdata = {
         uid: message.author.id,
         username: message.member.user.tag,
-        bannerTypes: { event:0, weapon:0, standard:0, novice:'N/A' }
+        bannerTypes: { event:0, weapon:0, standard:0 }
     };
 
     if (length(arrayObj.users) == 0) {
