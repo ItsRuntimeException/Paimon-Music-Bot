@@ -10,7 +10,7 @@ const DICE = 6;
 const TOKEN = process.env.BOT_TOKEN;
 const youtube = new YouTube(process.env.YOUTUBE_API_KEY); // Personal Youtube-API key
 var servers = {};
-var volume_float = process.env.GLOBAL_VOLUME;
+var volume_float = 1;
 
 /* bot online */
 client.on("ready", () => {
