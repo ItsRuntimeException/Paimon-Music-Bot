@@ -683,12 +683,12 @@ function wishCount(message, bannerType, commandType, nInc) {
             +"\nThis command adds the number of rolls to your current Genshin Gacha Table."
             +"\n\nUsage: " + "gwish [BannerType] [CommandType] [Number]"
             +"\n\nBannerType:\n"
-                +"\t\t[c]: Character Event Banner\n"
-                +"\t\t[w]: Weapon Banner\n"
-                +"\t\t[s]: Standard Permanent Banner"
+                +"\t\t[Event]: Character Event Banner\n"
+                +"\t\t[Weapon]: Weapon Banner\n"
+                +"\t\t[Standard]: Standard Permanent Banner"
             +"\n\nCommandType:\n"
-                +"\t\t[Add]: Character Event Banner\n"
-                +"\t\t[Replace]: Weapon Banner"
+                +"\t\t[Add]: Add to the existing count\n"
+                +"\t\t[Replace]: Replace the existing count"
             +"\n\nNumber:\n"
                 +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
     }
@@ -726,13 +726,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
         else if (commandType === "add") {
             switch (bannerType) {
-                case "event" || "c":
+                case "event":
                     arrayObj.users[i].bannerTypes.event += roll_count;
                     break;
-                case "weapon" || "w":
+                case "weapon":
                     arrayObj.users[i].bannerTypes.weapon += roll_count;
                     break;
-                case "standard" || "s":
+                case "standard":
                     arrayObj.users[i].bannerTypes.standard += roll_count;
                     break;
                 default: 
@@ -742,13 +742,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
         else if (commandType === "replace") {
             switch (bannerType) {
-                case "event" || "c":
+                case "event":
                     arrayObj.users[i].bannerTypes.event = roll_count;
                     break;
-                case "weapon" || "w":
+                case "weapon":
                     arrayObj.users[i].bannerTypes.weapon = roll_count;
                     break;
-                case "standard" || "s":
+                case "standard":
                     arrayObj.users[i].bannerTypes.standard = roll_count;
                     break;
                 default: 
@@ -800,9 +800,9 @@ function wishReset(message, bannerType) {
             +"\nThis command resets the specified Genshin Gacha BannerType back to 0."
             +"\n\nUsage: " + "gReset [BannerType]"
             +"\n\nBannerType:\n"
-                +"\t\t[c]: Character Event Banner\n"
-                +"\t\t[w]: Weapon Banner\n"
-                +"\t\t[s]: Standard Permanent Banner")
+                +"\t\t[Event]: Character Event Banner\n"
+                +"\t\t[Weapon]: Weapon Banner\n"
+                +"\t\t[Standard]: Standard Permanent Banner")
                 .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
     }
 
@@ -826,15 +826,15 @@ function wishReset(message, bannerType) {
     bannerType = bannerType.toLowerCase();
     var bannerString = "";
     switch (bannerType) {
-        case "event" || "c":
+        case "event":
             bannerString = "Character Event Banner";
             arrayObj.users[i].bannerTypes.event = 0;
             break;
-        case "weapon" || "w":
+        case "weapon":
             bannerString = "Weapon Banner";
             arrayObj.users[i].bannerTypes.weapon = 0;
             break;
-        case "standard" || "s":
+        case "standard":
             bannerString = "Standard Wish Banner";
             arrayObj.users[i].bannerTypes.standard = 0;
             break;

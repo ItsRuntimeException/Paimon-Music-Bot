@@ -148,7 +148,6 @@ client.on("message", async message => {
         case "greset":
             wishReset(message, args[0]);
             break;
-        /* Owner Commands */
         case "wipe":
             clear_messages(message, args[0]);
             break;
@@ -412,14 +411,6 @@ function source_send(message) {
 }
 
 async function clear_messages(message, numline) {
-    /* ONLY OWNER MAY USE THIS COMMAND */
-    var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
-    var rand = Math.floor(Math.random() * Math.floor(length(moji_array)));
-    if (message.author.id !== "190588852769914880"){
-        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
-        message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
-        return;
-    }
     // Checks if the `amount` parameter is given
     if (numline == undefined)
         return message.reply('You haven\'t given the amount of messages to be deleted!');
@@ -683,9 +674,9 @@ function wishCount(message, bannerType, commandType, nInc) {
             +"\nThis command adds the number of rolls to your current Genshin Gacha Table."
             +"\n\nUsage: " + "gwish [BannerType] [CommandType] [Number]"
             +"\n\nBannerType:\n"
-                +"\t\t[c]: Character Event Banner\n"
-                +"\t\t[w]: Weapon Banner\n"
-                +"\t\t[s]: Standard Permanent Banner"
+                +"\t\t[Event]: Character Event Banner\n"
+                +"\t\t[Weapon]: Weapon Banner\n"
+                +"\t\t[Standard]: Standard Permanent Banner"
             +"\n\nCommandType:\n"
                 +"\t\t[Add]: Character Event Banner\n"
                 +"\t\t[Replace]: Weapon Banner"
@@ -726,13 +717,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
         else if (commandType === "add") {
             switch (bannerType) {
-                case "event" || "c":
+                case "event":
                     arrayObj.users[i].bannerTypes.event += roll_count;
                     break;
-                case "weapon" || "w":
+                case "weapon":
                     arrayObj.users[i].bannerTypes.weapon += roll_count;
                     break;
-                case "standard" || "s":
+                case "standard":
                     arrayObj.users[i].bannerTypes.standard += roll_count;
                     break;
                 default: 
@@ -742,13 +733,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
         else if (commandType === "replace") {
             switch (bannerType) {
-                case "event" || "c":
+                case "event":
                     arrayObj.users[i].bannerTypes.event = roll_count;
                     break;
-                case "weapon" || "w":
+                case "weapon":
                     arrayObj.users[i].bannerTypes.weapon = roll_count;
                     break;
-                case "standard" || "s":
+                case "standard":
                     arrayObj.users[i].bannerTypes.standard = roll_count;
                     break;
                 default: 
@@ -800,9 +791,9 @@ function wishReset(message, bannerType) {
             +"\nThis command resets the specified Genshin Gacha BannerType back to 0."
             +"\n\nUsage: " + "gReset [BannerType]"
             +"\n\nBannerType:\n"
-                +"\t\t[c]: Character Event Banner\n"
-                +"\t\t[w]: Weapon Banner\n"
-                +"\t\t[s]: Standard Permanent Banner")
+                +"\t\t[Event]: Character Event Banner\n"
+                +"\t\t[Weapon]: Weapon Banner\n"
+                +"\t\t[Standard]: Standard Permanent Banner")
                 .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
     }
 
@@ -826,15 +817,15 @@ function wishReset(message, bannerType) {
     bannerType = bannerType.toLowerCase();
     var bannerString = "";
     switch (bannerType) {
-        case "event" || "c":
+        case "event":
             bannerString = "Character Event Banner";
             arrayObj.users[i].bannerTypes.event = 0;
             break;
-        case "weapon" || "w":
+        case "weapon":
             bannerString = "Weapon Banner";
             arrayObj.users[i].bannerTypes.weapon = 0;
             break;
-        case "standard" || "s":
+        case "standard":
             bannerString = "Standard Wish Banner";
             arrayObj.users[i].bannerTypes.standard = 0;
             break;
