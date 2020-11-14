@@ -290,8 +290,8 @@ function vol_music(message, num) {
             console.log(`Volume set to ${percentage}%`);
         }
         else {
-            message.channel.send(`Cannot set volume greater than ${percentage}%`);
-            console.log(`Cannot set volume greater than ${percentage}%`);
+            message.channel.send(`Cannot set volume greater than 100%`);
+            console.log(`Cannot set volume greater than 100%`);
         }
     }
     else {
