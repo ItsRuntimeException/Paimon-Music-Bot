@@ -14,6 +14,7 @@ const youtube = new YouTube(readTextFile('./source/youtube_api_key.txt')); // Pe
 var servers = {};
 var volume_float = 1;
 var loop = false;
+var skip = false;
 
 /* bot online */
 client.on("ready", () => {
@@ -258,8 +259,15 @@ async function play_music(message, search_string) {
     }
 
     server.dispatcher.on('end', function() {
-        if (loop == true)
-            console.log('Loop Mode: ON, replay current song.')
+        if (loop) {
+            if (skip) {
+                server.queue.shift();
+                skip = false;
+            }
+            else {
+                console.log('Loop Mode: ON, replay current song.')
+            }
+        }
         else
             server.queue.shift();
 
@@ -383,6 +391,7 @@ function skip_music(message) {
         }
     }
     let server = servers[message.guild.id];
+    skip = true;
     if (server.dispatcher != null) {
         server.dispatcher.end();
         message.channel.send('Music skipped.').catch(console.error);
