@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: November 10, 2020***
+***Personal Project; Last Updated: November 16, 2020***
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
@@ -12,9 +12,8 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 
 **Bot Functions**
 - [Help](#Help)
-- [Mention](#Mention)
-- [Reboot](#Reboot)
-- [Kill](#Kill)
+- [Music Support](#MusicSupport)
+- [Reboot|Kill](#Reboot)
 - [Roll](#Roll)
 - [MapleStory](#MapleStory)
 - [gCreate](#gCreate)
@@ -26,14 +25,11 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 # Help #
 Display a list of functions and its usage.
 
-# Mention #
-The bot will reply back to the user with a greeting if it is mentioned.
+# Music Support #
+Several music control commands: play|pause|resume|skip|stop|loop
 
-# Reboot #
-Reboot the bot from the server.
-
-# Kill #
-Shut down the bot from the server.
+# Reboot|Kill #
+Reboot|Shutdown the bot from the server.
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).

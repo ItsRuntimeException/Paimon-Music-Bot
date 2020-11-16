@@ -9,8 +9,11 @@ const DICE = 6;
 // native token file
 const BOT_TOKEN = readTextFile('./source/bot_token.txt');
 const youtube = new YouTube(readTextFile('./source/youtube_api_key.txt')); // Personal Youtube-API key
+
+// music variables
 var servers = {};
 var volume_float = 1;
+var loop = false;
 
 /* bot online */
 client.on("ready", () => {
@@ -94,11 +97,14 @@ client.on("message", async message => {
             else if (server.queue.length >= 1) {
                 return queueSong(message,search_string);
             }
-            play_music(message, search_string);
+            play_music(message, server.queue[0]);
             console.log(server.queue);
             break;
         case "vol":
             vol_music(message, args[0]);
+            break;
+        case "loop":
+            loop_music(message, args[0]);
             break;
         case "pause":
             pause_music(message);
@@ -252,11 +258,15 @@ async function play_music(message, search_string) {
     }
 
     server.dispatcher.on('end', function() {
-        server.queue.shift();
+        if (loop == true)
+            console.log('Loop Mode: ON, replay current song.')
+        else
+            server.queue.shift();
+
         if (server.queue.length > 0) {
             play_music(message, server.queue[0]);
         }
-        if (server.queue.length == 0) {
+        else if (server.queue.length == 0) {
             server.dispatcher = undefined;
         }
     })
@@ -296,6 +306,36 @@ function vol_music(message, num) {
     }
     else {
         message.channel.send('Music is not playing.');
+    }
+}
+
+function loop_music(message, switcher) {
+    if (switcher == undefined) {
+        if (loop) {
+            message.channel.send('Loop Mode: ON');
+            return;
+        }
+        else {
+            message.channel.send('Loop Mode: OFF');
+            return;
+        }
+    }
+
+    switcher = switcher.toLowerCase();
+    switch (switcher) {
+        case 'on':
+            loop = true;
+            message.channel.send('Loop Mode: ON');
+            console.log('Loop Mode: ON');
+            break;
+        case 'off':
+            loop = false;
+            message.channel.send('Loop Mode: OFF');
+            console.log('Loop Mode: OFF');
+            break;
+        default:
+            message.channel.send('Usage: ?loop ON|OFF');
+            break;
     }
 }
 
@@ -953,7 +993,7 @@ function userHelp(message) {
             value:"Set the current music volume."
           },
           {
-            name: "Pause|Resume|Skip|Stop",
+            name: "Pause|Resume|Skip|Stop|Loop",
             value: "Music Control Logic."
           },
           {
