@@ -13,7 +13,7 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 **Bot Functions**
 - [Help](#Help)
 - [Music Support](#Music-Support)
-- [Reboot|Kill](#Reboot|Kill)
+- [Reboot|Kill](#rebootkill)
 - [Roll](#Roll)
 - [MapleStory](#MapleStory)
 - [gCreate](#gCreate)
