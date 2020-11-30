@@ -1,5 +1,6 @@
 const PREFIX = "?";
 const ytdl = require('ytdl-core');
+const ytpl = require('ytpl');
 const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
 const filestream = require("fs");
@@ -93,13 +94,11 @@ client.on("message", async message => {
              *    1+ = queue
              */
             if (server.queue.length == 0) {
-                queueSong(message,search_string);
+                queueLogic(message,search_string, true);
             }
             else if (server.queue.length >= 1) {
-                return queueSong(message,search_string);
+                queueLogic(message,search_string, false);
             }
-            play_music(message, server.queue[0]);
-            console.log(server.queue);
             break;
         case "vol":
             vol_music(message, args[0]);
@@ -175,27 +174,62 @@ async function join(message) {
     }
 }
 
-async function queueSong(message, search_string) {
+async function queueLogic(message, search_string, playToggle) {
     var server = servers[message.guild.id];
     // queue the search_string only, only fetch metadata upon playing
-    let validate = ytdl.validateURL(search_string);
-    server.queue.push(search_string);
-    if (server.queue.length > 1) {
-        if (!validate)
-            message.channel.send(`Your query: '${search_string}' have been queued.\n`);
-        else
-            message.channel.send(`Your link have been queued.\n`);
+    let validateURL = false;
+    let validate_playlist = ytpl.getPlaylistID(search_string);
+    if (!validate_playlist) {
+        validateURL = ytdl.validateURL(search_string);
+        server.queue.push(search_string);
     }
+    else if (validate_playlist) {
+        try {
+            var yt_playlist = await youtube.getPlaylist(search_string);
+        } catch (error) {
+            console.log(error);
+            return message.channel.send('Something went wrong! ' + error);
+        }
+        for (var i = 0; i < yt_playlist.length; i++) {
+            server.queue.push(yt_playlist[i].url);
+        }
+    }
+    if (server.queue.length > 1) {
+        if (!validate_playlist) {
+            if (!validateURL) {
+                message.channel.send(`Your query: '${search_string}' have been queued.\n`);
+            }
+            else if (validateURL) {
+                message.channel.send(`Your link have been queued.\n`);
+            }
+        }
+        else if (validate_playlist) {
+            message.channel.send(`Your playlist have been queued.\n`);
+        }
+    }
+    /* 
+    *  server.queue only seems to have updated inside this function instead of client.on(...), 
+    *  call play_music here to avoid playing [undefined] song.
+    */
+    if (playToggle) {
+        play_music(message);
+    }
+    console.log(server.queue);
 }
 
-async function play_music(message, search_string) {
+async function play_music(message) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
-    let validate = ytdl.validateURL(search_string);
+    let validate = ytdl.validateURL(server.queue[0]);
     console.log('validate-mode? ' + validate);
     if (!validate) {
         // PRELOAD
-        var video = await youtube.searchVideos(search_string);
+        try {
+            var video = await youtube.searchVideos(server.queue[0]);
+        } catch (error) {
+            console.log(error);
+            return message.channel.send('Something went wrong! ' + error);
+        }
         // PLAY MUSIC via keywords
         var stream = ytdl(video.url, { filter: 'audioonly' });
         server.dispatcher = connection.playStream(stream);
@@ -229,7 +263,12 @@ async function play_music(message, search_string) {
     }
     else if (validate) {
         // PLAY MUSIC via link
-        var video = await youtube.getVideo(search_string);
+        try {
+            var video = await youtube.getVideo(server.queue[0]);
+        } catch (error) {
+            console.log(error);
+            return message.channel.send('Something went wrong! ' + error);
+        }
         var stream = ytdl(video.url, { filter: 'audioonly' });
         server.dispatcher = connection.playStream(stream);
         server.dispatcher.setVolume(volume_float);

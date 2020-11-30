@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: November 16, 2020***
+***Personal Project; Last Updated: November 30, 2020***
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
@@ -27,6 +27,8 @@ Display a list of functions and its usage.
 
 # Music Support #
 Several music control commands: play|pause|resume|skip|stop|loop
+Play Support: youtube-URL|keywords|youtube-playlist-URL
+Loop Support: single|multi(work in progress)
 
 # Reboot|Kill #
 Reboot|Shutdown the bot from the server.
