@@ -447,7 +447,7 @@ function stop_music(message, fcode) {
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // clear queue
-        for (var i = 0; i < server.queue.length; i++) {
+        while (server.queue.length > 0) {
             server.queue.shift();
         }
         server.dispatcher.end();
