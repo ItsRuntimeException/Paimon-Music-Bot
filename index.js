@@ -197,14 +197,14 @@ async function queueLogic(message, search_string, playToggle) {
     if (server.queue.length > 1) {
         if (!validate_playlist) {
             if (!validateURL) {
-                message.channel.send(`Your query: '${search_string}' have been queued.\n`).then(messageReply => messageReply.delete(5000));
+                message.channel.send(`Your query: '${search_string}' have been queued.\n`);
             }
             else if (validateURL) {
-                message.channel.send(`Your link have been queued.\n`).then(messageReply => messageReply.delete(5000));
+                message.channel.send(`Your link have been queued.\n`);
             }
         }
         else if (validate_playlist) {
-            message.channel.send(`Your playlist have been queued.\n`).then(messageReply => messageReply.delete(5000));
+            message.channel.send(`Your playlist have been queued.\n`);
         }
     }
     /* 
@@ -304,7 +304,7 @@ async function play_music(message) {
                 skip = false;
             }
             else {
-                console.log('Loop Mode: ON, replay current song.').then(messageReply => messageReply.delete(5000));
+                console.log('Loop Mode: ON, replay current song.');
             }
         }
         else
@@ -327,7 +327,7 @@ function vol_music(message, num) {
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
         console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`);
-        return message.channel.send(`${message.author}. You need to supply a VALID number!`).then(messageReply => messageReply.delete(5000));
+        return message.channel.send(`${message.author}. You need to supply a VALID number!`);
     }
     // initialize queue
     if (!servers[message.guild.id]) {
@@ -342,11 +342,11 @@ function vol_music(message, num) {
         if (volume_float <= 1) {
             server.dispatcher.setVolume(volume_float);
             console.log(`Volume set to ${percentage}%`);
-            message.channel.send(`Volume set to ${percentage}%`).then(messageReply => messageReply.delete(5000));
+            message.channel.send(`Volume set to ${percentage}%`);
         }
         else {
             console.log(`Cannot set volume greater than 100%`);
-            message.channel.send(`Cannot set volume greater than 100%`).then(messageReply => messageReply.delete(5000));
+            message.channel.send(`Cannot set volume greater than 100%`);
         }
     }
     else {
@@ -357,10 +357,10 @@ function vol_music(message, num) {
 function loop_music(message, switcher) {
     if (switcher == undefined) {
         if (loop) {
-            return message.channel.send('Loop Mode Status: ON').then(messageReply => messageReply.delete(5000));
+            return message.channel.send('Loop Mode Status: ON');
         }
         else {
-            return message.channel.send('Loop Mode Status: OFF').then(messageReply => messageReply.delete(5000));
+            return message.channel.send('Loop Mode Status: OFF');
         }
     }
 
@@ -369,15 +369,15 @@ function loop_music(message, switcher) {
         case 'on':
             loop = true;
             console.log('Loop Mode is turned ON');
-            message.channel.send('Loop Mode is turned ON').then(messageReply => messageReply.delete(5000));
+            message.channel.send('Loop Mode is turned ON');
             break;
         case 'off':
             loop = false;
             console.log('Loop Mode is turned OFF');
-            message.channel.send('Loop Mode is turned OFF').then(messageReply => messageReply.delete(5000));
+            message.channel.send('Loop Mode is turned OFF');
             break;
         default:
-            message.channel.send('Usage: ?loop ON|OFF').then(messageReply => messageReply.delete(5000));
+            message.channel.send('Usage: ?loop ON|OFF');
             break;
     }
 }
@@ -505,16 +505,16 @@ async function clear_messages(message, numline) {
     }
     // Checks if the `amount` parameter is given
     if (numline == undefined)
-        return message.reply('You haven\'t given the amount of messages to be deleted!').then(messageReply => messageReply.delete(5000));
+        return message.reply('You haven\'t given the amount of messages to be deleted!');
     // Checks if the `amount` parameter is a number. If not, the command throws an error
     if (isNaN(numline))
-        return message.reply('The amount parameter isn`t a number!').then(messageReply => messageReply.delete(5000));
+        return message.reply('The amount parameter isn`t a number!');
     // Checks if the `numline` integer is bigger than 100
     if (numline > 99)
-        return message.reply('Maximum of clearing **99 messages** at once!').then(messageReply => messageReply.delete(5000));
+        return message.reply('Maximum of clearing **99 messages** at once!');
     // Checks if the `numline` integer is smaller than 1
     if (numline < 1)
-        return message.reply('You must delete **at least 1 message!**').then(messageReply => messageReply.delete(5000));
+        return message.reply('You must delete **at least 1 message!**');
     
     /* BEGIN SWEEPING */
     // Fetching the execution command and sweep that first, catch any errors.
