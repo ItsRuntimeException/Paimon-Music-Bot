@@ -197,14 +197,14 @@ async function queueLogic(message, search_string, playToggle) {
     if (server.queue.length > 1) {
         if (!validate_playlist) {
             if (!validateURL) {
-                message.channel.send(`Your query: '${search_string}' have been queued.\n`);
+                message.channel.send(`Your query: '${search_string}' have been queued.\n`).then(messageReply => messageReply.delete(5000));
             }
             else if (validateURL) {
-                message.channel.send(`Your link have been queued.\n`);
+                message.channel.send(`Your link have been queued.\n`).then(messageReply => messageReply.delete(5000));
             }
         }
         else if (validate_playlist) {
-            message.channel.send(`Your playlist have been queued.\n`);
+            message.channel.send(`Your playlist have been queued.\n`).then(messageReply => messageReply.delete(5000));
         }
     }
     /* 
@@ -259,7 +259,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }})
+        }}).then(messageReply => messageReply.delete(5000));
     }
     else if (validate) {
         // PLAY MUSIC via link
@@ -294,7 +294,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }})
+        }}).then(messageReply => messageReply.delete(5000));
     }
 
     server.dispatcher.on('end', function() {
@@ -304,7 +304,7 @@ async function play_music(message) {
                 skip = false;
             }
             else {
-                console.log('Loop Mode: ON, replay current song.')
+                console.log('Loop Mode: ON, replay current song.').then(messageReply => messageReply.delete(5000));
             }
         }
         else
@@ -321,15 +321,13 @@ async function play_music(message) {
 
 function vol_music(message, num) {
     if (num == undefined) {
-        message.channel.send(`Current volume: ${volume_float*100}%`)
-        .then(console.log(`Current volume: ${volume_float*100}%`)).catch(console.error);
-        return;
+        console.log(`Current volume: ${volume_float*100}%`);
+        return message.channel.send(`Current volume: ${volume_float*100}%`).then(messageReply => messageReply.delete(5000));
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
-        message.channel.send(`${message.author}. You need to supply a VALID number!`)
-        .then(console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`)).catch(console.error);
-        return;
+        console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`);
+        return message.channel.send(`${message.author}. You need to supply a VALID number!`).then(messageReply => messageReply.delete(5000));
     }
     // initialize queue
     if (!servers[message.guild.id]) {
@@ -343,12 +341,12 @@ function vol_music(message, num) {
         volume_float = percentage / 100;
         if (volume_float <= 1) {
             server.dispatcher.setVolume(volume_float);
-            message.channel.send(`Volume set to ${percentage}%`);
             console.log(`Volume set to ${percentage}%`);
+            message.channel.send(`Volume set to ${percentage}%`).then(messageReply => messageReply.delete(5000));
         }
         else {
-            message.channel.send(`Cannot set volume greater than 100%`);
             console.log(`Cannot set volume greater than 100%`);
+            message.channel.send(`Cannot set volume greater than 100%`).then(messageReply => messageReply.delete(5000));
         }
     }
     else {
@@ -359,12 +357,10 @@ function vol_music(message, num) {
 function loop_music(message, switcher) {
     if (switcher == undefined) {
         if (loop) {
-            message.channel.send('Loop Mode: ON');
-            return;
+            return message.channel.send('Loop Mode Status: ON').then(messageReply => messageReply.delete(5000));
         }
         else {
-            message.channel.send('Loop Mode: OFF');
-            return;
+            return message.channel.send('Loop Mode Status: OFF').then(messageReply => messageReply.delete(5000));
         }
     }
 
@@ -372,16 +368,16 @@ function loop_music(message, switcher) {
     switch (switcher) {
         case 'on':
             loop = true;
-            message.channel.send('Loop Mode: ON');
-            console.log('Loop Mode: ON');
+            console.log('Loop Mode is turned ON');
+            message.channel.send('Loop Mode is turned ON').then(messageReply => messageReply.delete(5000));
             break;
         case 'off':
             loop = false;
-            message.channel.send('Loop Mode: OFF');
-            console.log('Loop Mode: OFF');
+            console.log('Loop Mode is turned OFF');
+            message.channel.send('Loop Mode is turned OFF').then(messageReply => messageReply.delete(5000));
             break;
         default:
-            message.channel.send('Usage: ?loop ON|OFF');
+            message.channel.send('Usage: ?loop ON|OFF').then(messageReply => messageReply.delete(5000));
             break;
     }
 }
@@ -451,10 +447,9 @@ function stop_music(message, fcode) {
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // clear queue
-        for (let i = 0; i < server.queue.length; i++) {
+        for (var i = 0; i < server.queue.length; i++) {
             server.queue.shift();
         }
-	    server.dispatcher.pause();
         server.dispatcher.end();
         if (fcode == 0) {
             message.channel.send('Music stopped.');
@@ -510,16 +505,16 @@ async function clear_messages(message, numline) {
     }
     // Checks if the `amount` parameter is given
     if (numline == undefined)
-        return message.reply('You haven\'t given the amount of messages to be deleted!');
+        return message.reply('You haven\'t given the amount of messages to be deleted!').then(messageReply => messageReply.delete(5000));
     // Checks if the `amount` parameter is a number. If not, the command throws an error
     if (isNaN(numline))
-        return message.reply('The amount parameter isn`t a number!');
+        return message.reply('The amount parameter isn`t a number!').then(messageReply => messageReply.delete(5000));
     // Checks if the `numline` integer is bigger than 100
     if (numline > 99)
-        return message.reply('Maximum of clearing **99 messages** at once!');
+        return message.reply('Maximum of clearing **99 messages** at once!').then(messageReply => messageReply.delete(5000));
     // Checks if the `numline` integer is smaller than 1
     if (numline < 1)
-        return message.reply('You must delete **at least 1 message!**');
+        return message.reply('You must delete **at least 1 message!**').then(messageReply => messageReply.delete(5000));
     
     /* BEGIN SWEEPING */
     // Fetching the execution command and sweep that first, catch any errors.
@@ -876,7 +871,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }});
+        }}).then(messageReply => messageReply.delete(5000));;
     }
 }
 
@@ -962,7 +957,7 @@ function wishReset(message, bannerType) {
             icon_url: client.user.avatarURL,
             text: '© Rich Embedded Frameworks'
         }
-    }});
+    }}).then(messageReply => messageReply.delete(5000));;
 }
 
 function length(obj) {
