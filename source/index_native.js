@@ -177,10 +177,9 @@ async function join(message) {
 async function queueLogic(message, search_string, playToggle) {
     var server = servers[message.guild.id];
     // queue the search_string only, only fetch metadata upon playing
-    let validateURL = false;
-    let validate_playlist = ytpl.getPlaylistID(search_string);
+    let validateURL = ytdl.validateURL(search_string);
+    let validate_playlist = ytpl.validateID(search_string);
     if (!validate_playlist) {
-        validateURL = ytdl.validateURL(search_string);
         server.queue.push(search_string);
     }
     else if (validate_playlist) {
