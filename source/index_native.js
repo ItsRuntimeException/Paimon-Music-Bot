@@ -258,7 +258,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(messageReply => messageReply.delete(5000));
+        }});
     }
     else if (validate) {
         // PLAY MUSIC via link
@@ -293,7 +293,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(messageReply => messageReply.delete(5000));
+        }});
     }
 
     server.dispatcher.on('end', function() {
@@ -314,6 +314,7 @@ async function play_music(message) {
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
+            leave(message);
         }
     })
 }
@@ -321,7 +322,7 @@ async function play_music(message) {
 function vol_music(message, num) {
     if (num == undefined) {
         console.log(`Current volume: ${volume_float*100}%`);
-        return message.channel.send(`Current volume: ${volume_float*100}%`).then(messageReply => messageReply.delete(5000));
+        return message.channel.send(`Current volume: ${volume_float*100}%`);
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
@@ -870,7 +871,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(messageReply => messageReply.delete(5000));;
+        }});;
     }
 }
 
@@ -956,7 +957,7 @@ function wishReset(message, bannerType) {
             icon_url: client.user.avatarURL,
             text: '© Rich Embedded Frameworks'
         }
-    }}).then(messageReply => messageReply.delete(5000));;
+    }});;
 }
 
 function length(obj) {
