@@ -26,8 +26,8 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of functions and its usage.
 
 # Music Support #
-Several music control commands: play|pause|resume|skip|stop|loop
-Play Support: youtube-URL|keywords|youtube-playlist-URL
+Several music control commands: play|pause|resume|skip|stop|loop</br>
+Play Support: youtube-URL|keywords|youtube-playlist-URL</br>
 Loop Support: single|multi(work in progress)
 
 # Reboot|Kill #
