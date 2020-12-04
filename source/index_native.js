@@ -310,10 +310,11 @@ async function play_music(message) {
             server.queue.shift();
 
         if (server.queue.length > 0) {
-            play_music(message, server.queue[0]);
+            play_music(message);
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
+            leave(message);
         }
     })
 }
