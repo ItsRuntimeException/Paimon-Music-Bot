@@ -1,1 +1,1 @@
-node ./source/index_native.js
+node .\src\index_native.js

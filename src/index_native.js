@@ -8,8 +8,8 @@ const client = new Discord.Client();
 const DICE = 6;
 
 // native token file
-const BOT_TOKEN = readTextFile('./source/bot_token.txt');
-const youtube = new YouTube(readTextFile('./source/youtube_api_key.txt')); // Personal Youtube-API key
+const BOT_TOKEN = readTextFile('./src/bot_token.txt');
+const youtube = new YouTube(readTextFile('./src/youtube_api_key.txt')); // Personal Youtube-API key
 
 // music variables
 var servers = {};
