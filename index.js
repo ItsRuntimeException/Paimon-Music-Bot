@@ -14,7 +14,7 @@ const youtube = new YouTube(process.env.YOUTUBE_API_KEY); // Personal Youtube-AP
 // music variables
 var servers = {};
 var volume_float = 1;
-var loop = false;
+var loopMode = 'off';
 var skip = false;
 
 /* bot online */
@@ -258,7 +258,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }});
+        }}).then(newMessage => newMessage.delete(5000));
     }
     else if (validate) {
         // PLAY MUSIC via link
@@ -293,28 +293,32 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }});
+        }}).then(newMessage => newMessage.delete(5000));
     }
 
     server.dispatcher.on('end', function() {
-        if (loop) {
-            if (skip) {
+        if (skip) {
+            server.queue.shift();
+            skip = false;
+        }
+        else {
+            if (loopMode = 'off') {
                 server.queue.shift();
-                skip = false;
             }
-            else {
-                console.log('Loop Mode: ON, replay current song.');
+            else if (loopMode = 'single') {
+                // do nothing
+            }
+            else if (loopMode = 'playlist') {
+                server.queue.push(server.queue.shift());
             }
         }
-        else
-            server.queue.shift();
 
         if (server.queue.length > 0) {
             play_music(message);
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
-            leave(message);
+            setTimeout(() => {leave(message);}, 60000);
         }
     })
 }
@@ -356,28 +360,36 @@ function vol_music(message, num) {
 
 function loop_music(message, switcher) {
     if (switcher == undefined) {
-        if (loop) {
-            return message.channel.send('Loop Mode Status: ON');
+        if (loopMode == 'single') {
+            return message.channel.send('Loop Mode Status: SINGLE');
         }
-        else {
+        else if (loopMode == 'playlist') {
+            return message.channel.send('Loop Mode Status: PLAYLIST');
+        }
+        else if (loopMode == 'off') {
             return message.channel.send('Loop Mode Status: OFF');
         }
     }
 
     switcher = switcher.toLowerCase();
     switch (switcher) {
-        case 'on':
-            loop = true;
-            console.log('Loop Mode is turned ON');
-            message.channel.send('Loop Mode is turned ON');
+        case 'single':
+            loopMode = 'single';
+            console.log('Loop is now in SINGLE mode');
+            message.channel.send('Loop is now in SINGLE mode');
+            break;
+        case 'playlist':
+            loopMode = 'playlist';
+            console.log('Loop is now in PLAYLIST mode');
+            message.channel.send('Loop is now in PLAYLIST mode');
             break;
         case 'off':
-            loop = false;
-            console.log('Loop Mode is turned OFF');
-            message.channel.send('Loop Mode is turned OFF');
+            loopMode = 'off';
+            console.log('Loop Mode is now turned OFF');
+            message.channel.send('Loop Mode is now turned OFF');
             break;
         default:
-            message.channel.send('Usage: ?loop ON|OFF');
+            message.channel.send('Usage: ?loop SINGLE|PLAYLIST|OFF');
             break;
     }
 }
