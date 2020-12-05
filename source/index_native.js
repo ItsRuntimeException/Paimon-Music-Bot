@@ -314,11 +314,14 @@ async function play_music(message) {
         }
 
         if (server.queue.length > 0) {
-            play_music(message);
+            play_music(message, server.queue[0]);
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
+<<<<<<< HEAD
             setTimeout(() => {leave(message);}, 60000);
+=======
+>>>>>>> parent of 018b43a... auto leave channel
         }
     })
 }
