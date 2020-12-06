@@ -155,8 +155,8 @@ client.on("message", async message => {
             wishReset(message, args[0]);
             break;
         /* Owner Commands */
-        case "wipe":
-            clear_messages(message, args[0]);
+        case "clean":
+            clean_messages(message, args[0]);
             break;
         default:
             message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
@@ -187,7 +187,7 @@ async function queueLogic(message, search_string, playToggle) {
             var yt_playlist = await youtube.getPlaylist(search_string);
         } catch (error) {
             console.log(error);
-            return message.channel.send('Something went wrong! ' + error);
+            return message.channel.send('Something went wrong!\n\n' + error);
         }
         for (var i = 0; i < yt_playlist.length; i++) {
             server.queue.push(yt_playlist[i].url);
@@ -227,7 +227,7 @@ async function play_music(message) {
             var video = await youtube.searchVideos(server.queue[0]);
         } catch (error) {
             console.log(error);
-            return message.channel.send('Something went wrong! ' + error);
+            return message.channel.send('Something went wrong!\n\n' + error);
         }
         // PLAY MUSIC via keywords
         var stream = ytdl(video.url, { filter: 'audioonly' });
@@ -258,7 +258,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }});
+        }}).then(newMessage => newMessage.delete(5000));
     }
     else if (validate) {
         // PLAY MUSIC via link
@@ -266,7 +266,7 @@ async function play_music(message) {
             var video = await youtube.getVideo(server.queue[0]);
         } catch (error) {
             console.log(error);
-            return message.channel.send('Something went wrong! ' + error);
+            return message.channel.send('Something went wrong!\n\n' + error);
         }
         var stream = ytdl(video.url, { filter: 'audioonly' });
         server.dispatcher = connection.playStream(stream);
@@ -293,7 +293,7 @@ async function play_music(message) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }});
+        }}).then(newMessage => newMessage.delete(5000));
     }
 
     server.dispatcher.on('end', function() {
@@ -322,7 +322,7 @@ async function play_music(message) {
 function vol_music(message, num) {
     if (num == undefined) {
         console.log(`Current volume: ${volume_float*100}%`);
-        return message.channel.send(`Current volume: ${volume_float*100}%`);
+        return message.channel.send(`Current volume: ${volume_float*100}%`).then(newMessage => newMessage.delete(5000));
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
@@ -342,25 +342,25 @@ function vol_music(message, num) {
         if (volume_float <= 1) {
             server.dispatcher.setVolume(volume_float);
             console.log(`Volume set to ${percentage}%`);
-            message.channel.send(`Volume set to ${percentage}%`);
+            message.channel.send(`Volume set to ${percentage}%`).then(newMessage => newMessage.delete(5000));
         }
         else {
             console.log(`Cannot set volume greater than 100%`);
-            message.channel.send(`Cannot set volume greater than 100%`);
+            message.channel.send(`Cannot set volume greater than 100%`).then(newMessage => newMessage.delete(5000));
         }
     }
     else {
-        message.channel.send('Music is not playing.');
+        message.channel.send('Music is not playing.').then(newMessage => newMessage.delete(5000));
     }
 }
 
 function loop_music(message, switcher) {
     if (switcher == undefined) {
         if (loop) {
-            return message.channel.send('Loop Mode Status: ON');
+            return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete(5000));
         }
         else {
-            return message.channel.send('Loop Mode Status: OFF');
+            return message.channel.send('Loop Mode Status: OFF').then(newMessage => newMessage.delete(5000));
         }
     }
 
@@ -392,10 +392,10 @@ function pause_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.pause();
-        message.channel.send('Music paused.').catch(console.error);
+        message.channel.send('Music paused.');
     }
     else {
-        message.channel.send('There is nothing to pause.').catch(console.error);
+        message.channel.send('There is nothing to pause.');
     }
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to pause music.');
 }
@@ -410,10 +410,10 @@ function resume_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.resume();
-        message.channel.send('Music resume.').catch(console.error);
+        message.channel.send('Music resume.');
     }
     else {
-        message.channel.send('There is nothing to resume.').catch(console.error);
+        message.channel.send('There is nothing to resume.');
     }
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resume music.');
 }
@@ -429,10 +429,10 @@ function skip_music(message) {
     skip = true;
     if (server.dispatcher != null) {
         server.dispatcher.end();
-        message.channel.send('Music skipped.').catch(console.error);
+        message.channel.send('Music skipped.');
     }
     else {
-        message.channel.send('There is nothing to skip.').catch(console.error);
+        message.channel.send('There is nothing to skip.');
     }
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
 }
@@ -494,7 +494,7 @@ function source_send(message) {
     console.log(`${message.member.user.tag} requested Paimon as food!`);
 }
 
-async function clear_messages(message, numline) {
+async function clean_messages(message, numline) {
     /* ONLY OWNER MAY USE THIS COMMAND */
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(length(moji_array)));
@@ -504,16 +504,18 @@ async function clear_messages(message, numline) {
         return;
     }
     // Checks if the `amount` parameter is given
-    if (numline == undefined)
-        return message.reply('You haven\'t given the amount of messages to be deleted!');
+    if (numline == undefined) {
+        /* default to 15 messages */
+        numline = 15;
+    }
     // Checks if the `amount` parameter is a number. If not, the command throws an error
-    if (isNaN(numline))
+    else if (isNaN(numline))
         return message.reply('The amount parameter isn`t a number!');
     // Checks if the `numline` integer is bigger than 100
-    if (numline > 99)
+    else if (numline > 99)
         return message.reply('Maximum of clearing **99 messages** at once!');
     // Checks if the `numline` integer is smaller than 1
-    if (numline < 1)
+    else if (numline < 1)
         return message.reply('You must delete **at least 1 message!**');
     
     /* BEGIN SWEEPING */
@@ -522,8 +524,13 @@ async function clear_messages(message, numline) {
     // Fetch the given number of messages to sweeps: numline+1 to include the execution command
     await message.channel.fetchMessages({ limit: ++numline })
     .then(messages => {
-        // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
-        message.channel.bulkDelete(messages).catch(console.err);
+        try {
+            // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
+            message.channel.bulkDelete(messages);
+        } catch (error) {
+            console.log(error);
+            return message.channel.send('Something went wrong!\n\n' + error);
+        }
     });
 }
 
@@ -535,7 +542,7 @@ function readTextFile(file)
 
 function reboot(message) {
     message.channel.send("Rebooting...")
-    .then(console.log(`${message.member.user.tag} rebooted the bot.`)).catch(console.error)
+    .then(console.log(`${message.member.user.tag} rebooted the bot.`))
     .then(client.destroy())
     .then(client.login(BOT_TOKEN));
 }
@@ -543,7 +550,7 @@ function reboot(message) {
 function emergency_food_time(message) {
     // channel reply
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
-    .then(console.log(`${message.member.user.tag} killed Paimon as food~`)).catch(console.error)
+    .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
     
     /*fix error: 'Request to use token, but token was unavailable to the client' */
     setTimeout(function(err) {
@@ -589,7 +596,7 @@ function vSens(message, gameCode, sens) {
     var sensitivity = parseFloat(sens);
     if (isNaN(sensitivity)) // is Not a Number
         return message.channel.send(`${message.author}. You need to supply a VALID sensitivity!`)
-        .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`)).catch(console.error);
+        .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`));
     else {
         var convertedSens = 0;
         var gameName = null;
@@ -612,7 +619,7 @@ function vSens(message, gameCode, sens) {
                 break;
             default: 
                 return message.channel.send(`${message.author}. Unsupported GameCode, cannot determine your sensitivity.`)
-                .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID GameCode.`)).catch(console.error);
+                .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID GameCode.`));
         }
 
         console.log(`\n${message.member.user.tag} requested for VALORANT sensitivity conversion.`);
@@ -773,7 +780,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 +"\t\t[Add]: Add to the existing count\n"
                 +"\t\t[Replace]: Replace the existing count"
             +"\n\nNumber:\n"
-                +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
+                +"\t\t[Integer]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
 
     bannerType = bannerType.toLowerCase();
@@ -782,7 +789,7 @@ function wishCount(message, bannerType, commandType, nInc) {
     if (isNaN(roll_count)) // is Not a Number
     {
         return message.channel.send(`${message.author}. You need to supply a VALID count!`)
-        .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`)).catch(console.error);
+        .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`));
     }
     else {
         // find user
@@ -805,7 +812,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         // edit GGachaTable
         if ( !(commandType === "add" || commandType === "replace") ) {
             return message.channel.send(`${message.author}. Unsupported CommandType, cannot edit your gacha data.`)
-            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`)).catch(console.error);
+            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`));
         }
         else if (commandType === "add") {
             switch (bannerType) {
@@ -819,8 +826,8 @@ function wishCount(message, bannerType, commandType, nInc) {
                     arrayObj.users[i].bannerTypes.standard += roll_count;
                     break;
                 default: 
-                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`)
-                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
+                    console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
+                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
             }
         }
         else if (commandType === "replace") {
@@ -835,8 +842,8 @@ function wishCount(message, bannerType, commandType, nInc) {
                     arrayObj.users[i].bannerTypes.standard = roll_count;
                     break;
                 default: 
-                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot fetch your gacha data.`)
-                    .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
+                    console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
+                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot fetch your gacha data.`);
             }
         }
 
@@ -871,7 +878,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }});;
+        }}).then(newMessage => newMessage.delete(5000));
     }
 }
 
@@ -886,7 +893,7 @@ function wishReset(message, bannerType) {
                 +"\t\t[Event]: Character Event Banner\n"
                 +"\t\t[Weapon]: Weapon Banner\n"
                 +"\t\t[Standard]: Standard Permanent Banner")
-                .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`)).catch(console.error);
+                .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
 
     // find user
@@ -923,7 +930,7 @@ function wishReset(message, bannerType) {
             break;
         default: 
             return message.channel.send(`${message.author}. Unsupported BannerType, cannot reset your gacha data.`)
-            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`)).catch(console.error);
+            .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
     }
 
     // save data back to json
@@ -957,7 +964,7 @@ function wishReset(message, bannerType) {
             icon_url: client.user.avatarURL,
             text: '© Rich Embedded Frameworks'
         }
-    }});;
+    }}).then(newMessage => newMessage.delete(5000));
 }
 
 function length(obj) {
@@ -1052,7 +1059,7 @@ function userHelp(message) {
             value: "Paimon's delicious sauce code~"
           },
           {
-            name: "Wipe",
+            name: "Clean",
             value: "Paimon will clean up your mess!"
           },
           {
@@ -1077,7 +1084,7 @@ function userHelp(message) {
             icon_url: client.user.avatarURL,
             text: '© Rich Embedded Frameworks'
         }
-    }}).then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`)).catch(console.error);
+    }}).then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`));
 }
 
 client.login(BOT_TOKEN);
