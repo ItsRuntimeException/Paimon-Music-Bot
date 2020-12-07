@@ -4,6 +4,7 @@ const ytpl = require('ytpl');
 const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
 const filestream = require("fs");
+const { error } = require('console');
 const client = new Discord.Client();
 const DICE = 6;
 
@@ -522,16 +523,9 @@ async function clean_messages(message, numline) {
     // Fetching the execution command and sweep that first, catch any errors.
 
     // Fetch the given number of messages to sweeps: numline+1 to include the execution command
-    try {
-        // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
-        await message.channel.fetchMessages({ limit: ++numline })
-        .then(messages => {
-            message.channel.bulkDelete(messages);
-        });
-    } catch (error) {
-        console.log(error);
-        return message.channel.send('Something went wrong!\n\n' + error);
-    }
+    // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
+    var bulkMessages = await message.channel.fetchMessages({ limit: ++numline });
+    message.channel.bulkDelete(bulkMessages, true).catch(error);
 }
 
 function readTextFile(file)
