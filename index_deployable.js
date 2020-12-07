@@ -1039,7 +1039,7 @@ function userHelp(message) {
             value: "1: Play audio from the user's provided link.\n2: Perform a search on the user's provided keyword."
           },
           {
-            name: "?vol [percent]",
+            name: "?vol [Percent]",
             value:"Set the current music volume."
           },
           {
@@ -1060,7 +1060,7 @@ function userHelp(message) {
           },
           {
             name: "Clean",
-            value: "Paimon will clean up your mess!"
+            value: "Paimon will clean up your mess!\nDefault: 15"
           },
           {
             name: "Roll",
@@ -1071,7 +1071,7 @@ function userHelp(message) {
             value: "MapleStory guild page."
           },
           {
-            name: "gCreate|gShowtable|gPity|gWish|gReset",
+            name: "g[Create|Showtable|Pity|Wish|Reset]",
             value: "Genshin Impact's manual \'Gacha Count-Table\'."
           },
           {
