@@ -498,7 +498,7 @@ async function clean_messages(message, numline) {
     /* ONLY OWNER MAY USE THIS COMMAND */
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(length(moji_array)));
-    if (message.author.id !== "190588852769914880"){
+    if (message.author.id !== readTextFile('./src/ownerID.txt')){
         console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
         message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
         return;
@@ -524,7 +524,7 @@ async function clean_messages(message, numline) {
     // Fetch the given number of messages to sweeps: numline+1 to include the execution command
     // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
     var bulkMessages = await message.channel.fetchMessages({ limit: ++numline });
-    message.channel.bulkDelete(bulkMessages, true).catch(error);
+    message.channel.bulkDelete(bulkMessages, true);
 }
 
 function readTextFile(file)
