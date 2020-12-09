@@ -526,6 +526,7 @@ async function clean_messages(message, numline) {
     // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
     var bulkMessages = await message.channel.fetchMessages({ limit: ++numline });
     message.channel.bulkDelete(bulkMessages, true);
+    console.log('message cleaning requested!');
 }
 
 function readTextFile(file)
@@ -550,7 +551,7 @@ function emergency_food_time(message) {
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
-    }, 3000);
+    }, 1000);
 }
 
 function rand(length) {
@@ -656,7 +657,10 @@ function create_genshin_table(message) {
     }
 
     // update JSON Data
-    save_JSON_Data(arrayObj);
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_JSON_Data(arrayObj);
+    }, 1000);
 
     // display message
     console.log('Finished creating Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
@@ -808,7 +812,7 @@ function wishCount(message, bannerType, commandType, nInc) {
             return message.channel.send(`${message.author}. Unsupported CommandType, cannot edit your gacha data.`)
             .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`));
         }
-        else if (commandType === "add") {
+        if (commandType === "add") {
             switch (bannerType) {
                 case "event":
                     arrayObj.users[i].bannerTypes.event += roll_count;
@@ -821,10 +825,10 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
-                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
+                    message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
             }
         }
-        else if (commandType === "replace") {
+        if (commandType === "replace") {
             switch (bannerType) {
                 case "event":
                     arrayObj.users[i].bannerTypes.event = roll_count;
@@ -837,12 +841,15 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
-                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot fetch your gacha data.`);
+                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
             }
         }
 
         // save data back to json
-        save_JSON_Data(arrayObj);
+        setTimeout(function(err) {
+            if (err) throw err;
+            save_JSON_Data(arrayObj);
+        }, 1000);
         
         // display message
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
@@ -928,7 +935,10 @@ function wishReset(message, bannerType) {
     }
 
     // save data back to json
-    save_JSON_Data(arrayObj);
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_JSON_Data(arrayObj);
+    }, 1000);
 
     // display message
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
@@ -999,8 +1009,10 @@ function update_genshin_userTag(arrayObj, cached_index) {
         arrayObj.users[cached_index].username = current_userTag;
     }
     // update JSON Data
-    save_JSON_Data(arrayObj);
-    // no need to return arrayObj, it is passed by reference
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_JSON_Data(arrayObj);
+    }, 1000);
 }
 
 function save_JSON_Data(arrayObj) {
