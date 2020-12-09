@@ -497,7 +497,7 @@ function source_send(message) {
 async function clean_messages(message, numline) {
     /* ONLY OWNER MAY USE THIS COMMAND */
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
-    var rand = Math.floor(Math.random() * Math.floor(length(moji_array)));
+    var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
     if (message.author.id !== readTextFile('./src/ownerID.txt')){
         console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
         message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
@@ -524,7 +524,10 @@ async function clean_messages(message, numline) {
     // Fetch the given number of messages to sweeps: numline+1 to include the execution command
     // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
     var bulkMessages = await message.channel.fetchMessages({ limit: ++numline });
-    message.channel.bulkDelete(bulkMessages, true);
+    let bulkMessages_Array = bulkMessages.array();
+    message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
+    message.channel.send(`Cleaned ${bulkMessages_Array.length-1} messages.`).then(newMessage => newMessage.delete(5000));
+    console.log('Cleared!');
 }
 
 function readTextFile(file)
@@ -549,7 +552,7 @@ function emergency_food_time(message) {
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
-    }, 3000);
+    }, 1000);
 }
 
 function rand(length) {
@@ -633,12 +636,12 @@ function create_genshin_table(message) {
         bannerTypes: { event:0, weapon:0, standard:0 }
     };
 
-    if (length(arrayObj.users) == 0) {
+    if (objLength(arrayObj.users) == 0) {
         arrayObj.users.push(new_userdata);
     }
-    if (length(arrayObj.users) > 0) {
+    if (objLength(arrayObj.users) > 0) {
         // this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates.
-        for (var i = 0; i < length(arrayObj.users); i++) {
+        for (var i = 0; i < objLength(arrayObj.users); i++) {
             // this user table already exist.
             if (arrayObj.users[i].uid === message.author.id) {
                 // check if this user has recently changed his/her userTag.
@@ -655,7 +658,10 @@ function create_genshin_table(message) {
     }
 
     // update JSON Data
-    save_JSON_Data(arrayObj);
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_JSON_Data(arrayObj);
+    }, 1000);
 
     // display message
     console.log('Finished creating Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
@@ -666,7 +672,7 @@ function create_genshin_table(message) {
 function showtable(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
-    for (var i = 0; i < length(arrayObj.users); i++) {
+    for (var i = 0; i < objLength(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
 	        message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
             // check if this user has recently changed his/her userTag.
@@ -709,7 +715,7 @@ function showtable(message) {
 function genshin_pity_calculation(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
-    for (var i = 0; i < length(arrayObj.users); i++) {
+    for (var i = 0; i < objLength(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
 	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
             // check if this user has recently changed his/her userTag.
@@ -788,7 +794,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         // find user
         var text = readTextFile('./genshin_data/genshin_wish_tables.json');
         var arrayObj = JSON.parse(text);
-        for (var i = 0; i < length(arrayObj.users); i++) {
+        for (var i = 0; i < objLength(arrayObj.users); i++) {
             if (arrayObj.users[i].uid === message.author.id) {
                 // check if this user has recently changed his/her userTag.
                 update_genshin_userTag(arrayObj, i);
@@ -797,7 +803,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 break;
             }
         }
-        if (i == length(arrayObj.users)) {
+        if (i == objLength(arrayObj.users)) {
             // this user table already exist.
             return message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
         }
@@ -807,7 +813,7 @@ function wishCount(message, bannerType, commandType, nInc) {
             return message.channel.send(`${message.author}. Unsupported CommandType, cannot edit your gacha data.`)
             .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`));
         }
-        else if (commandType === "add") {
+        if (commandType === "add") {
             switch (bannerType) {
                 case "event":
                     arrayObj.users[i].bannerTypes.event += roll_count;
@@ -820,10 +826,10 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
-                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
+                    message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
             }
         }
-        else if (commandType === "replace") {
+        if (commandType === "replace") {
             switch (bannerType) {
                 case "event":
                     arrayObj.users[i].bannerTypes.event = roll_count;
@@ -836,12 +842,15 @@ function wishCount(message, bannerType, commandType, nInc) {
                     break;
                 default: 
                     console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
-                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot fetch your gacha data.`);
+                    return message.channel.send(`${message.author}. Unsupported BannerType, cannot determine your gacha data.`);
             }
         }
 
         // save data back to json
-        save_JSON_Data(arrayObj);
+        setTimeout(function(err) {
+            if (err) throw err;
+            save_JSON_Data(arrayObj);
+        }, 1000);
         
         // display message
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
@@ -892,7 +901,7 @@ function wishReset(message, bannerType) {
     // find user
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
-    for (var i = 0; i < length(arrayObj.users); i++) {
+    for (var i = 0; i < objLength(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
             // check if this user has recently changed his/her userTag.
             update_genshin_userTag(arrayObj, i);
@@ -901,7 +910,7 @@ function wishReset(message, bannerType) {
             break;
         }
     }
-    if (i == length(arrayObj.users)) {
+    if (i == objLength(arrayObj.users)) {
         // this user table already exist.
         return message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
     }
@@ -927,7 +936,10 @@ function wishReset(message, bannerType) {
     }
 
     // save data back to json
-    save_JSON_Data(arrayObj);
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_JSON_Data(arrayObj);
+    }, 1000);
 
     // display message
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
@@ -960,7 +972,7 @@ function wishReset(message, bannerType) {
     }}).then(newMessage => newMessage.delete(5000));
 }
 
-function length(obj) {
+function objLength(obj) {
     return Object.keys(obj).length;
 }
 
@@ -998,8 +1010,10 @@ function update_genshin_userTag(arrayObj, cached_index) {
         arrayObj.users[cached_index].username = current_userTag;
     }
     // update JSON Data
-    save_JSON_Data(arrayObj);
-    // no need to return arrayObj, it is passed by reference
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_JSON_Data(arrayObj);
+    }, 1000);
 }
 
 function save_JSON_Data(arrayObj) {
