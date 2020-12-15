@@ -29,7 +29,7 @@ client.on("guildCreate", guild => {
     let channelID;
     let channels = guild.channels;
     channelLoop:
-        for (let c of channels) {
+        for (var c of channels) {
             let channelType = c[1].type;
             if (channelType === "text") {
                 channelID = c[0];
@@ -197,7 +197,7 @@ function queueInfo(message) {
     var server = servers[message.guild.id];
     var queueString = '';
     /* Top 5 in the queue */
-    for (let i = 1; i <= server.queue || i <= 5; i++) {
+    for (var i = 1; i <= server.queue || i <= 5; i++) {
         queueString += i+'.) '+server.queue[i]+'\n'; /* Ex: 1. [songName]... */
     }
     message.channel.send({embed: {
@@ -237,7 +237,7 @@ async function queueLogic(message, search_string, playToggle = false, local = fa
                 console.log(err);
                 return;
             }
-            for(let i = 0; i < files.length; i++) {
+            for (var i = 0; i < files.length; i++) {
                 server.queue.push(files[i]);
             }
             console.log(server.queue);
@@ -384,16 +384,14 @@ async function play_music(message, soundPath = '', local = false) {
     }
 
     server.dispatcher.on('end', function() {
-        if (loop) {
-            if (skip) {
-                for (let i = 0; i < skipAmount; i++){
-                    server.queue.shift();
-                }
-                skip = false;
+        if (skip) {
+            for (var i = 0; i < skipAmount; i++) {
+                server.queue.shift();
             }
-            else {
-                console.log('Loop Mode: ON, replaying song.');
-            }
+            skip = false;
+        }
+        else if (loop) {
+            console.log('Loop Mode: ON, replaying song.');
         }
         else
             server.queue.shift();
@@ -500,9 +498,12 @@ function resume_music(message) {
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resume music.');
 }
 
-function skip_music(message, sNum = 1) {
+function skip_music(message, sNum) {
     let server = servers[message.guild.id];
     skip = true;
+    if (sNum == undefined) {
+        sNum = 1;
+    }
     skipAmount = sNum;
     if (server.dispatcher != null) {
         server.dispatcher.end();
