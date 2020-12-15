@@ -214,18 +214,20 @@ async function join(message) {
     }
 }
 
-function queueInfo(message, qNum) {
+function queueInfo(message, qNum = 5) {
     var server = servers[message.guild.id];
-    if (qNum == undefined)
-        qNum = 5;
     /* Top 5 in the queue */
     var queueString = '';
     for (var i = 1; i < server.queue.length; i++) {
-        if (i <= qNum) {
-            queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
+        if (qNum <= 20) {
+            if (i <= qNum) {
+                queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
+            }
+            else break;
         }
-        else
-            break;
+        else {
+            return message.channel.send('Max queue display is 20 songs!');
+        }
     }
     message.channel.send({embed: {
         author: {
