@@ -296,6 +296,7 @@ async function play_music(message, soundPath = '', local = false) {
         server.dispatcher = connection.playStream(song, {volume: volume_float});
         let songName = server.queue[0].split('.')[0];
         var video = await youtube.searchVideos(songName);
+        console.log('[Local] Now Playing: ' + songName);
         message.channel.send('[Local] Now Playing: ' + songName);
         message.channel.send({embed: {
             author: {
