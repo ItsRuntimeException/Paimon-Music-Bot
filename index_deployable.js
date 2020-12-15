@@ -206,7 +206,6 @@ function queueInfo(message) {
             icon_url: client.user.avatarURL,
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
-        title: 'Basic Music Queue Info',
         fields: [{
             name: "Now Playing:",
             value: ((server.queue) ? server.queue[0] : 'None')
