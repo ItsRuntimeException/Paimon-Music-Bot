@@ -102,18 +102,30 @@ client.on("message", async message => {
             }
             break;
         case "playlocal":
+            var server = servers[message.guild.id];
             // IN-CHANNEL CHECK
             if (!message.member.voiceChannel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
+            if (server.dispatcher != null) {
+                return message.channel.send('Please wait until all local music has been finished playing OR ?Stop.');
+            }
+
             var search_string = args.toString().replace(/,/g,' ');
             /* https://regexr.com/ */
             if (search_string.match(/anime/gi)) {
                 queueLogic(message, './anime_music/', true, true);
             }
+            else if (search_string.match(/persona/gi)) {
+                queueLogic(message, './persona_music/', true, true);
+            }
+            else if (search_string == undefined) {
+                console.log('playLocal: User did not specify category');
+                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete(5000));
+            }
             else {
-                console.log('playLocal: User did not specify category!');
-                return message.channel.send('Please specify Category! (Anime, etc...)').then(newMessage => newMessage.delete(5000));
+                console.log('playLocal: Category does not exist!');
+                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete(5000));
             }
             break;
         case "queue":
