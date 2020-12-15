@@ -145,6 +145,7 @@ client.on("message", async message => {
             break;
         case "reboot":
             reboot(message);
+            resetVoice(message);
             break;
         case "kill":
             emergency_food_time(message);
@@ -622,6 +623,18 @@ function reboot(message) {
     .then(console.log(`${message.member.user.tag} rebooted the bot.`))
     .then(client.destroy())
     .then(client.login(TOKEN));
+}
+
+function resetVoice(message) {
+    var server = servers[message.guild.id];
+    volume_float = 0.25;
+    loop = false;
+    skip = false;
+    skipAmount = 1;
+    server.dispatcher = undefined;
+    while (server.queue.length > 0) {
+        server.queue.shift();
+    }
 }
 
 function emergency_food_time(message) {
