@@ -197,8 +197,12 @@ function queueInfo(message) {
     var server = servers[message.guild.id];
     var queueString = '';
     /* Top 5 in the queue */
-    for (var i = 1; i <= server.queue || i <= 5; i++) {
-        queueString += i+'.) '+server.queue[i]+'\n'; /* Ex: 1. [songName]... */
+    for (var i = 1; i < server.queue.length; i++) {
+        if (i <= 5) {
+            queueString += i+'.) '+server.queue[i]+'\n'; /* Ex: 1. [songName]... */
+        }
+        else
+            break;
     }
     message.channel.send({embed: {
         author: {
@@ -298,10 +302,12 @@ async function play_music(message, soundPath = '', local = false) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
     if (local == true) {
-        let song = soundPath + server.queue[0];
-        server.dispatcher = connection.playStream(song, {volume: volume_float});
-        let songName = server.queue[0].split('.')[0];
-        console.log('[Local] Now Playing: ' + songName);
+        if (server.queue) {
+            let song = soundPath + server.queue[0];
+            let songName = server.queue[0].split('.')[0];
+            server.dispatcher = connection.playStream(song, {volume: volume_float});
+            console.log('[Local] Now Playing: ' + songName);
+        }
         queueInfo(message);
     }
     else {
