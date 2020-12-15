@@ -143,6 +143,7 @@ client.on("message", async message => {
                     text: '© Rich Embedded Frameworks'
                 }
             }}).then(newMessage => newMessage.delete(10000));
+            break;
         case "vol":
             vol_music(message, args[0]);
             break;
