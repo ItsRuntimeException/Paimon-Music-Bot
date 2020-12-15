@@ -105,7 +105,15 @@ client.on("message", async message => {
             if (!message.member.voiceChannel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
-            queueLogic(message, '', true, true);
+            var search_string = args.toString().replace(/,/g,' ');
+            /* https://regexr.com/ */
+            if (search_string.match(/anime/gi)) {
+                queueLogic(message, './anime_music/', true, true);
+            }
+            else {
+                console.log('playLocal: User did not specify category!');
+                return message.channel.send('Please specify Category! (Anime, etc...)').then(newMessage => newMessage.delete(5000));
+            }
             break;
         case "currentsong":
             var server = servers[message.guild.id];
@@ -211,12 +219,12 @@ async function join(message) {
 
 async function queueLogic(message, search_string, playToggle = false, local = false) {
     var server = servers[message.guild.id];
-    if (local) {
+    if (local == true) {
         while (server.queue > 0) {
             //clear queue
             server.queue.shift();
         }
-        let soundPath = './local_music/';
+        let soundPath = search_string;
         filestream.readdir(soundPath, function (err, files) {
             if (err) {
                 console.log(err);
@@ -226,8 +234,9 @@ async function queueLogic(message, search_string, playToggle = false, local = fa
                 server.queue.push(files[i]);
             }
             console.log(server.queue);
-            if (server.queue > 0)
-                play_music(message, soundPath, local);
+            if (server.queue) {
+                play_music(message, soundPath, true);
+            }
             else {
                 /*    USE:     https://regexr.com/ to help build a regex   */
                 /*    GOAL:       get rid of './' or '/'                   */
@@ -282,7 +291,7 @@ async function queueLogic(message, search_string, playToggle = false, local = fa
 async function play_music(message, soundPath = '', local = false) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
-    if (local) {
+    if (local == true) {
         let song = soundPath + server.queue[0];
         server.dispatcher = connection.playStream(song, {volume: volume_float});
         let songName = server.queue[0].split('.')[0];
@@ -405,8 +414,8 @@ async function play_music(message, soundPath = '', local = false) {
             server.queue.shift();
 
         if (server.queue.length > 0) {
-            if (local) {
-                play_music(message, local);
+            if (local == true) {
+                play_music(message, soundPath, true);
             }
             else {
                 play_music(message);
