@@ -4,7 +4,6 @@ const ytpl = require('ytpl');
 const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
 const filestream = require("fs");
-const { error } = require('console');
 const client = new Discord.Client();
 const DICE = 6;
 
@@ -14,7 +13,7 @@ const youtube = new YouTube(readTextFile('./src/youtube_api_key.txt')); // Perso
 
 // music variables
 var servers = {};
-var volume_float = 1;
+var volume_float = 0.25;
 var loop = false;
 var skip = false;
 
@@ -41,7 +40,13 @@ client.on("guildCreate", guild => {
 });
 
 client.on("message", async message => {
-    
+    // initialize music queue
+    if (!servers[message.guild.id]) {
+        servers[message.guild.id] = {
+            queue:[]
+        }
+    }
+
     /* Ignore messages that don"t start with prefix or written by bot*/
     if (!message.content.startsWith(PREFIX) || message.author.bot) return;
     const args = message.content.slice(PREFIX.length).split(/ +/);
@@ -63,12 +68,6 @@ client.on("message", async message => {
             join(message);
             break;
         case "play":
-            // initialize queue
-            if (!servers[message.guild.id]) {
-                servers[message.guild.id] = {
-                    queue:[]
-                }
-            }
             var server = servers[message.guild.id];
             // string logic:
             var search_string = args.toString().replace(/,/g,' ');
@@ -95,12 +94,47 @@ client.on("message", async message => {
              *    1+ = queue
              */
             if (server.queue.length == 0) {
-                queueLogic(message,search_string, true);
+                queueLogic(message, search_string, true);
             }
             else if (server.queue.length >= 1) {
-                queueLogic(message,search_string, false);
+                queueLogic(message, search_string);
             }
             break;
+        case "playlocal":
+            // IN-CHANNEL CHECK
+            if (!message.member.voiceChannel) {
+                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+            }
+            queueLogic(message, '', true, true);
+            break;
+        case "currentsong":
+            var server = servers[message.guild.id];
+            // display current song
+            var video = await youtube.searchVideos(server.queue[0]);
+            message.channel.send({embed: {
+                author: {
+                    name: 'Paimon-chan\'s Embedded Lookup',
+                    icon_url: client.user.avatarURL,
+                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                },
+                thumbnail: video.thumbnail,
+                title: video.title,
+                url: video.url,
+                fields: [{
+                    name: "Link",
+                    value: video.url
+                },
+                {
+                    name: "Duration",
+                    value: sec_Convert(video.durationSeconds)
+                }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }}).then(newMessage => newMessage.delete(10000));
         case "vol":
             vol_music(message, args[0]);
             break;
@@ -175,70 +209,88 @@ async function join(message) {
     }
 }
 
-async function queueLogic(message, search_string, playToggle) {
+async function queueLogic(message, search_string, playToggle = false, local = false) {
     var server = servers[message.guild.id];
-    // queue the search_string only, only fetch metadata upon playing
-    let validateURL = ytdl.validateURL(search_string);
-    let validate_playlist = ytpl.validateID(search_string);
-    if (!validate_playlist) {
-        server.queue.push(search_string);
-    }
-    else if (validate_playlist) {
-        try {
-            var yt_playlist = await youtube.getPlaylist(search_string);
-        } catch (error) {
-            console.log(error);
-            return message.channel.send('Something went wrong!\n\n' + error);
+    if (local) {
+        while (server.queue > 0) {
+            //clear queue
+            server.queue.shift();
         }
-        for (var i = 0; i < yt_playlist.length; i++) {
-            server.queue.push(yt_playlist[i].url);
-        }
+        let soundPath = './local_music/';
+        filestream.readdir(soundPath, function (err, files) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            for(let i = 0; i < files.length; i++) {
+                server.queue.push(files[i]);
+            }
+            console.log(server.queue);
+            if (server.queue > 0)
+                play_music(message, soundPath, local);
+            else {
+                /*    USE:     https://regexr.com/ to help build a regex   */
+                /*    GOAL:       get rid of './' or '/'                   */
+                /*    RESULT:     ./local_music/    ----->   'local_music' */
+                console.log(`${soundPath.replace(/\/|\./g,'')} folder currently has no music files!`);
+                return message.channel.send(`${soundPath.replace(/\/|\./g,'')} folder currently has no music files!`);
+            }
+        });
     }
-    if (server.queue.length > 1) {
+    else {
+        // queue the search_string only, only fetch metadata upon playing
+        let validateURL = ytdl.validateURL(search_string);
+        let validate_playlist = ytpl.validateID(search_string);
         if (!validate_playlist) {
-            if (!validateURL) {
-                message.channel.send(`Your query: '${search_string}' have been queued.\n`);
-            }
-            else if (validateURL) {
-                message.channel.send(`Your link have been queued.\n`);
-            }
+            server.queue.push(search_string);
         }
         else if (validate_playlist) {
-            message.channel.send(`Your playlist have been queued.\n`);
+            try {
+                var yt_playlist = await youtube.getPlaylist(search_string);
+            } catch (error) {
+                console.log(error);
+                return message.channel.send('Something went wrong!\n\n' + error);
+            }
+            for (var i = 0; i < yt_playlist.length; i++) {
+                server.queue.push(yt_playlist[i].url);
+            }
         }
+        if (server.queue.length > 1) {
+            if (!validate_playlist) {
+                if (!validateURL) {
+                    message.channel.send(`Your query: '${search_string}' have been queued.\n`);
+                }
+                else if (validateURL) {
+                    message.channel.send(`Your link have been queued.\n`);
+                }
+            }
+            else if (validate_playlist) {
+                message.channel.send(`Your playlist have been queued.\n`);
+            }
+        }
+        /* 
+        *  server.queue only seems to have updated inside this function instead of client.on(...), 
+        *  call play_music here to avoid playing [undefined] song.
+        */
+        if (playToggle) {
+            play_music(message);
+        }
+        console.log(server.queue);
     }
-    /* 
-    *  server.queue only seems to have updated inside this function instead of client.on(...), 
-    *  call play_music here to avoid playing [undefined] song.
-    */
-    if (playToggle) {
-        play_music(message);
-    }
-    console.log(server.queue);
 }
 
-async function play_music(message) {
+async function play_music(message, soundPath = '', local = false) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
-    let validate = ytdl.validateURL(server.queue[0]);
-    console.log('validate-mode? ' + validate);
-    if (!validate) {
-        // PRELOAD
-        try {
-            var video = await youtube.searchVideos(server.queue[0]);
-        } catch (error) {
-            console.log(error);
-            return message.channel.send('Something went wrong!\n\n' + error);
-        }
-        // PLAY MUSIC via keywords
-        var stream = ytdl(video.url, { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream);
-        server.dispatcher.setVolume(volume_float);
-        console.log(`url: ${video.url}`);
-        console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+    if (local) {
+        let song = soundPath + server.queue[0];
+        server.dispatcher = connection.playStream(song, {volume: volume_float});
+        let songName = server.queue[0].split('.')[0];
+        var video = await youtube.searchVideos(songName);
+        message.channel.send('[Local] Now Playing: ' + songName);
         message.channel.send({embed: {
             author: {
-                name: 'Paimon-chan\'s Embedded Info',
+                name: 'Paimon-chan\'s Embedded Lookup',
                 icon_url: client.user.avatarURL,
                 url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
             },
@@ -248,53 +300,95 @@ async function play_music(message) {
             fields: [{
                 name: "Link",
                 value: video.url
-              },
-              {
-                  name: "Duration",
-                  value: sec_Convert(video.durationSeconds)
-              }
-            ],
-            timestamp: new Date(),
-            footer: {
-                icon_url: client.user.avatarURL,
-                text: '© Rich Embedded Frameworks'
-            }
-        }}).then(newMessage => newMessage.delete(5000));
-    }
-    else if (validate) {
-        // PLAY MUSIC via link
-        try {
-            var video = await youtube.getVideo(server.queue[0]);
-        } catch (error) {
-            console.log(error);
-            return message.channel.send('Something went wrong!\n\n' + error);
-        }
-        var stream = ytdl(video.url, { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream);
-        server.dispatcher.setVolume(volume_float);
-        console.log(`url: ${video.url}`);
-        console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
-        message.channel.send({embed: {
-            author: {
-                name: 'Paimon-chan\'s Embedded Info',
-                icon_url: client.user.avatarURL,
-                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
             },
-            fields: [{
-                name: "Title",
-                value: video.title
-              },
-              {
-                  name: "Duration",
-                  value: sec_Convert(video.durationSeconds)
-              }
+            {
+                name: "Duration",
+                value: sec_Convert(video.durationSeconds)
+            }
             ],
             timestamp: new Date(),
             footer: {
                 icon_url: client.user.avatarURL,
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(newMessage => newMessage.delete(5000));
+        }}).then(newMessage => newMessage.delete(10000));
+    }
+    else {
+        message.channel.send('ytdl-core currently \'may or may not\' be able to play youtube audio-stream!');
+        let validate = ytdl.validateURL(server.queue[0]);
+        console.log('validate-mode? ' + validate);
+        if (!validate) {
+            // PRELOAD
+            try {
+                var video = await youtube.searchVideos(server.queue[0]);
+            } catch (error) {
+                console.log(error);
+                return message.channel.send('Something went wrong!\n\n' + error);
+            }
+            // PLAY MUSIC via keywords
+            let stream = ytdl(video.url, { filter: 'audioonly' });
+            server.dispatcher = connection.playStream(stream, {volume: volume_float});
+            console.log(`url: ${video.url}`);
+            console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+            message.channel.send({embed: {
+                author: {
+                    name: 'Paimon-chan\'s Embedded Lookup',
+                    icon_url: client.user.avatarURL,
+                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                },
+                thumbnail: video.thumbnail,
+                title: video.title,
+                url: video.url,
+                fields: [{
+                    name: "Link",
+                    value: video.url
+                },
+                {
+                    name: "Duration",
+                    value: sec_Convert(video.durationSeconds)
+                }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }}).then(newMessage => newMessage.delete(10000));
+        }
+        else if (validate) {
+            // PLAY MUSIC via link
+            try {
+                var video = await youtube.getVideo(server.queue[0]);
+            } catch (error) {
+                console.log(error);
+                return message.channel.send('Something went wrong!\n\n' + error);
+            }
+            let stream = ytdl(video.url, { filter: 'audioonly' });
+            server.dispatcher = connection.playStream(stream, {volume: volume_float});
+            console.log(`url: ${video.url}`);
+            console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+            message.channel.send({embed: {
+                author: {
+                    name: 'Paimon-chan\'s Embedded Lookup',
+                    icon_url: client.user.avatarURL,
+                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                },
+                fields: [{
+                    name: "Title",
+                    value: video.title
+                },
+                {
+                    name: "Duration",
+                    value: sec_Convert(video.durationSeconds)
+                }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }}).then(newMessage => newMessage.delete(10000));
+        }
     }
 
     server.dispatcher.on('end', function() {
@@ -311,7 +405,12 @@ async function play_music(message) {
             server.queue.shift();
 
         if (server.queue.length > 0) {
-            play_music(message);
+            if (local) {
+                play_music(message, local);
+            }
+            else {
+                play_music(message);
+            }
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
@@ -329,12 +428,6 @@ function vol_music(message, num) {
     if (isNaN(percentage)) {
         console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`);
         return message.channel.send(`${message.author}. You need to supply a VALID number!`);
-    }
-    // initialize queue
-    if (!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue:[]
-        }
     }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
@@ -384,12 +477,6 @@ function loop_music(message, switcher) {
 }
 
 function pause_music(message) {
-    // initialize queue
-    if (!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue:[]
-        }
-    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.pause();
@@ -420,12 +507,6 @@ function resume_music(message) {
 }
 
 function skip_music(message) {
-    // initialize queue
-    if (!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue:[]
-        }
-    }
     let server = servers[message.guild.id];
     skip = true;
     if (server.dispatcher != null) {
@@ -439,12 +520,6 @@ function skip_music(message) {
 }
 
 function stop_music(message, fcode) {
-    // initialize queue
-    if (!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue:[]
-        }
-    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // clear queue
@@ -504,12 +579,10 @@ async function clean_messages(message, numline) {
         message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
         return;
     }
-    // Checks if the `amount` parameter is given
-    if (numline == undefined) {
-        /* default to 15 messages */
-        numline = 15;
-    }
     // Checks if the `amount` parameter is a number. If not, the command throws an error
+    if (numline == undefined) {
+        // it's fine, continue...
+    }
     else if (isNaN(numline))
         return message.reply('The amount parameter isn`t a number!');
     // Checks if the `numline` integer is bigger than 100
@@ -524,10 +597,9 @@ async function clean_messages(message, numline) {
 
     // Fetch the given number of messages to sweeps: numline+1 to include the execution command
     // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
-    var bulkMessages = await message.channel.fetchMessages({ limit: ++numline });
-    let bulkMessages_Array = bulkMessages.array();
+    var bulkMessages = ((numline == undefined) ? await message.channel.fetchMessages() : await message.channel.fetchMessages( {limit: ++numline}));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
-    message.channel.send(`Cleaned ${bulkMessages_Array.length-1} messages.`).then(newMessage => newMessage.delete(5000));
+    message.channel.send(`Cleaned ${bulkMessages.array().length-1} messages.`).then(newMessage => newMessage.delete(5000));
     console.log('Cleared!');
 }
 
@@ -1068,7 +1140,7 @@ function userHelp(message) {
           },
           {
             name: "Clean",
-            value: "Paimon will clean up your mess!\nDefault: 15"
+            value: "Paimon will clean up your mess!"
           },
           {
             name: "Roll",
