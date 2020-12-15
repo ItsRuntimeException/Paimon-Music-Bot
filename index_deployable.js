@@ -13,10 +13,6 @@ const youtube = new YouTube(process.env.YOUTUBE_API_KEY); // Personal Youtube-AP
 
 // music variables
 var servers = {};
-var volume_float = 0.25;
-var loop = false;
-var skip = false;
-var skipAmount = 1;
 
 /* bot online */
 client.on("ready", () => {
@@ -44,7 +40,12 @@ client.on("message", async message => {
     // initialize music queue
     if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
-            queue:[]
+            queue:[],
+            volume: 0.50,
+            loop: false,
+            skip: false,
+            skipAmount: 1,
+            dispatcher: undefined
         }
     }
 
@@ -98,7 +99,7 @@ client.on("message", async message => {
                 queueLogic(message, search_string, true);
             }
             else if (server.queue.length >= 1) {
-                queueLogic(message, search_string);
+                queueLogic(message, search_string, false);
             }
             break;
         case "playlocal":
@@ -117,7 +118,15 @@ client.on("message", async message => {
                 queueLogic(message, './anime_music/', true, true);
             }
             else if (search_string.match(/persona/gi)) {
-                queueLogic(message, './persona_music/', true, true);
+                if (!search_string.match(/[3-5]/g)) {
+                    message.channel.send('Please specify: 3|4|5');
+                }
+                else if (search_string.match(/3/gi))
+                    queueLogic(message, './persona3_music/', true, true);
+                else if (search_string.match(/4/gi))
+                    queueLogic(message, './persona4_music/', true, true);
+                else if (search_string.match(/5/gi))
+                    queueLogic(message, './persona5_music/', true, true);
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
@@ -129,7 +138,7 @@ client.on("message", async message => {
             }
             break;
         case "queue":
-            queueInfo(message);
+            queueInfo(message, args[0]);
             break;
         case "vol":
             vol_music(message, args[0]);
@@ -206,13 +215,15 @@ async function join(message) {
     }
 }
 
-function queueInfo(message) {
+function queueInfo(message, qNum) {
     var server = servers[message.guild.id];
-    var queueString = '';
+    if (qNum == undefined)
+        qNum = 5;
     /* Top 5 in the queue */
+    var queueString = '';
     for (var i = 1; i < server.queue.length; i++) {
-        if (i <= 5) {
-            queueString += i+'.) '+server.queue[i]+'\n'; /* Ex: 1. [songName]... */
+        if (i <= qNum) {
+            queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
         }
         else
             break;
@@ -240,13 +251,9 @@ function queueInfo(message) {
     }}).then(newMessage => newMessage.delete(10000));
 }
 
-async function queueLogic(message, search_string, playToggle = false, local = false) {
+async function queueLogic(message, search_string, playToggle, local = false) {
     var server = servers[message.guild.id];
     if (local == true) {
-        while (server.queue > 0) {
-            //clear queue
-            server.queue.shift();
-        }
         let soundPath = search_string;
         filestream.readdir(soundPath, function (err, files) {
             if (err) {
@@ -317,9 +324,9 @@ async function play_music(message, soundPath = '', local = false) {
     if (local == true) {
         if (server.queue) {
             let song = soundPath + server.queue[0];
-            let songName = server.queue[0].split('.')[0];
-            server.dispatcher = connection.playStream(song, {volume: volume_float});
-            console.log('[Local] Now Playing: ' + songName);
+            let songName = server.queue[0].split('.mp3')[0];
+            server.dispatcher = connection.playStream(song, {volume: server.volume});
+            console.log('[Local-Mode][Server:'+message.guild.id+'] Now Playing: ' + songName);
         }
         queueInfo(message);
     }
@@ -337,9 +344,9 @@ async function play_music(message, soundPath = '', local = false) {
             }
             // PLAY MUSIC via keywords
             let stream = ytdl(video.url, { filter: 'audioonly' });
-            server.dispatcher = connection.playStream(stream, {volume: volume_float});
+            server.dispatcher = connection.playStream(stream, {volume: server.volume});
             console.log(`url: ${video.url}`);
-            console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+            console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
             message.channel.send({embed: {
                 author: {
                     name: 'Paimon-chan\'s Embedded Info',
@@ -374,9 +381,9 @@ async function play_music(message, soundPath = '', local = false) {
                 return message.channel.send('Something went wrong!\n\n' + error);
             }
             let stream = ytdl(video.url, { filter: 'audioonly' });
-            server.dispatcher = connection.playStream(stream, {volume: volume_float});
+            server.dispatcher = connection.playStream(stream, {volume: server.volume});
             console.log(`url: ${video.url}`);
-            console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
+            console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
             message.channel.send({embed: {
                 author: {
                     name: 'Paimon-chan\'s Embedded Info',
@@ -402,9 +409,9 @@ async function play_music(message, soundPath = '', local = false) {
     }
 
     server.dispatcher.on('end', function() {
-        if (skip) {
+        if (server.skip) {
             var count = 0;
-            for (var i = 0; i < skipAmount; i++) {
+            for (var i = 0; i < server.skipAmount; i++) {
                 if (server.queue.length > 0) {
                     server.queue.shift();
                     count++;
@@ -412,11 +419,11 @@ async function play_music(message, soundPath = '', local = false) {
                 else
                     break; // stop unnecessary skip
             }
-            console.log(`Skipped ${((server.queue) ? skipAmount : count)} songs.`);
-            message.channel.send(`Skipped ${((server.queue) ? skipAmount : count)} songs.`);
-            skip = false;
+            console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+            message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+            server.skip = false;
         }
-        else if (loop) {
+        else if (server.loop) {
             console.log('Loop Mode: ON, replaying song.');
         }
         else
@@ -438,26 +445,26 @@ async function play_music(message, soundPath = '', local = false) {
 }
 
 function vol_music(message, num) {
+    var server = servers[message.guild.id];
     if (num == undefined) {
-        console.log(`Current volume: ${volume_float*100}%`);
-        return message.channel.send(`Current volume: ${volume_float*100}%`).then(newMessage => newMessage.delete(5000));
+        console.log(`[Server: ${message.guild.id}] Current volume: ${server.volume*100}%`);
+        return message.channel.send(`Current volume: ${server.volume*100}%`).then(newMessage => newMessage.delete(5000));
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
-        console.log(`${message.member.user.tag} requested for volume change, but reached INVALID number.`);
+        console.log(`${message.member.user.tag} requested for [Server: ${message.guild.id}] volume change, but reached INVALID number.`);
         return message.channel.send(`${message.author}. You need to supply a VALID number!`);
     }
-    let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // Sets the volume relative to the input stream - i.e. 1 is normal, 0.5 is half, 2 is double.
-        volume_float = percentage / 100;
-        if (volume_float <= 1) {
-            server.dispatcher.setVolume(volume_float);
-            console.log(`Volume set to ${percentage}%`);
+        server.volume = percentage / 100;
+        if (server.volume <= 1) {
+            server.dispatcher.setVolume(server.volume);
+            console.log(`[Server: ${message.guild.id}] Volume set to ${percentage}%`);
             message.channel.send(`Volume set to ${percentage}%`).then(newMessage => newMessage.delete(5000));
         }
         else {
-            console.log(`Cannot set volume greater than 100%`);
+            console.log(`[Server: ${message.guild.id}] Cannot set volume greater than 100%`);
             message.channel.send(`Cannot set volume greater than 100%`).then(newMessage => newMessage.delete(5000));
         }
     }
@@ -467,8 +474,9 @@ function vol_music(message, num) {
 }
 
 function loop_music(message, switcher) {
+    var server = servers[message.guild.id];
     if (switcher == undefined) {
-        if (loop) {
+        if (server.loop) {
             return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete(5000));
         }
         else {
@@ -479,13 +487,13 @@ function loop_music(message, switcher) {
     switcher = switcher.toLowerCase();
     switch (switcher) {
         case 'on':
-            loop = true;
-            console.log('Loop Mode is turned ON');
+            server.loop = true;
+            console.log(`[Server: ${message.guild.id}] Loop Mode is turned ON`);
             message.channel.send('Loop Mode is turned ON');
             break;
         case 'off':
-            loop = false;
-            console.log('Loop Mode is turned OFF');
+            server.loop = false;
+            console.log(`[Server: ${message.guild.id}] Loop Mode is turned OFF`);
             message.channel.send('Loop Mode is turned OFF');
             break;
         default:
@@ -526,18 +534,18 @@ function resume_music(message) {
 
 function skip_music(message, sNum) {
     let server = servers[message.guild.id];
-    skip = true;
+    server.skip = true;
     if (sNum == undefined) {
         sNum = 1;
     }
-    skipAmount = sNum;
+    server.skipAmount = sNum;
     if (server.dispatcher != null) {
         server.dispatcher.end();
     }
     else {
         message.channel.send('There is nothing to skip.');
     }
-    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
+    console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
 }
 
 function stop_music(message, fcode) {
@@ -550,7 +558,7 @@ function stop_music(message, fcode) {
         server.dispatcher.end();
         if (fcode == 0) {
             message.channel.send('Music stopped.');
-            console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
+            console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
         }
         else if (fcode == 1)
             message.channel.send("I have left the voice channel.");
@@ -558,7 +566,7 @@ function stop_music(message, fcode) {
     else {
         if (fcode == 0) {
             message.channel.send('There is nothing to stop.');
-            console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
+            console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
         }
         else if (fcode == 1)
             message.channel.send("I have left the voice channel.");
@@ -639,10 +647,10 @@ function reboot(message) {
 
 function resetVoice(message) {
     var server = servers[message.guild.id];
-    volume_float = 0.25;
-    loop = false;
-    skip = false;
-    skipAmount = 1;
+    server.volume = 0.50;
+    server.loop = false;
+    server.skip = false;
+    server.skipAmount = 1;
     server.dispatcher = undefined;
     while (server.queue.length > 0) {
         server.queue.shift();
@@ -661,13 +669,13 @@ function emergency_food_time(message) {
     }, 1000);
 }
 
-function rand(length) {
-    return 1 + Math.floor(Math.random()*length);
+function rand(min, max) {
+    return min + Math.floor(Math.random()*max);
 }
 
 function roll(message) {
-    var diceNum1 = rand(DICE);
-    var diceNum2 = rand(DICE);
+    var diceNum1 = rand(1, DICE);
+    var diceNum2 = rand(1, DICE);
     message.channel.send(`${message.author}. You rolled (${diceNum1}, ${diceNum2}) on a pair of dice.\nTotal: ${diceNum1+diceNum2}`)
     .then(console.log(`${message.member.user.tag} rolled (${diceNum1}, ${diceNum2}) on a pair of dice. Total: ${diceNum1+diceNum2}`));
 }
