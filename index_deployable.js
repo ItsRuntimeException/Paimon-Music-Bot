@@ -514,7 +514,6 @@ function skip_music(message, sNum) {
     skipAmount = sNum;
     if (server.dispatcher != null) {
         server.dispatcher.end();
-        message.channel.send('Music skipped.');
     }
     else {
         message.channel.send('There is nothing to skip.');
