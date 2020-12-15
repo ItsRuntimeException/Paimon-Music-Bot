@@ -385,9 +385,16 @@ async function play_music(message, soundPath = '', local = false) {
 
     server.dispatcher.on('end', function() {
         if (skip) {
+            var count = 0;
             for (var i = 0; i < skipAmount; i++) {
-                server.queue.shift();
+                if (server.queue.length > 0) {
+                    server.queue.shift();
+                    count++;
+                }
+                else
+                    break; // stop unnecessary skip
             }
+            message.channel.send(`Skipped ${((server.queue) ? skipAmount : count)} songs.`);
             skip = false;
         }
         else if (loop) {
