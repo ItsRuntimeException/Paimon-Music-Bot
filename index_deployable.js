@@ -16,6 +16,7 @@ var servers = {};
 var volume_float = 0.25;
 var loop = false;
 var skip = false;
+var skipAmount = 1;
 
 /* bot online */
 client.on("ready", () => {
@@ -115,34 +116,8 @@ client.on("message", async message => {
                 return message.channel.send('Please specify Category! (Anime, etc...)').then(newMessage => newMessage.delete(5000));
             }
             break;
-        case "currentsong":
-            var server = servers[message.guild.id];
-            // display current song
-            var video = await youtube.searchVideos(server.queue[0]);
-            message.channel.send({embed: {
-                author: {
-                    name: 'Paimon-chan\'s Embedded Lookup',
-                    icon_url: client.user.avatarURL,
-                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-                },
-                thumbnail: video.thumbnail,
-                title: video.title,
-                url: video.url,
-                fields: [{
-                    name: "Link",
-                    value: video.url
-                },
-                {
-                    name: "Duration",
-                    value: sec_Convert(video.durationSeconds)
-                }
-                ],
-                timestamp: new Date(),
-                footer: {
-                    icon_url: client.user.avatarURL,
-                    text: '© Rich Embedded Frameworks'
-                }
-            }}).then(newMessage => newMessage.delete(10000));
+        case "queue":
+            queueInfo(message);
             break;
         case "vol":
             vol_music(message, args[0]);
@@ -157,7 +132,7 @@ client.on("message", async message => {
             resume_music(message);
             break;
         case "skip":
-            skip_music(message);
+            skip_music(message, args[0]);
             break;
         case "stop":
             stop_music(message, 0);
@@ -216,6 +191,37 @@ async function join(message) {
     else {
         message.member.voiceChannel.join();
     }
+}
+
+function queueInfo(message) {
+    var server = servers[message.guild.id];
+    var queueString = '';
+    /* Top 5 in the queue */
+    for (let i = 1; i <= server.queue || i <= 5; i++) {
+        queueString += i+'.) '+server.queue[i]+'\n'; /* Ex: 1. [songName]... */
+    }
+    message.channel.send({embed: {
+        author: {
+            name: 'Paimon-chan\'s Embedded Info',
+            icon_url: client.user.avatarURL,
+            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+        },
+        title: 'Basic Music Queue Info',
+        fields: [{
+            name: "Now Playing:",
+            value: ((server.queue) ? server.queue[0] : 'None')
+        },
+        {
+            name: "In the Queue:",
+            value: ((server.queue.length >= 2) ? queueString : 'None')
+        }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }}).then(newMessage => newMessage.delete(10000));
 }
 
 async function queueLogic(message, search_string, playToggle = false, local = false) {
@@ -296,33 +302,8 @@ async function play_music(message, soundPath = '', local = false) {
         let song = soundPath + server.queue[0];
         server.dispatcher = connection.playStream(song, {volume: volume_float});
         let songName = server.queue[0].split('.')[0];
-        var video = await youtube.searchVideos(songName);
         console.log('[Local] Now Playing: ' + songName);
-        message.channel.send('[Local] Now Playing: ' + songName);
-        message.channel.send({embed: {
-            author: {
-                name: 'Paimon-chan\'s Embedded Lookup',
-                icon_url: client.user.avatarURL,
-                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-            },
-            thumbnail: video.thumbnail,
-            title: video.title,
-            url: video.url,
-            fields: [{
-                name: "Link",
-                value: video.url
-            },
-            {
-                name: "Duration",
-                value: sec_Convert(video.durationSeconds)
-            }
-            ],
-            timestamp: new Date(),
-            footer: {
-                icon_url: client.user.avatarURL,
-                text: '© Rich Embedded Frameworks'
-            }
-        }}).then(newMessage => newMessage.delete(10000));
+        queueInfo(message);
     }
     else {
         message.channel.send('ytdl-core currently \'may or may not\' be able to play youtube audio-stream!');
@@ -343,7 +324,7 @@ async function play_music(message, soundPath = '', local = false) {
             console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
             message.channel.send({embed: {
                 author: {
-                    name: 'Paimon-chan\'s Embedded Lookup',
+                    name: 'Paimon-chan\'s Embedded Info',
                     icon_url: client.user.avatarURL,
                     url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
                 },
@@ -380,7 +361,7 @@ async function play_music(message, soundPath = '', local = false) {
             console.log(`Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
             message.channel.send({embed: {
                 author: {
-                    name: 'Paimon-chan\'s Embedded Lookup',
+                    name: 'Paimon-chan\'s Embedded Info',
                     icon_url: client.user.avatarURL,
                     url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
                 },
@@ -405,11 +386,13 @@ async function play_music(message, soundPath = '', local = false) {
     server.dispatcher.on('end', function() {
         if (loop) {
             if (skip) {
-                server.queue.shift();
+                for (let i = 0; i < skipAmount; i++){
+                    server.queue.shift();
+                }
                 skip = false;
             }
             else {
-                console.log('Loop Mode: ON, replay current song.');
+                console.log('Loop Mode: ON, replaying song.');
             }
         }
         else
@@ -517,9 +500,10 @@ function resume_music(message) {
     console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resume music.');
 }
 
-function skip_music(message) {
+function skip_music(message, sNum = 1) {
     let server = servers[message.guild.id];
     skip = true;
+    skipAmount = sNum;
     if (server.dispatcher != null) {
         server.dispatcher.end();
         message.channel.send('Music skipped.');
@@ -1129,8 +1113,15 @@ function userHelp(message) {
             name: "?Play [YouTube-Link|Keyword]",
             value: "1: Play audio from the user's provided link.\n2: Perform a search on the user's provided keyword."
           },
+          { name: "?PlayLocal [Category]",
+            value: "Play host's local audio files."
+          },
           {
-            name: "?vol [Percent]",
+            name: "?Queue",
+            value: "Display server's current music queue."
+          },
+          {
+            name: "?Vol [Percent]",
             value:"Set the current music volume."
           },
           {
