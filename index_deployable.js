@@ -156,7 +156,7 @@ client.on("message", async message => {
             skip_music(message, args[0]);
             break;
         case "stop":
-            stop_music(message, 0);
+            stop_music(message);
             break;
         case "leave":
             leave(message);
@@ -164,8 +164,7 @@ client.on("message", async message => {
         case "source":
             source_send(message);
             break;
-        case "reboot":
-            reboot(message);
+        case "reset":
             resetVoice(message);
             break;
         case "kill":
@@ -548,28 +547,20 @@ function skip_music(message, sNum) {
     console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
 }
 
-function stop_music(message, fcode) {
+function stop_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         // clear queue
         while (server.queue.length > 0) {
             server.queue.shift();
         }
-        server.dispatcher.end();
-        if (fcode == 0) {
-            message.channel.send('Music stopped.');
-            console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
-        }
-        else if (fcode == 1)
-            message.channel.send("I have left the voice channel.");
+        server.dispatcher = undefined;
+        message.channel.send('Music stopped.');
+        console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
     }
     else {
-        if (fcode == 0) {
-            message.channel.send('There is nothing to stop.');
-            console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
-        }
-        else if (fcode == 1)
-            message.channel.send("I have left the voice channel.");
+        message.channel.send('There is nothing to stop.');
+        console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
     }
 }
 
@@ -585,8 +576,9 @@ async function leave(message) {
     }
     // valid compare
     else if (userVoiceChannel == clientVoiceConnection.channel) {
-        stop_music(message, 1);
+        stop_music(message);
         clientVoiceConnection.disconnect();
+        message.channel.send("I have left the voice channel.");
     }
     else {
         message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
@@ -638,23 +630,13 @@ function readTextFile(file)
     return text;
 }
 
-function reboot(message) {
-    message.channel.send("Rebooting...")
-    .then(console.log(`${message.member.user.tag} rebooted the bot.`))
-    .then(client.destroy())
-    .then(client.login(TOKEN));
-}
-
 function resetVoice(message) {
     var server = servers[message.guild.id];
+    stop_music(message); // clear server.queue & set server.dispatcher = undefined
     server.volume = 0.50;
     server.loop = false;
     server.skip = false;
     server.skipAmount = 1;
-    server.dispatcher = undefined;
-    while (server.queue.length > 0) {
-        server.queue.shift();
-    }
 }
 
 function emergency_food_time(message) {
