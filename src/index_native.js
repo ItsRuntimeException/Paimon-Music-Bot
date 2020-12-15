@@ -394,6 +394,7 @@ async function play_music(message, soundPath = '', local = false) {
                 else
                     break; // stop unnecessary skip
             }
+            console.log(`Skipped ${((server.queue) ? skipAmount : count)} songs.`);
             message.channel.send(`Skipped ${((server.queue) ? skipAmount : count)} songs.`);
             skip = false;
         }
