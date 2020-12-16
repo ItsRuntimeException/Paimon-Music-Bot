@@ -1,5 +1,5 @@
 const PREFIX = "?";
-const ytdl = require('ytdl-core');
+const ytdl = require('discord-ytdl-core');
 const ytpl = require('ytpl');
 const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
@@ -42,9 +42,11 @@ client.on("message", async message => {
         servers[message.guild.id] = {
             queue:[],
             volume: 0.50,
+            skipAmount: 1,
             loop: false,
             skip: false,
-            skipAmount: 1,
+            local: false,
+            playToggle: false,
             dispatcher: undefined,
             embedMessage: undefined
         }
@@ -90,6 +92,9 @@ client.on("message", async message => {
             if (!message.member.voiceChannel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
+            if (server.local && server.queue.length > 0) {
+                return message.channel.send('Please finish local playlist first!');
+            }
 
             /** Queue Logic
              *    0  = no song; queue then play
@@ -97,10 +102,14 @@ client.on("message", async message => {
              *    1+ = queue
              */
             if (server.queue.length == 0) {
-                queueLogic(message, search_string, true);
+                server.playToggle = true;
+                server.local = false;
+                queueLogic(message, search_string);
             }
             else if (server.queue.length >= 1) {
-                queueLogic(message, search_string, false);
+                server.playToggle = false;
+                server.local = false;
+                queueLogic(message, search_string);
             }
             break;
         case "playlocal":
@@ -112,22 +121,27 @@ client.on("message", async message => {
             if (server.dispatcher != null) {
                 return message.channel.send('Please wait until all local music has been finished playing OR ?Stop.');
             }
+            if (!server.local && server.queue.length > 0) {
+                return message.channel.send('Please finish stream playlist first!');
+            }
 
+            server.playToggle = true;
+            server.local = true;
             var search_string = args.toString().replace(/,/g,' ');
             /* https://regexr.com/ */
             if (search_string.match(/anime/gi)) {
-                queueLogic(message, './anime_music/', true, true);
+                queueLogic(message, './anime_music/');
             }
             else if (search_string.match(/persona/gi)) {
                 if (!search_string.match(/[3-5]/g)) {
                     message.channel.send('Please specify: 3|4|5');
                 }
                 else if (search_string.match(/3/gi))
-                    queueLogic(message, './persona3_music/', true, true);
+                    queueLogic(message, './persona3_music/');
                 else if (search_string.match(/4/gi))
-                    queueLogic(message, './persona4_music/', true, true);
+                    queueLogic(message, './persona4_music/');
                 else if (search_string.match(/5/gi))
-                    queueLogic(message, './persona5_music/', true, true);
+                    queueLogic(message, './persona5_music/');
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
@@ -136,6 +150,28 @@ client.on("message", async message => {
             else {
                 console.log('playLocal: Category does not exist!');
                 return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete(5000));
+            }
+            break;
+        case "shuffle":
+            var server = servers[message.guild.id];
+            console.log(`[Server: ${message.guild.id}] Queue Shuffle Requested.`);
+            /* Fisher–Yates Shuffle Algorithm */
+            var n = server.queue.length;
+            var que_index = 1; // currentSong playing is always at [0] -> [currentSong, 1, 2, 3, ..., n]
+            for (var i = n-1; i > que_index; i--) {
+                // random index
+                let r = rand(que_index,i);
+                // swap
+                let temp_arr = server.queue[i];
+                server.queue[i] = server.queue[r];
+                server.queue[r] = temp_arr;
+            }
+            if (n > 1) {
+                console.log(server.queue);
+                message.channel.send('Queue Shuffle Complete!');
+            }
+            else {
+                message.channel.send('There is nothing to shuffle!');
             }
             break;
         case "queue":
@@ -158,6 +194,7 @@ client.on("message", async message => {
             break;
         case "stop":
             stop_music(message);
+            message.channel.send('Music stopped.');
             break;
         case "leave":
             leave(message);
@@ -239,7 +276,7 @@ function queueInfo(message, qNum = 5) {
         description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
         fields: [{
             name: "Now Playing:",
-            value: ((server.queue) ? server.queue[0] : 'None')
+            value: ((server.queue[0] != undefined) ? server.queue[i].split('.mp3')[0] : 'None')
         },
         {
             name: "In the Queue:",
@@ -254,9 +291,9 @@ function queueInfo(message, qNum = 5) {
     }}).then(newMessage => server.embedMessage = newMessage);
 }
 
-async function queueLogic(message, search_string, playToggle, local = false) {
+async function queueLogic(message, search_string) {
     var server = servers[message.guild.id];
-    if (local == true) {
+    if (server.local) {
         let soundPath = search_string;
         // create directory if not exist
         if (!filestream.existsSync(soundPath)) {
@@ -269,14 +306,15 @@ async function queueLogic(message, search_string, playToggle, local = false) {
                 console.log(err);
                 return;
             }
+            console.log(server.queue);
             for (var i = 0; i < files.length; i++) {
                 // push into queue if filetype matches '.mp3' format
                 if (files[i].match(/.mp3/gi))
                     server.queue.push(files[i]);
             }
-            console.log(server.queue);
             if (server.queue[0] != undefined) {
-                play_music(message, soundPath, true);
+                console.log(server.queue);
+                play_music(message, soundPath);
             }
             else {
                 /*    USE:     https://regexr.com/ to help build a regex   */
@@ -322,17 +360,16 @@ async function queueLogic(message, search_string, playToggle, local = false) {
         *  server.queue only seems to have updated inside this function instead of client.on(...), 
         *  call play_music here to avoid playing [undefined] song.
         */
-        if (playToggle) {
-            play_music(message);
+        if (server.playToggle) {
+            play_music(message, '');
         }
-        console.log(server.queue);
     }
 }
 
-async function play_music(message, soundPath = '', local = false) {
+async function play_music(message, soundPath) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
-    if (local == true) {
+    if (server.local) {
         if (server.queue[0] != undefined) {
             let song = soundPath + server.queue[0];
             let songName = server.queue[0].split('.mp3')[0];
@@ -342,7 +379,6 @@ async function play_music(message, soundPath = '', local = false) {
         queueInfo(message);
     }
     else {
-        message.channel.send('ytdl-core currently \'may or may not\' be able to play youtube audio-stream!');
         let validate = ytdl.validateURL(server.queue[0]);
         console.log('validate-mode? ' + validate);
         if (!validate) {
@@ -421,7 +457,9 @@ async function play_music(message, soundPath = '', local = false) {
 
     server.dispatcher.on('end', function() {
         // delete old queue message
-        server.embedMessage.delete();
+        if (server.local) {
+            server.embedMessage.delete();
+        }
         // music 'end' logic
         if (server.skip) {
             var count = 0;
@@ -444,11 +482,11 @@ async function play_music(message, soundPath = '', local = false) {
             server.queue.shift();
 
         if (server.queue.length > 0) {
-            if (local == true) {
-                play_music(message, soundPath, true);
+            if (server.local) {
+                play_music(message, soundPath);
             }
             else {
-                play_music(message);
+                play_music(message, '');
             }
         }
         else if (server.queue.length == 0) {
@@ -528,12 +566,6 @@ function pause_music(message) {
 }
 
 function resume_music(message) {
-    // initialize queue
-    if (!servers[message.guild.id]) {
-	servers[message.guild.id] = {
-            queue:[]
-        }
-    }
     let server = servers[message.guild.id];
     if (server.dispatcher != null) {
         server.dispatcher.resume();
@@ -570,12 +602,11 @@ function stop_music(message) {
             server.queue.shift();
         }
         server.dispatcher = undefined;
-        message.channel.send('Music stopped.');
         console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
     }
     else {
-        message.channel.send('There is nothing to stop.');
         console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
+        message.channel.send('There is nothing to stop.');
     }
 }
 
@@ -1171,43 +1202,39 @@ function userHelp(message) {
             value: "Display server's current music queue."
           },
           {
+            name: "?Pause|Resume|Skip|Stop|Loop|Shuffle",
+            value: "Music Control Logic."
+          },
+          {
             name: "?Vol [Percent]",
             value:"Set the current music volume."
           },
           {
-            name: "Pause|Resume|Skip|Stop|Loop",
-            value: "Music Control Logic."
-          },
-          {
-            name: "Kill",
+            name: "?Kill",
             value: "Paimon shall be served as food T^T"
           },
           {
-            name: "Reboot",
-            value: "Paimon shall take a nap!"
-          },
-          {
-            name: "Source",
+            name: "?Source",
             value: "Paimon's delicious sauce code~"
           },
           {
-            name: "Clean",
+            name: "?Clean",
             value: "Paimon will clean up your mess!"
           },
           {
-            name: "Roll",
+            name: "?Roll",
             value: "Random Number between 1-6."
           },
           {
-            name: "MapleStory",
+            name: "?MapleStory",
             value: "MapleStory guild page."
           },
           {
-            name: "g[Create|Showtable|Pity|Wish|Reset]",
+            name: "?g[Create|Showtable|Pity|Wish|Reset]",
             value: "Genshin Impact's manual \'Gacha Count-Table\'."
           },
           {
-            name: "Valorant [GameCode] [Sensitivity]",
+            name: "?Valorant [GameCode] [Sensitivity]",
             value: "Convert other games' sensitivity ↦ Valorant's."
           }
         ],
