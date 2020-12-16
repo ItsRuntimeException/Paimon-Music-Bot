@@ -34,8 +34,8 @@ Loop Support: loop current song<br>
 # Clean #
 Clean channel message
 
-# Reboot | Kill #
-Reboot | Shutdown the bot from the server.
+# Shutdown #
+Shutdown the bot from the server.
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).
