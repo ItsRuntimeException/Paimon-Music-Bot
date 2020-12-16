@@ -193,6 +193,7 @@ client.on("message", async message => {
             skip_music(message, args[0]);
             break;
         case "stop":
+            var server = servers[message.guild.id];
             stop_music(message);
             if (server.dispatcher != null) {
                 message.channel.send('Music stopped.');
