@@ -32,7 +32,7 @@ Play Support: youtube-URL |keywords | youtube-playlist-URL<br>
 Loop Support: loop current song<br>
 
 # Clean #
-Clean channel message
+Clean channel messages.
 
 # Shutdown #
 Shutdown the bot from the server.
