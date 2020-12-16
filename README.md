@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: December 15, 2020***
+***Personal Project; Last Updated: December 16, 2020***
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
@@ -26,12 +26,14 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of functions and its usage.
 
 # Music Support #
-Several music control commands: play|playLocal|pause|resume|skip|stop|loop|currentSong
-Play Support: youtube-URL|keywords|youtube-playlist-URL
-Loop Support: single|multi(work in progress)
+Music controls: play|playLocal|pause|resume|skip<br>
+Extra Music Controls: stop|loop|queue|shuffle<br>
+Play Support: youtube-URL|keywords|youtube-playlist-URL<br>
+Loop Support: loop current song<br>
 
 # Clean #
 Clean channel message
+
 # Reboot|Kill #
 Reboot|Shutdown the bot from the server.
 
