@@ -439,8 +439,7 @@ async function play_music(message, soundPath = '', local = false) {
             }
         }
         else if (server.queue.length == 0) {
-            server.dispatcher = undefined;
-            leave(message);
+            leave(message); // leave: leave channel -> stop: server.dispatcher = undefined & flush queue
         }
     })
 }
@@ -551,6 +550,7 @@ function skip_music(message, sNum) {
 
 function stop_music(message) {
     let server = servers[message.guild.id];
+    server.dispatcher.pause();
     if (server.dispatcher != null) {
         // clear queue
         while (server.queue.length > 0) {
@@ -643,7 +643,11 @@ function reboot(message) {
 
 function resetVoice(message) {
     var server = servers[message.guild.id];
-    stop_music(message); // clear server.queue & set server.dispatcher = undefined
+    // clear server.queue & set server.dispatcher = undefined
+    while (server.queue.length > 0) {
+        server.queue.shift();
+    }
+    server.dispatcher = undefined
     server.volume = 0.50;
     server.loop = false;
     server.skip = false;
