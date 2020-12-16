@@ -207,7 +207,7 @@ client.on("message", async message => {
         case "reset":
             resetVoice(message);
             break;
-        case "kill":
+        case "shutdown":
             emergency_food_time(message);
             break;
         case "roll":
@@ -1212,7 +1212,7 @@ function userHelp(message) {
             value:"Set the current music volume."
           },
           {
-            name: "?Kill",
+            name: "?Shutdown",
             value: "Paimon shall be served as food T^T"
           },
           {
