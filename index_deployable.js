@@ -194,7 +194,9 @@ client.on("message", async message => {
             break;
         case "stop":
             stop_music(message);
-            message.channel.send('Music stopped.');
+            if (server.dispatcher != null) {
+                message.channel.send('Music stopped.');
+            }
             break;
         case "leave":
             leave(message);
