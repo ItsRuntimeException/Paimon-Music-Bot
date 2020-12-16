@@ -595,8 +595,8 @@ function skip_music(message, sNum) {
 
 function stop_music(message) {
     let server = servers[message.guild.id];
-    server.dispatcher.pause();
     if (server.dispatcher != null) {
+        server.dispatcher.pause();
         // clear queue
         while (server.queue.length > 0) {
             server.queue.shift();
