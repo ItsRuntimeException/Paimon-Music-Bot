@@ -45,7 +45,8 @@ client.on("message", async message => {
             loop: false,
             skip: false,
             skipAmount: 1,
-            dispatcher: undefined
+            dispatcher: undefined,
+            embedMessage: undefined
         }
     }
 
@@ -242,6 +243,10 @@ function queueInfo(message, qNum = 5) {
         {
             name: "In the Queue:",
             value: ((server.queue.length >= 2) ? queueString : 'None')
+        },
+        {
+            name: "[Server: " +message.guild.name+ "] Volume:",
+            value: (server.volume*100).toString()+"%"
         }
         ],
         timestamp: new Date(),
@@ -249,23 +254,31 @@ function queueInfo(message, qNum = 5) {
             icon_url: client.user.avatarURL,
             text: '© Rich Embedded Frameworks'
         }
-    }}).then(newMessage => newMessage.delete(10000));
+    }}).then(newMessage => server.embedMessage = newMessage);
 }
 
 async function queueLogic(message, search_string, playToggle, local = false) {
     var server = servers[message.guild.id];
     if (local == true) {
         let soundPath = search_string;
+        // create directory if not exist
+        if (!filestream.existsSync(soundPath)) {
+            filestream.mkdirSync(soundPath);
+            console.log(`New ${soundPath.replace(/\/|\./g,'')} folder created!`);
+        }
+        // push files into queue -> play
         filestream.readdir(soundPath, function (err, files) {
             if (err) {
                 console.log(err);
                 return;
             }
             for (var i = 0; i < files.length; i++) {
-                server.queue.push(files[i]);
+                // push into queue if filetype matches '.mp3' format
+                if (files[i].match(/.mp3/gi))
+                    server.queue.push(files[i]);
             }
             console.log(server.queue);
-            if (server.queue) {
+            if (server.queue[0] != undefined) {
                 play_music(message, soundPath, true);
             }
             else {
@@ -323,11 +336,11 @@ async function play_music(message, soundPath = '', local = false) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
     if (local == true) {
-        if (server.queue) {
+        if (server.queue[0] != undefined) {
             let song = soundPath + server.queue[0];
             let songName = server.queue[0].split('.mp3')[0];
             server.dispatcher = connection.playStream(song, {volume: server.volume});
-            console.log('[Local-Mode][Server:'+message.guild.id+'] Now Playing: ' + songName);
+            console.log('[Local-Mode][Server: '+message.guild.id+'] Now Playing: ' + songName);
         }
         queueInfo(message);
     }
@@ -410,6 +423,9 @@ async function play_music(message, soundPath = '', local = false) {
     }
 
     server.dispatcher.on('end', function() {
+        // delete old queue message
+        server.embedMessage.delete();
+        // music 'end' logic
         if (server.skip) {
             var count = 0;
             for (var i = 0; i < server.skipAmount; i++) {
@@ -643,6 +659,9 @@ function resetVoice(message) {
     server.loop = false;
     server.skip = false;
     server.skipAmount = 1;
+
+    console.log(`[Server: ${message.guild.id}] requested to reset variables!`);
+    message.channel.send('Bot Reset Complete!');
 }
 
 function emergency_food_time(message) {
