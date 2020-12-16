@@ -26,16 +26,16 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of functions and its usage.
 
 # Music Support #
-Music Controls: play|playLocal|pause|resume|skip<br>
-Extra Music Controls: stop|loop|queue|shuffle<br>
-Play Support: youtube-URL|keywords|youtube-playlist-URL<br>
+Music Controls: play | playLocal | pause | resume | skip<br>
+Extra Music Controls: stop | loop | queue | shuffle<br>
+Play Support: youtube-URL |keywords | youtube-playlist-URL<br>
 Loop Support: loop current song<br>
 
 # Clean #
 Clean channel message
 
-# Reboot|Kill #
-Reboot|Shutdown the bot from the server.
+# Reboot | Kill #
+Reboot | Shutdown the bot from the server.
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).
