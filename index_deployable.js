@@ -236,6 +236,7 @@ function queueInfo(message, qNum = 5) {
             icon_url: client.user.avatarURL,
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
+        description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
         fields: [{
             name: "Now Playing:",
             value: ((server.queue) ? server.queue[0] : 'None')
@@ -243,10 +244,6 @@ function queueInfo(message, qNum = 5) {
         {
             name: "In the Queue:",
             value: ((server.queue.length >= 2) ? queueString : 'None')
-        },
-        {
-            name: "[Server: " +message.guild.name+ "] Volume:",
-            value: (server.volume*100).toString()+"%"
         }
         ],
         timestamp: new Date(),
@@ -1153,7 +1150,7 @@ function userHelp(message) {
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
         title: "Fuctions",
-        description: "[Currently Hosting via Heroku]\nMusic Support Enabled!",
+        description: `[Currently Hosting from ${process.cwd()}]\nMusic Support Enabled!`,
         fields: [{
             name: "?Help",
             value: "Display a general list of commands."
