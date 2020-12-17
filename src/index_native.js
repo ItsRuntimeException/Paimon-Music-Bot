@@ -41,7 +41,7 @@ client.on("message", async message => {
     if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
             queue:[],
-            volume: 0.50,
+            volume: 0.02,
             skipAmount: 1,
             loop: false,
             skip: false,
@@ -194,10 +194,14 @@ client.on("message", async message => {
             break;
         case "stop":
             var server = servers[message.guild.id];
-            stop_music(message);
             if (server.dispatcher != undefined) {
+                stop_music(message);
                 message.channel.send('Music stopped.');
             }
+            else {
+                message.channel.send('There is nothing to stop.');
+            }
+            console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
             break;
         case "leave":
             leave(message);
@@ -280,7 +284,7 @@ function queueInfo(message, qNum = 5) {
         description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
         fields: [{
             name: "Now Playing:",
-            value: ((server.queue[0] != undefined) ? server.queue[i].split('.mp3')[0] : 'None')
+            value: ((server.queue[0] != undefined) ? server.queue[0].split('.mp3')[0] : 'None')
         },
         {
             name: "In the Queue:",
@@ -462,13 +466,15 @@ async function play_music(message, soundPath) {
     server.dispatcher.on('end', function() {
         if (server.local) {
             try {
-                server.embedMessage.delete();
+                if (server.embedMessage != undefined)
+                    server.embedMessage.delete();
             } catch (error) {
                 console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
             }
         }
         // music 'end' logic
         if (server.skip) {
+            server.skip = false;
             var count = 0;
             for (var i = 0; i < server.skipAmount; i++) {
                 if (server.queue.length > 0) {
@@ -480,13 +486,14 @@ async function play_music(message, soundPath) {
             }
             console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
             message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
-            server.skip = false;
         }
         else if (server.loop) {
             console.log('Loop Mode: ON, replaying song.');
         }
         else
-            server.queue.shift();
+            if (server.queue.length > 0) {
+                server.queue.shift();
+            }
 
         if (server.queue.length > 0) {
             if (server.local) {
@@ -497,6 +504,7 @@ async function play_music(message, soundPath) {
             }
         }
         else if (server.queue.length == 0) {
+            server.dispatcher = undefined;
             leave(message); // leave: leave channel -> stop: server.dispatcher = undefined & flush queue
         }
     })
@@ -597,23 +605,19 @@ function skip_music(message, sNum) {
     else {
         message.channel.send('There is nothing to skip.');
     }
-    console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
 }
 
 function stop_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != undefined) {
-        server.dispatcher.pause();
         // clear queue
         while (server.queue.length > 0) {
             server.queue.shift();
         }
-        server.dispatcher = undefined;
-        console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
+        server.dispatcher.end();
     }
     else {
-        console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to stop music.');
-        message.channel.send('There is nothing to stop.');
+        ;// base case: do nothing
     }
 }
 
