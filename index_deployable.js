@@ -163,9 +163,12 @@ client.on("message", async message => {
                 /* random index */
                 let r = rand(que_index,i);
                 /* swap */
-                let temp_arr = server.queue[i];
+                let temp = server.queue[i];
                 server.queue[i] = server.queue[r];
-                server.queue[r] = temp_arr;
+                server.queue[r] = temp;
+                temp = server.cached_video_info[i];
+                server.cached_video_info[i] = server.cached_video_info[r];
+                server.cached_video_info[r] = temp;
             }
             if (n > 1) {
                 console.log(server.queue);
