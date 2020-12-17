@@ -76,7 +76,7 @@ client.on("message", async message => {
             var server = servers[message.guild.id];
             // string logic:
             var search_string = args.toString().replace(/,/g,' ');
-            // VALIDATE ARG NOT NULL
+            // VALIDATE ARG NOT undefined
             if (search_string == '') {
                 console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
                 return message.channel.send(`${message.author}.`
@@ -118,7 +118,7 @@ client.on("message", async message => {
             if (!message.member.voiceChannel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
-            if (server.dispatcher != null) {
+            if (server.dispatcher != undefined) {
                 return message.channel.send('Please wait until all local music has been finished playing OR ?Stop.');
             }
             if (!server.local && server.queue.length > 0) {
@@ -195,7 +195,7 @@ client.on("message", async message => {
         case "stop":
             var server = servers[message.guild.id];
             stop_music(message);
-            if (server.dispatcher != null) {
+            if (server.dispatcher != undefined) {
                 message.channel.send('Music stopped.');
             }
             break;
@@ -270,6 +270,7 @@ function queueInfo(message, qNum = 5) {
             return message.channel.send('Max queue display is 20 songs!');
         }
     }
+    /* send new embed */
     message.channel.send({embed: {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
@@ -459,9 +460,12 @@ async function play_music(message, soundPath) {
     }
 
     server.dispatcher.on('end', function() {
-        // delete old queue message
         if (server.local) {
-            server.embedMessage.delete();
+            try {
+                server.embedMessage.delete();
+            } catch (error) {
+                console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
+            }
         }
         // music 'end' logic
         if (server.skip) {
@@ -509,7 +513,7 @@ function vol_music(message, num) {
         console.log(`${message.member.user.tag} requested for [Server: ${message.guild.id}] volume change, but reached INVALID number.`);
         return message.channel.send(`${message.author}. You need to supply a VALID number!`);
     }
-    if (server.dispatcher != null) {
+    if (server.dispatcher != undefined) {
         // Sets the volume relative to the input stream - i.e. 1 is normal, 0.5 is half, 2 is double.
         server.volume = percentage / 100;
         if (server.volume <= 1) {
@@ -558,7 +562,7 @@ function loop_music(message, switcher) {
 
 function pause_music(message) {
     let server = servers[message.guild.id];
-    if (server.dispatcher != null) {
+    if (server.dispatcher != undefined) {
         server.dispatcher.pause();
         message.channel.send('Music paused.');
     }
@@ -570,7 +574,7 @@ function pause_music(message) {
 
 function resume_music(message) {
     let server = servers[message.guild.id];
-    if (server.dispatcher != null) {
+    if (server.dispatcher != undefined) {
         server.dispatcher.resume();
         message.channel.send('Music resume.');
     }
@@ -587,7 +591,7 @@ function skip_music(message, sNum) {
         sNum = 1;
     }
     server.skipAmount = sNum;
-    if (server.dispatcher != null) {
+    if (server.dispatcher != undefined) {
         server.dispatcher.end();
     }
     else {
@@ -598,7 +602,7 @@ function skip_music(message, sNum) {
 
 function stop_music(message) {
     let server = servers[message.guild.id];
-    if (server.dispatcher != null) {
+    if (server.dispatcher != undefined) {
         server.dispatcher.pause();
         // clear queue
         while (server.queue.length > 0) {
@@ -620,7 +624,7 @@ async function leave(message) {
     // Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
     
     // no current connection or check for same current channel
-    if (clientVoiceConnection == null){
+    if (clientVoiceConnection == undefined){
         message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
     }
     // valid compare
@@ -747,7 +751,7 @@ function vSens(message, gameCode, sens) {
         .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`));
     else {
         var convertedSens = 0;
-        var gameName = null;
+        var gameName = undefined;
         switch (gameCode) {
             case "a":
                 convertedSens = (sensitivity / 3.18181818);
