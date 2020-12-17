@@ -1,5 +1,5 @@
 const PREFIX = "?";
-const ytdl = require('discord-ytdl-core');
+const ytdl = require('ytdl-core');
 const ytpl = require('ytpl');
 const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
@@ -7,11 +7,11 @@ const filestream = require("fs");
 const client = new Discord.Client();
 const DICE = 6;
 
-// set up envrionment token for heroku deployment website.
+/* set up envrionment token for heroku deployment website. */
 const TOKEN = process.env.BOT_TOKEN;
-const youtube = new YouTube(process.env.YOUTUBE_API_KEY); // Personal Youtube-API key
+const youtube = new YouTube(process.env.YOUTUBE_API_KEY); /* Personal Youtube-API key */
 
-// music variables
+/* music variables */
 var servers = {};
 
 /* bot online */
@@ -37,10 +37,11 @@ client.on("guildCreate", guild => {
 });
 
 client.on("message", async message => {
-    // initialize music queue
+    /* initialize music queue */
     if (!servers[message.guild.id]) {
         servers[message.guild.id] = {
-            queue:[],
+            queue: [],
+            cached_video_info: [],
             volume: 0.02,
             skipAmount: 1,
             loop: false,
@@ -52,7 +53,7 @@ client.on("message", async message => {
         }
     }
 
-    /* Ignore messages that don"t start with prefix or written by bot*/
+    /* Ignore messages that don"t start with prefix or written by bot */
     if (!message.content.startsWith(PREFIX) || message.author.bot) return;
     const args = message.content.slice(PREFIX.length).split(/ +/);
     const command = args.shift().toLowerCase();
@@ -64,7 +65,7 @@ client.on("message", async message => {
     /* Voice only works in guilds, if the message does not come from a guild, then ignore it */
     if (!message.guild) return;
 
-    /* commands & voice*/
+    /* commands & voice */
     switch (command) {
         case "help":
             userHelp(message)
@@ -74,9 +75,9 @@ client.on("message", async message => {
             break;
         case "play":
             var server = servers[message.guild.id];
-            // string logic:
+            /* string logic: */
             var search_string = args.toString().replace(/,/g,' ');
-            // VALIDATE ARG NOT undefined
+            /* VALIDATE ARG NOT undefined */
             if (search_string == '') {
                 console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
                 return message.channel.send(`${message.author}.`
@@ -88,7 +89,7 @@ client.on("message", async message => {
                         +"\t\tPekora bgm music 1 hour");
             }
 
-            // IN-CHANNEL CHECK
+            /* IN-CHANNEL CHECK */
             if (!message.member.voiceChannel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
@@ -114,7 +115,7 @@ client.on("message", async message => {
             break;
         case "playlocal":
             var server = servers[message.guild.id];
-            // IN-CHANNEL CHECK
+            /* IN-CHANNEL CHECK */
             if (!message.member.voiceChannel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
@@ -157,11 +158,11 @@ client.on("message", async message => {
             console.log(`[Server: ${message.guild.id}] Queue Shuffle Requested.`);
             /* Fisher–Yates Shuffle Algorithm */
             var n = server.queue.length;
-            var que_index = 1; // currentSong playing is always at [0] -> [currentSong, 1, 2, 3, ..., n]
+            var que_index = 1; /* currentSong playing is always at [0] -> [currentSong, 1, 2, 3, ..., n] */
             for (var i = n-1; i > que_index; i--) {
-                // random index
+                /* random index */
                 let r = rand(que_index,i);
-                // swap
+                /* swap */
                 let temp_arr = server.queue[i];
                 server.queue[i] = server.queue[r];
                 server.queue[r] = temp_arr;
@@ -176,6 +177,9 @@ client.on("message", async message => {
             break;
         case "queue":
             queueInfo(message, args[0]);
+            break;
+        case "musicinfo":
+            musicInfo_Lookup(message);
             break;
         case "vol":
             vol_music(message, args[0]);
@@ -259,14 +263,58 @@ async function join(message) {
     }
 }
 
-function queueInfo(message, qNum = 5) {
+function musicInfo_Lookup(message) {
     var server = servers[message.guild.id];
-    /* Top 5 in the queue */
+    if (!server.local) {
+        var cached = server.cached_video_info;
+        message.channel.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL,
+                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            },
+            title: cached[0].title,
+            url: cached[0].url,
+            thumbnail: cached[0].thumbnail,
+            fields:
+            [{
+                name: "Duration",
+                value: cached[0].duration
+            }],
+            timestamp: new Date(),
+            footer:{
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }}).then(newMessage => newMessage.delete(10000));
+    }
+    else
+        return message.channel.send('Local Music does not support Info-Lookup');
+}
+
+async function queueInfo(message, qNum = 10) {
+    var server = servers[message.guild.id];
+    var cached = server.cached_video_info;
     var queueString = '';
+    var playString = 'None';
+
+    /* playString */
+    if (server.queue[0] != undefined) {
+        if (ytdl.validateURL(server.queue[0])) /* check link validity */
+            playString = cached[0].title;
+        else
+            playString = server.queue[0].split('.mp3')[0];
+    }
+    /* queueString */
     for (var i = 1; i < server.queue.length; i++) {
-        if (qNum <= 20) {
+        if (qNum <= 25) {
             if (i <= qNum) {
-                queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
+                /* check link validity */
+                if (ytdl.validateURL(server.queue[i]))
+                    queueString += i+'.) '+cached[i].title+'\n'; /* Ex: 1. [songName]... */
+                else
+                    queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
+                
             }
             else break;
         }
@@ -282,9 +330,10 @@ function queueInfo(message, qNum = 5) {
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
         description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
+        thumbnail: cached[0].thumbnail,
         fields: [{
             name: "Now Playing:",
-            value: ((server.queue[0] != undefined) ? server.queue[0].split('.mp3')[0] : 'None')
+            value: playString
         },
         {
             name: "In the Queue:",
@@ -303,12 +352,12 @@ async function queueLogic(message, search_string) {
     var server = servers[message.guild.id];
     if (server.local) {
         let soundPath = search_string;
-        // create directory if not exist
+        /* create directory if not exist */
         if (!filestream.existsSync(soundPath)) {
             filestream.mkdirSync(soundPath);
             console.log(`New ${soundPath.replace(/\/|\./g,'')} folder created!`);
         }
-        // push files into queue -> play
+        /* push files into queue -> play */
         filestream.readdir(soundPath, function (err, files) {
             if (err) {
                 console.log(err);
@@ -316,7 +365,7 @@ async function queueLogic(message, search_string) {
             }
             console.log(server.queue);
             for (var i = 0; i < files.length; i++) {
-                // push into queue if filetype matches '.mp3' format
+                /* push into queue if filetype matches '.mp3' format */
                 if (files[i].match(/.mp3/gi))
                     server.queue.push(files[i]);
             }
@@ -325,30 +374,62 @@ async function queueLogic(message, search_string) {
                 play_music(message, soundPath);
             }
             else {
-                /*    USE:     https://regexr.com/ to help build a regex   */
+                /*    USE:    https://regexr.com/ to help build a regex    */
                 /*    GOAL:       get rid of './' or '/'                   */
-                /*    RESULT:     ./local_music/    ----->   'local_music' */
+                /*    RESULT:    ./local_music/   ----->  'local_music'    */
                 console.log(`${soundPath.replace(/\/|\./g,'')} folder currently has no music files!`);
                 return message.channel.send(`${soundPath.replace(/\/|\./g,'')} folder currently has no music files!`);
             }
         });
     }
     else {
-        // queue the search_string only, only fetch metadata upon playing
+        /* queue the search_string only, only fetch metadata upon playing */
         let validateURL = ytdl.validateURL(search_string);
         let validate_playlist = ytpl.validateID(search_string);
         if (!validate_playlist) {
-            server.queue.push(search_string);
-        }
-        else if (validate_playlist) {
+            /* PRELOAD */
             try {
-                var yt_playlist = await youtube.getPlaylist(search_string);
+                var video = await youtube.searchVideo(search_string);
             } catch (error) {
                 console.log(error);
                 return message.channel.send('Something went wrong!\n\n' + error);
             }
+            /* cache the video data for faster lookup */
+            server.queue.push(video.url);
+            server.cached_video_info.push({
+                title: video.title,
+                url: video.url,
+                duration: sec_Convert(video.durationSeconds),
+                data: video.data,
+                thumbnail: video.thumbnail
+            });
+        }
+        else if (validate_playlist) {
+            /* PRELOAD PLAYLIST */
+            try {
+                var yt_playlist = await youtube.getPlaylist(search_string, 5000);
+            } catch (error) {
+                console.log(error);
+                return message.channel.send('Something went wrong!\n\n' + error);
+            }
+            /* LOAD PLAYLIST VIDEOS */
             for (var i = 0; i < yt_playlist.length; i++) {
-                server.queue.push(yt_playlist[i].url);
+                /* PRELOAD */
+                try {
+                    var video = await youtube.getVideo(yt_playlist[i].url);
+                } catch (error) {
+                    console.log(error);
+                    return message.channel.send('Something went wrong!\n\n' + error);
+                }
+                /* cache the video data for faster lookup */
+                server.queue.push(video.url);
+                server.cached_video_info.push({
+                    title: video.title,
+                    url: video.url,
+                    duration: sec_Convert(video.durationSeconds),
+                    data: video.data,
+                    thumbnail: video.thumbnail
+                });
             }
         }
         if (server.queue.length > 1) {
@@ -383,106 +464,39 @@ async function play_music(message, soundPath) {
             let songName = server.queue[0].split('.mp3')[0];
             server.dispatcher = connection.playStream(song, {volume: server.volume});
             console.log('[Local-Mode][Server: '+message.guild.id+'] Now Playing: ' + songName);
+            queueInfo(message);
         }
-        queueInfo(message);
     }
     else {
-        let validate = ytdl.validateURL(server.queue[0]);
-        console.log('validate-mode? ' + validate);
-        if (!validate) {
-            // PRELOAD
-            try {
-                var video = await youtube.searchVideos(server.queue[0]);
-            } catch (error) {
-                console.log(error);
-                return message.channel.send('Something went wrong!\n\n' + error);
-            }
-            // PLAY MUSIC via keywords
-            let stream = ytdl(video.url, { filter: 'audioonly' });
-            server.dispatcher = connection.playStream(stream, {volume: server.volume});
-            console.log(`url: ${video.url}`);
-            console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
-            message.channel.send({embed: {
-                author: {
-                    name: 'Paimon-chan\'s Embedded Info',
-                    icon_url: client.user.avatarURL,
-                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-                },
-                thumbnail: video.thumbnail,
-                title: video.title,
-                url: video.url,
-                fields: [{
-                    name: "Link",
-                    value: video.url
-                },
-                {
-                    name: "Duration",
-                    value: sec_Convert(video.durationSeconds)
-                }
-                ],
-                timestamp: new Date(),
-                footer: {
-                    icon_url: client.user.avatarURL,
-                    text: '© Rich Embedded Frameworks'
-                }
-            }}).then(newMessage => newMessage.delete(10000));
-        }
-        else if (validate) {
-            // PLAY MUSIC via link
-            try {
-                var video = await youtube.getVideo(server.queue[0]);
-            } catch (error) {
-                console.log(error);
-                return message.channel.send('Something went wrong!\n\n' + error);
-            }
-            let stream = ytdl(video.url, { filter: 'audioonly' });
-            server.dispatcher = connection.playStream(stream, {volume: server.volume});
-            console.log(`url: ${video.url}`);
-            console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${video.title}\nDuration: ${sec_Convert(video.durationSeconds)}\n`);
-            message.channel.send({embed: {
-                author: {
-                    name: 'Paimon-chan\'s Embedded Info',
-                    icon_url: client.user.avatarURL,
-                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-                },
-                fields: [{
-                    name: "Title",
-                    value: video.title
-                },
-                {
-                    name: "Duration",
-                    value: sec_Convert(video.durationSeconds)
-                }
-                ],
-                timestamp: new Date(),
-                footer: {
-                    icon_url: client.user.avatarURL,
-                    text: '© Rich Embedded Frameworks'
-                }
-            }}).then(newMessage => newMessage.delete(10000));
-        }
+        /* PLAY MUSIC */
+        var stream = ytdl(server.queue[0], { filter: 'audioonly' });
+        server.dispatcher = connection.playStream(stream, {volume: server.volume});
+        console.log(`url: ${server.cached_video_info[0].url}`);
+        console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
+        queueInfo(message);
+        musicInfo_Lookup(message);
     }
 
     server.dispatcher.on('end', function() {
-        if (server.local) {
-            try {
-                if (server.embedMessage != undefined)
-                    server.embedMessage.delete();
-            } catch (error) {
-                console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
-            }
+        /* try delete old embedMessage */
+        try {
+            if (server.embedMessage != undefined)
+                server.embedMessage.delete();
+        } catch (error) {
+            console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
         }
-        // music 'end' logic
+        /* music 'end' logic */
         if (server.skip) {
             server.skip = false;
             var count = 0;
             for (var i = 0; i < server.skipAmount; i++) {
                 if (server.queue.length > 0) {
                     server.queue.shift();
+                    server.cached_video_info.shift();
                     count++;
                 }
                 else
-                    break; // stop unnecessary skip
+                    break; /* stop unnecessary iteration */
             }
             console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
             message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
@@ -493,6 +507,7 @@ async function play_music(message, soundPath) {
         else
             if (server.queue.length > 0) {
                 server.queue.shift();
+                server.cached_video_info.shift();
             }
 
         if (server.queue.length > 0) {
@@ -505,7 +520,7 @@ async function play_music(message, soundPath) {
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
-            leave(message); // leave: leave channel -> stop: server.dispatcher = undefined & flush queue
+            leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
         }
     })
 }
@@ -522,7 +537,7 @@ function vol_music(message, num) {
         return message.channel.send(`${message.author}. You need to supply a VALID number!`);
     }
     if (server.dispatcher != undefined) {
-        // Sets the volume relative to the input stream - i.e. 1 is normal, 0.5 is half, 2 is double.
+        /* Sets the volume relative to the input stream - i.e. 1 is normal, 0.5 is half, 2 is double. */
         server.volume = percentage / 100;
         if (server.volume <= 1) {
             server.dispatcher.setVolume(server.volume);
@@ -610,28 +625,26 @@ function skip_music(message, sNum) {
 function stop_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != undefined) {
-        // clear queue
+        /* clear queue */
         while (server.queue.length > 0) {
             server.queue.shift();
+            server.cached_video_info.shift();
         }
         server.dispatcher.end();
     }
-    else {
-        ;// base case: do nothing
-    }
+    /* base case: do nothing */
 }
 
 async function leave(message) {
     let userVoiceChannel = message.member.voiceChannel;
     let clientVoiceConnection = message.guild.voiceConnection;
-    // https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
-    // Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
-    
-    // no current connection or check for same current channel
+    /* https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
+    *  Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
+    */
     if (clientVoiceConnection == undefined){
         message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
     }
-    // valid compare
+    /* valid compare */
     else if (userVoiceChannel == clientVoiceConnection.channel) {
         stop_music(message);
         clientVoiceConnection.disconnect();
@@ -652,29 +665,28 @@ async function clean_messages(message, numline) {
     /* ONLY OWNER MAY USE THIS COMMAND */
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
-    if (message.author.id !== readTextFile('./src/ownerID.txt')){
+    if (message.author.id !== readTextFile('./src/ownerID.txt')) {
         console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
         message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
         return;
     }
-    // Checks if the `amount` parameter is a number. If not, the command throws an error
+    /* Checks if the `amount` parameter is a number. If not, the command throws an error */
     if (numline == undefined) {
-        // it's fine, continue...
+        /* continue */
     }
     else if (isNaN(numline))
         return message.reply('The amount parameter isn`t a number!');
-    // Checks if the `numline` integer is bigger than 100
+    /* Checks if the `numline` integer is bigger than 100 */
     else if (numline > 99)
         return message.reply('Maximum of clearing **99 messages** at once!');
-    // Checks if the `numline` integer is smaller than 1
+    /* Checks if the `numline` integer is smaller than 1 */
     else if (numline < 1)
         return message.reply('You must delete **at least 1 message!**');
     
-    /* BEGIN SWEEPING */
-    // Fetching the execution command and sweep that first, catch any errors.
-
-    // Fetch the given number of messages to sweeps: numline+1 to include the execution command
-    // Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
+    /* Fetching the execution command and sweep that first, catch any errors.
+    *  Fetch the given number of messages to sweeps: numline+1 to include the execution command
+    *  Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
+    */
     var bulkMessages = ((numline == undefined) ? await message.channel.fetchMessages() : await message.channel.fetchMessages( {limit: ++numline}));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
     message.channel.send(`Cleaned ${bulkMessages.array().length-1} messages.`).then(newMessage => newMessage.delete(5000));
@@ -689,9 +701,10 @@ function readTextFile(file)
 
 function resetVoice(message) {
     var server = servers[message.guild.id];
-    // clear server.queue & set server.dispatcher = undefined
+    /* clear server.queue & set server.dispatcher = undefined */
     while (server.queue.length > 0) {
         server.queue.shift();
+        server.cached_video_info.shift();
     }
     server.dispatcher = undefined
     server.volume = 0.50;
@@ -704,11 +717,11 @@ function resetVoice(message) {
 }
 
 function emergency_food_time(message) {
-    // channel reply
+    /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
     .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
     
-    /*fix error: 'Request to use token, but token was unavailable to the client' */
+    /* fix error: 'Request to use token, but token was unavailable to the client' */
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
@@ -750,7 +763,8 @@ function vSens(message, gameCode, sens) {
 
     gameCode = gameCode.toLowerCase();
     var sensitivity = parseFloat(sens);
-    if (isNaN(sensitivity)) // is Not a Number
+    /* is Not a Number */
+    if (isNaN(sensitivity))
         return message.channel.send(`${message.author}. You need to supply a VALID sensitivity!`)
         .then(console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached INVALID sensitivity.`));
     else {
@@ -800,30 +814,30 @@ function create_genshin_table(message) {
         arrayObj.users.push(new_userdata);
     }
     if (objLength(arrayObj.users) > 0) {
-        // this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates.
+        /* this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates. */
         for (var i = 0; i < objLength(arrayObj.users); i++) {
-            // this user table already exist.
+            /* this user table already exist. */
             if (arrayObj.users[i].uid === message.author.id) {
-                // check if this user has recently changed his/her userTag.
+                /* check if this user has recently changed his/her userTag. */
                 update_genshin_userTag(arrayObj, i);
-                //terminal logging
+                /* terminal logging */
                 console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] already EXIST!');
-                // channel reply
+                /* channel reply */
                 message.channel.send(`${message.author}. Your Genshin Gacha Table aready exist!`);
                 return;
             }
         }
-        // if this user does does not have an existing table, create a default table for this user.
+        /* if this user does does not have an existing table, create a default table for this user. */
         arrayObj.users.push(new_userdata);
     }
 
-    // update JSON Data
+    /* update JSON Data */
     setTimeout(function(err) {
         if (err) throw err;
         save_JSON_Data(arrayObj);
     }, 1000);
 
-    // display message
+    /* display message */
     console.log('Finished creating Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
     console.log(new_userdata);
     message.channel.send(`${message.author}. Your Genshin Gacha Table has been created!`);
@@ -835,12 +849,12 @@ function showtable(message) {
     for (var i = 0; i < objLength(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
 	        message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
-            // check if this user has recently changed his/her userTag.
+            /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(arrayObj, i);
-            // terminal logging
+            /* terminal logging */
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             console.log(arrayObj.users[i]);
-            // channel reply
+            /* channel reply */
             var bannerObj = arrayObj.users[i].bannerTypes;
             return message.channel.send({embed: {
                     author: {
@@ -868,7 +882,7 @@ function showtable(message) {
             }});
         }
     }
-    // this user table already exist.
+    /* this user table already exist. */
     message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function!`);
 }
 
@@ -878,9 +892,9 @@ function genshin_pity_calculation(message) {
     for (var i = 0; i < objLength(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
 	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
-            // check if this user has recently changed his/her userTag.
+            /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(arrayObj, i);
-            // terminal logging
+            /* terminal logging */
             console.log('Genshin Pity Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             console.log('Pity Calculation: ');
             const normal_pity_goal = 90;
@@ -891,7 +905,7 @@ function genshin_pity_calculation(message) {
                 weapon: weapon_pity_goal - arrayObj.users[i].bannerTypes.weapon, 
                 standard: normal_pity_goal - arrayObj.users[i].bannerTypes.standard
             }
-            // channel reply
+            /* channel reply */
             console.log(pity_table);
             console.log('\n');
             return message.channel.send({embed: {
@@ -920,7 +934,7 @@ function genshin_pity_calculation(message) {
             }});
         }
     }
-    // this user table already exist.
+    /* this user table already exist. */
     message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function!`);
 }
 
@@ -945,30 +959,31 @@ function wishCount(message, bannerType, commandType, nInc) {
     bannerType = bannerType.toLowerCase();
     commandType = commandType.toLowerCase();
     var roll_count = parseInt(nInc);
-    if (isNaN(roll_count)) // is Not a Number
+    /* is Not a Number */
+    if (isNaN(roll_count))
     {
         return message.channel.send(`${message.author}. You need to supply a VALID count!`)
         .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID count.`));
     }
     else {
-        // find user
+        /* find user */
         var text = readTextFile('./genshin_data/genshin_wish_tables.json');
         var arrayObj = JSON.parse(text);
         for (var i = 0; i < objLength(arrayObj.users); i++) {
             if (arrayObj.users[i].uid === message.author.id) {
-                // check if this user has recently changed his/her userTag.
+                /* check if this user has recently changed his/her userTag. */
                 update_genshin_userTag(arrayObj, i);
-                // terminal logging
+                /* terminal logging */
                 console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
                 break;
             }
         }
         if (i == objLength(arrayObj.users)) {
-            // this user table already exist.
+            /* this user table already exist. */
             return message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
         }
 
-        // edit GGachaTable
+        /* edit GGachaTable */
         if ( !(commandType === "add" || commandType === "replace") ) {
             return message.channel.send(`${message.author}. Unsupported CommandType, cannot edit your gacha data.`)
             .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID commandType.`));
@@ -1006,13 +1021,13 @@ function wishCount(message, bannerType, commandType, nInc) {
             }
         }
 
-        // save data back to json
+        /* save data back to json */
         setTimeout(function(err) {
             if (err) throw err;
             save_JSON_Data(arrayObj);
         }, 1000);
         
-        // display message
+        /* display message */
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
         console.log(arrayObj.users[i]);
         message.channel.send(`${message.author}. Your Genshin Gacha Table has been updated!`);
@@ -1058,20 +1073,20 @@ function wishReset(message, bannerType) {
                 .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
 
-    // find user
+    /* find user */
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
     var arrayObj = JSON.parse(text);
     for (var i = 0; i < objLength(arrayObj.users); i++) {
         if (arrayObj.users[i].uid === message.author.id) {
-            // check if this user has recently changed his/her userTag.
+            /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(arrayObj, i);
-            // terminal logging
+            /* terminal logging */
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             break;
         }
     }
     if (i == objLength(arrayObj.users)) {
-        // this user table already exist.
+        /* this user table already exist. */
         return message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
     }
     
@@ -1095,13 +1110,13 @@ function wishReset(message, bannerType) {
             .then(console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`));
     }
 
-    // save data back to json
+    /* save data back to json */
     setTimeout(function(err) {
         if (err) throw err;
         save_JSON_Data(arrayObj);
     }, 1000);
 
-    // display message
+    /* display message */
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
     console.log(arrayObj.users[i]);
     message.channel.send(`${message.author}. Your GGT:${bannerString} has been reset...`);
@@ -1137,12 +1152,12 @@ function objLength(obj) {
 }
 
 function sec_Convert(sec_string) {
-    // time variable decl
+    /* time variable decl */
     var seconds = Math.floor(parseInt(sec_string));
     var minutes = Math.floor(seconds / 60);
     var hours = Math.floor(minutes / 60);
 
-    // re-factor minutes and seconds
+    /* re-factor minutes and seconds */
     for (var i = 0; i < hours; i++) {
         minutes -= 60;
         seconds -= 3600;
@@ -1151,7 +1166,7 @@ function sec_Convert(sec_string) {
         seconds -= 60;
     }
 
-    // string variable
+    /* string variable */
     var time_string = `${seconds} secs`;
     if (minutes > 0)
         time_string = `${minutes} mins : ` + time_string;
@@ -1169,7 +1184,7 @@ function update_genshin_userTag(arrayObj, cached_index) {
     if (cached_userTag !== current_userTag) {
         arrayObj.users[cached_index].username = current_userTag;
     }
-    // update JSON Data
+    /* update JSON Data */
     setTimeout(function(err) {
         if (err) throw err;
         save_JSON_Data(arrayObj);
@@ -1177,7 +1192,7 @@ function update_genshin_userTag(arrayObj, cached_index) {
 }
 
 function save_JSON_Data(arrayObj) {
-    // save data back to json
+    /* save data back to json */
     var tableString = JSON.stringify(arrayObj, undefined, 2);
     filestream.writeFile('./genshin_data/genshin_wish_tables.json', tableString, 'utf-8', function(err) {
         if (err) throw err;
@@ -1211,6 +1226,10 @@ function userHelp(message) {
           {
             name: "?Queue",
             value: "Display server's current music queue."
+          },
+          {
+            name: "?MusicInfo",
+            value: "Fetch details of current song."
           },
           {
             name: "?Pause|Resume|Skip|Stop|Loop|Shuffle",
