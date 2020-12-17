@@ -42,7 +42,7 @@ client.on("message", async message => {
         servers[message.guild.id] = {
             queue: [],
             cached_video_info: [],
-            volume: 0.02,
+            volume: 0.05,
             skipAmount: 1,
             loop: false,
             skip: false,
@@ -173,6 +173,14 @@ client.on("message", async message => {
             if (n > 1) {
                 console.log(server.queue);
                 message.channel.send('Queue Shuffle Complete!');
+                /* try delete old embedMessage */
+                try {
+                    if (server.embedMessage != undefined)
+                        server.embedMessage.delete();
+                } catch (error) {
+                    console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
+                }
+                queueInfo(message);
             }
             else {
                 message.channel.send('There is nothing to shuffle!');
