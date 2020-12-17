@@ -366,7 +366,6 @@ async function queueLogic(message, search_string) {
                 console.log(err);
                 return;
             }
-            console.log(server.queue);
             for (var i = 0; i < files.length; i++) {
                 /* push into queue if filetype matches '.mp3' format */
                 if (files[i].match(/.mp3/gi))
@@ -406,6 +405,7 @@ async function queueLogic(message, search_string) {
                 data: video.data,
                 thumbnail: video.thumbnail
             });
+            console.log(server.queue);
         }
         else if (validate_playlist) {
             /* PRELOAD PLAYLIST */
@@ -434,6 +434,7 @@ async function queueLogic(message, search_string) {
                     thumbnail: video.thumbnail
                 });
             }
+            console.log(server.queue);
         }
         if (server.queue.length > 1) {
             if (!validate_playlist) {
