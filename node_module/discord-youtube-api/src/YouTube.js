@@ -32,7 +32,6 @@ class YouTube {
 		const type = "video";
 		try {
 			const response = await snekfetch.get(`${this.base}/search?part=${part}&key=${this.key}&maxResults=${max}&type=${type}&q=${query}`); 
-			response.request()
 			return await this.getVideoByID(JSON.parse(response.text).items[0].id.videoId);
 		} catch (err) {
 			throw new Error("Couldn't retrieve video");
