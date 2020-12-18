@@ -90,6 +90,10 @@ client.on("message", async message => {
                     +"\n\nKeywords example:\n"
                         +"\t\tPekora bgm music 1 hour");
             }
+            /* IN-CHANNEL CHECK */
+            if (!message.member.voiceChannel) {
+                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+            }
             if (server.local && server.queue.length > 0) {
                 return message.channel.send('Please finish local playlist first!');
             }
@@ -194,6 +198,10 @@ client.on("message", async message => {
             resume_music(message);
             break;
         case "skip":
+            /* IN-CHANNEL CHECK */
+            if (!message.member.voiceChannel) {
+                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+            }
             skip_music(message, args[0]);
             break;
         case "stop":
@@ -352,22 +360,15 @@ async function join(message) {
 }
 
 async function leave(message) {
-    let userVoiceChannel = message.member.voiceChannel;
     let clientVoiceConnection = message.guild.voiceConnection;
-    /* https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
-    *  Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
-    */
     if (clientVoiceConnection == undefined){
         message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
     }
     /* valid compare */
-    else if (userVoiceChannel == clientVoiceConnection.channel) {
+    else if (clientVoiceConnection.channel != undefined) {
         stop_music(message);
         clientVoiceConnection.disconnect();
         message.channel.send("I have left the voice channel.");
-    }
-    else {
-        message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
     }
 }
 
@@ -482,12 +483,7 @@ async function queueLogic(message, search_string) {
 
 async function play_music(message, soundPath) {
     var server = servers[message.guild.id];
-    /* IN-CHANNEL CHECK */
-    if (!message.member.voiceChannel) {
-        return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
-    }
-    else
-        var connection = await message.member.voiceChannel.join();
+    var connection = await message.member.voiceChannel.join();
 
     if (server.local) {
         if (server.queue[0] != undefined) {
@@ -720,12 +716,6 @@ function resume_music(message) {
 
 function skip_music(message, sNum) {
     let server = servers[message.guild.id];
-
-    /* IN-CHANNEL CHECK */
-    if (!message.member.voiceChannel) {
-        return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
-    }
-
     server.skip = true;
     if (sNum == undefined) {
         sNum = 1;
