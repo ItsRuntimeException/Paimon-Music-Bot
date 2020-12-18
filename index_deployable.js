@@ -173,13 +173,9 @@ client.on("message", async message => {
             if (n > 1) {
                 console.log(server.queue);
                 message.channel.send('Queue Shuffle Complete!');
-                /* try delete old embedMessage */
-                try {
-                    if (server.embedMessage != undefined)
-                        server.embedMessage.delete();
-                } catch (error) {
-                    console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
-                }
+                /* delete old embedMessage */
+                if (server.embedMessage != undefined)
+                    server.embedMessage.delete();
                 queueInfo(message);
             }
             else {
@@ -418,7 +414,8 @@ async function queueLogic(message, search_string) {
         else if (validate_playlist) {
             /* PRELOAD PLAYLIST */
             try {
-                var yt_playlist = await youtube.getPlaylist(search_string, 5000);
+                message.channel.send(`Fetching only up to 50 videos, please be patient if this takes awhile...`).then(newMessage => newMessage.delete(5000));
+                var yt_playlist = await youtube.getPlaylist(search_string);
             } catch (error) {
                 console.log(error);
                 return message.channel.send('Something went wrong!\n\n' + error);
@@ -483,20 +480,15 @@ async function play_music(message, soundPath) {
         /* PLAY MUSIC */
         var stream = ytdl(server.queue[0], { filter: 'audioonly' });
         server.dispatcher = connection.playStream(stream, {volume: server.volume});
-        console.log(`url: ${server.cached_video_info[0].url}`);
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         queueInfo(message);
         musicInfo_Lookup(message);
     }
 
     server.dispatcher.on('end', function() {
-        /* try delete old embedMessage */
-        try {
-            if (server.embedMessage != undefined)
-                server.embedMessage.delete();
-        } catch (error) {
-            console.log(`${error}: server.embedMessage might have been deleted by ?clean`);
-        }
+        /* delete old embedMessage */
+        if (server.embedMessage != undefined)
+            server.embedMessage.delete();
         /* music 'end' logic */
         if (server.skip) {
             server.skip = false;
@@ -694,7 +686,7 @@ async function clean_messages(message, numline) {
     /* Checks if the `numline` integer is smaller than 1 */
     else if (numline < 1)
         return message.reply('You must delete **at least 1 message!**');
-    
+
     /* Fetching the execution command and sweep that first, catch any errors.
     *  Fetch the given number of messages to sweeps: numline+1 to include the execution command
     *  Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
@@ -702,6 +694,7 @@ async function clean_messages(message, numline) {
     var bulkMessages = ((numline == undefined) ? await message.channel.fetchMessages() : await message.channel.fetchMessages( {limit: ++numline}));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
     message.channel.send(`Cleaned ${bulkMessages.array().length-1} messages.`).then(newMessage => newMessage.delete(5000));
+    servers[message.guild.id].embedMessage = undefined;
     console.log('Cleared!');
 }
 
