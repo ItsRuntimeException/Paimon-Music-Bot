@@ -337,7 +337,7 @@ async function queueInfo(message, qNum = 10) {
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
         description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
-        thumbnail: cached[0].thumbnail,
+        thumbnail: ((server.local) ? undefined : cached[0].thumbnail),
         fields: [{
             name: "Now Playing:",
             value: playString
@@ -395,7 +395,7 @@ async function queueLogic(message, search_string) {
         if (!validate_playlist) {
             /* PRELOAD */
             try {
-                var video = await youtube.searchVideo(search_string);
+                var video = await youtube.searchVideos(search_string);
             } catch (error) {
                 console.log(error);
                 return message.channel.send('Something went wrong!\n\n' + error);
