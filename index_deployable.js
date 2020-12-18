@@ -90,11 +90,6 @@ client.on("message", async message => {
                     +"\n\nKeywords example:\n"
                         +"\t\tPekora bgm music 1 hour");
             }
-
-            /* IN-CHANNEL CHECK */
-            if (!message.member.voiceChannel) {
-                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
-            }
             if (server.local && server.queue.length > 0) {
                 return message.channel.send('Please finish local playlist first!');
             }
@@ -117,10 +112,6 @@ client.on("message", async message => {
             break;
         case "playlocal":
             var server = servers[message.guild.id];
-            /* IN-CHANNEL CHECK */
-            if (!message.member.voiceChannel) {
-                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
-            }
             if (server.dispatcher != undefined) {
                 return message.channel.send('Please wait until all local music has been finished playing OR ?Stop.');
             }
@@ -491,7 +482,13 @@ async function queueLogic(message, search_string) {
 
 async function play_music(message, soundPath) {
     var server = servers[message.guild.id];
-    var connection = await message.member.voiceChannel.join();
+    /* IN-CHANNEL CHECK */
+    if (!message.member.voiceChannel) {
+        return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+    }
+    else
+        var connection = await message.member.voiceChannel.join();
+
     if (server.local) {
         if (server.queue[0] != undefined) {
             let song = soundPath + server.queue[0];
@@ -723,6 +720,12 @@ function resume_music(message) {
 
 function skip_music(message, sNum) {
     let server = servers[message.guild.id];
+
+    /* IN-CHANNEL CHECK */
+    if (!message.member.voiceChannel) {
+        return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+    }
+
     server.skip = true;
     if (sNum == undefined) {
         sNum = 1;
