@@ -693,9 +693,8 @@ async function clean_messages(message, numline) {
     */
     var bulkMessages = ((numline == undefined) ? await message.channel.fetchMessages() : await message.channel.fetchMessages( {limit: ++numline}));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
-    message.channel.send(`Cleaned ${bulkMessages.array().length-1} messages.`).then(newMessage => newMessage.delete(5000));
     servers[message.guild.id].embedMessage = undefined;
-    console.log('Cleared!');
+    console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
 }
 
 function readTextFile(file)
