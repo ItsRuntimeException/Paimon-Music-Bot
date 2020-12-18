@@ -78,7 +78,9 @@ client.on("message", async message => {
             /* string logic: */
             var search_string = args.toString().replace(/,/g,' ');
             /* VALIDATE ARG NOT undefined */
-            if (search_string == '') {
+            console.log(search_string);
+            /* FOUND EDGE-CASE: search_string.startsWith('?') fix -> TypeError: Cannot read property 'substr' of null */
+            if (search_string == '' || search_string.startsWith('?')) {
                 console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
                 return message.channel.send(`${message.author}.`
                     +"\nThis command plays your specified Youtube-link or keyword searched."
@@ -223,9 +225,6 @@ client.on("message", async message => {
         case "reset":
             resetVoice(message);
             break;
-        case "shutdown":
-            emergency_food_time(message);
-            break;
         case "roll":
             roll(message);
             break;
@@ -250,16 +249,107 @@ client.on("message", async message => {
         case "greset":
             wishReset(message, args[0]);
             break;
-        /* Owner Commands */
-        case "clean":
-            clean_messages(message, args[0]);
-            break;
         default:
-            message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
+            /* Owner Commands, etc... */
+            if (command.match(/clean|clear/)) {
+                if (isOwner(message)) {
+                    clean_messages(message, args[0]);
+                }
+            }
+            else if (command.match(/shutdown|kill/)) {
+                if (isOwner(message)) {
+                    emergency_food_time(message);
+                }
+            }
+            else
+                message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
             break;
     }
 });
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////// HELP DISPLAY ///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function userHelp(message) {
+    message.channel.send({embed: {
+        author: {
+            name: 'Paimon-chan\'s Embedded Info',
+            icon_url: client.user.avatarURL,
+            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+        },
+        title: "Fuctions",
+        description: `[Currently Hosting from ${process.cwd()}]\nMusic Support Enabled!`,
+        fields: [{
+            name: "?Help",
+            value: "Display a general list of commands."
+          },
+          {
+            name: "?Join|Leave",
+            value: "Paimon will join/leave your voice channel!"
+          },
+          {
+            name: "?Play [YouTube-Link|Keyword]",
+            value: "1: Play audio from the user's provided link.\n2: Perform a search on the user's provided keyword."
+          },
+          { name: "?PlayLocal [Category]",
+            value: "Play host's local audio files."
+          },
+          {
+            name: "?Queue",
+            value: "Display server's current music queue."
+          },
+          {
+            name: "?MusicInfo",
+            value: "Fetch details of current song."
+          },
+          {
+            name: "?Pause|Resume|Skip|Stop|Loop|Shuffle",
+            value: "Music Control Logic."
+          },
+          {
+            name: "?Vol [Percent]",
+            value:"Set the current music volume."
+          },
+          {
+            name: "?Shutdown|Kill",
+            value: "Paimon shall be served as food T^T"
+          },
+          {
+            name: "?Source",
+            value: "Paimon's delicious sauce code~"
+          },
+          {
+            name: "?Clean|Clear",
+            value: "Paimon will clean up your mess!"
+          },
+          {
+            name: "?Roll",
+            value: "Random Number between 1-6."
+          },
+          {
+            name: "?MapleStory",
+            value: "MapleStory guild page."
+          },
+          {
+            name: "?g[Create|Showtable|Pity|Wish|Reset]",
+            value: "Genshin Impact's manual \'Gacha Count-Table\'."
+          },
+          {
+            name: "?Valorant [GameCode] [Sensitivity]",
+            value: "Convert other games' sensitivity ↦ Valorant's."
+          }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }}).then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////// MAIN FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 async function join(message) {
     const { voiceChannel } = message.member;
     if (!voiceChannel) {
@@ -270,89 +360,24 @@ async function join(message) {
     }
 }
 
-function musicInfo_Lookup(message) {
-    var server = servers[message.guild.id];
-    if (!server.local) {
-        var cached = server.cached_video_info;
-        message.channel.send({embed: {
-            author: {
-                name: 'Paimon-chan\'s Embedded Info',
-                icon_url: client.user.avatarURL,
-                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-            },
-            title: cached[0].title,
-            url: cached[0].url,
-            thumbnail: cached[0].thumbnail,
-            fields:
-            [{
-                name: "Duration",
-                value: cached[0].duration
-            }],
-            timestamp: new Date(),
-            footer:{
-                icon_url: client.user.avatarURL,
-                text: '© Rich Embedded Frameworks'
-            }
-        }}).then(newMessage => newMessage.delete(10000));
+async function leave(message) {
+    let userVoiceChannel = message.member.voiceChannel;
+    let clientVoiceConnection = message.guild.voiceConnection;
+    /* https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
+    *  Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
+    */
+    if (clientVoiceConnection == undefined){
+        message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
     }
-    else
-        return message.channel.send('Local Music does not support Info-Lookup');
-}
-
-async function queueInfo(message, qNum = 10) {
-    var server = servers[message.guild.id];
-    var cached = server.cached_video_info;
-    var queueString = '';
-    var playString = 'None';
-
-    /* playString */
-    if (server.queue[0] != undefined) {
-        if (ytdl.validateURL(server.queue[0])) /* check link validity */
-            playString = cached[0].title;
-        else
-            playString = server.queue[0].split('.mp3')[0];
+    /* valid compare */
+    else if (userVoiceChannel == clientVoiceConnection.channel) {
+        stop_music(message);
+        clientVoiceConnection.disconnect();
+        message.channel.send("I have left the voice channel.");
     }
-    /* queueString */
-    for (var i = 1; i < server.queue.length; i++) {
-        if (qNum <= 25) {
-            if (i <= qNum) {
-                /* check link validity */
-                if (ytdl.validateURL(server.queue[i]))
-                    queueString += i+'.) '+cached[i].title+'\n'; /* Ex: 1. [songName]... */
-                else
-                    queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
-                
-            }
-            else break;
-        }
-        else {
-            return message.channel.send('Max queue display is 20 songs!');
-        }
+    else {
+        message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
     }
-    /* send new embed */
-    message.channel.send({embed: {
-        author: {
-            name: 'Paimon-chan\'s Embedded Info',
-            icon_url: client.user.avatarURL,
-            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-        },
-        description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
-        thumbnail: ((server.local) ? undefined : cached[0].thumbnail),
-        fields: [{
-            name: "Now Playing:",
-            value: playString
-        },
-        {
-            name: "In the Queue:",
-            value: ((server.queue.length >= 2) ? queueString : 'None')
-        }
-        ],
-        timestamp: new Date(),
-        footer: {
-            icon_url: client.user.avatarURL,
-            text: '© Rich Embedded Frameworks'
-        }
-    }}).then(newMessage => server.embedMessage = newMessage);
 }
 
 async function queueLogic(message, search_string) {
@@ -529,6 +554,91 @@ async function play_music(message, soundPath) {
     })
 }
 
+function musicInfo_Lookup(message) {
+    var server = servers[message.guild.id];
+    if (!server.local) {
+        var cached = server.cached_video_info;
+        message.channel.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL,
+                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            },
+            title: cached[0].title,
+            url: cached[0].url,
+            thumbnail: cached[0].thumbnail,
+            fields:
+            [{
+                name: "Duration",
+                value: cached[0].duration
+            }],
+            timestamp: new Date(),
+            footer:{
+                icon_url: client.user.avatarURL,
+                text: '© Rich Embedded Frameworks'
+            }
+        }}).then(newMessage => newMessage.delete(10000));
+    }
+    else
+        return message.channel.send('Local Music does not support Info-Lookup');
+}
+
+async function queueInfo(message, qNum = 10) {
+    var server = servers[message.guild.id];
+    var cached = server.cached_video_info;
+    var queueString = '';
+    var playString = 'None';
+
+    /* playString */
+    if (server.queue[0] != undefined) {
+        if (ytdl.validateURL(server.queue[0])) /* check link validity */
+            playString = cached[0].title;
+        else
+            playString = server.queue[0].split('.mp3')[0];
+    }
+    /* queueString */
+    for (var i = 1; i < server.queue.length; i++) {
+        if (qNum <= 25) {
+            if (i <= qNum) {
+                /* check link validity */
+                if (ytdl.validateURL(server.queue[i]))
+                    queueString += i+'.) '+cached[i].title+'\n'; /* Ex: 1. [songName]... */
+                else
+                    queueString += i+'.) '+server.queue[i].split('.mp3')[0]+'\n'; /* Ex: 1. [songName]... */
+                
+            }
+            else break;
+        }
+        else {
+            return message.channel.send('Max queue display is 20 songs!');
+        }
+    }
+    /* send new embed */
+    message.channel.send({embed: {
+        author: {
+            name: 'Paimon-chan\'s Embedded Info',
+            icon_url: client.user.avatarURL,
+            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+        },
+        description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
+        thumbnail: ((server.local) ? undefined : cached[0].thumbnail),
+        fields: [{
+            name: "Now Playing:",
+            value: playString
+        },
+        {
+            name: "In the Queue:",
+            value: ((server.queue.length >= 2) ? queueString : 'None')
+        }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }}).then(newMessage => server.embedMessage = newMessage);
+}
+
 function vol_music(message, num) {
     var server = servers[message.guild.id];
     if (num == undefined) {
@@ -639,24 +749,21 @@ function stop_music(message) {
     /* base case: do nothing */
 }
 
-async function leave(message) {
-    let userVoiceChannel = message.member.voiceChannel;
-    let clientVoiceConnection = message.guild.voiceConnection;
-    /* https://stackoverflow.com/questions/55089293/how-to-locate-the-voice-chat-that-the-discord-bot-is-connected-to
-    *  Compare the voiceChannels, The client and user are in the same voiceChannel, the client can disconnect
-    */
-    if (clientVoiceConnection == undefined){
-        message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
+function resetVoice(message) {
+    var server = servers[message.guild.id];
+    /* clear server.queue & set server.dispatcher = undefined */
+    while (server.queue.length > 0) {
+        server.queue.shift();
+        server.cached_video_info.shift();
     }
-    /* valid compare */
-    else if (userVoiceChannel == clientVoiceConnection.channel) {
-        stop_music(message);
-        clientVoiceConnection.disconnect();
-        message.channel.send("I have left the voice channel.");
-    }
-    else {
-        message.channel.send("I'm not in the same channel as you!", {files: ['./moji/PaimonNani.png']});
-    }
+    server.dispatcher = undefined
+    server.volume = 0.50;
+    server.loop = false;
+    server.skip = false;
+    server.skipAmount = 1;
+
+    console.log(`[Server: ${message.guild.id}] requested to reset variables!`);
+    message.channel.send('Bot Reset Complete!');
 }
 
 function source_send(message) {
@@ -666,14 +773,6 @@ function source_send(message) {
 }
 
 async function clean_messages(message, numline) {
-    /* ONLY OWNER MAY USE THIS COMMAND */
-    var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
-    var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
-    if (message.author.id !== readTextFile('./src/ownerID.txt')) {
-        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
-        message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
-        return;
-    }
     /* Checks if the `amount` parameter is a number. If not, the command throws an error */
     if (numline == undefined) {
         /* continue */
@@ -697,29 +796,6 @@ async function clean_messages(message, numline) {
     console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
 }
 
-function readTextFile(file)
-{
-    var text = filestream.readFileSync(file).toString('utf-8');
-    return text;
-}
-
-function resetVoice(message) {
-    var server = servers[message.guild.id];
-    /* clear server.queue & set server.dispatcher = undefined */
-    while (server.queue.length > 0) {
-        server.queue.shift();
-        server.cached_video_info.shift();
-    }
-    server.dispatcher = undefined
-    server.volume = 0.50;
-    server.loop = false;
-    server.skip = false;
-    server.skipAmount = 1;
-
-    console.log(`[Server: ${message.guild.id}] requested to reset variables!`);
-    message.channel.send('Bot Reset Complete!');
-}
-
 function emergency_food_time(message) {
     /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
@@ -730,17 +806,6 @@ function emergency_food_time(message) {
         if (err) throw err;
         client.destroy();
     }, 1000);
-}
-
-function rand(min, max) {
-    return min + Math.floor(Math.random()*max);
-}
-
-function roll(message) {
-    var diceNum1 = rand(1, DICE);
-    var diceNum2 = rand(1, DICE);
-    message.channel.send(`${message.author}. You rolled (${diceNum1}, ${diceNum2}) on a pair of dice.\nTotal: ${diceNum1+diceNum2}`)
-    .then(console.log(`${message.member.user.tag} rolled (${diceNum1}, ${diceNum2}) on a pair of dice. Total: ${diceNum1+diceNum2}`));
 }
 
 function guildLink(message) {
@@ -1151,8 +1216,47 @@ function wishReset(message, bannerType) {
     }}).then(newMessage => newMessage.delete(5000));
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////// HELPER FUNCTIONS ////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function isOwner(message) {
+    var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
+    var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
+    if (message.author.id !== readTextFile('./src/ownerID.txt')) {
+        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
+        message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
+        return false;
+    }
+    return true;
+}
+
 function objLength(obj) {
     return Object.keys(obj).length;
+}
+
+function rand(min, max) {
+    return min + Math.floor(Math.random()*max);
+}
+
+function roll(message) {
+    var diceNum1 = rand(1, DICE);
+    var diceNum2 = rand(1, DICE);
+    message.channel.send(`${message.author}. You rolled (${diceNum1}, ${diceNum2}) on a pair of dice.\nTotal: ${diceNum1+diceNum2}`)
+    .then(console.log(`${message.member.user.tag} rolled (${diceNum1}, ${diceNum2}) on a pair of dice. Total: ${diceNum1+diceNum2}`));
+}
+
+function readTextFile(file)
+{
+    var text = filestream.readFileSync(file).toString('utf-8');
+    return text;
+}
+
+function save_JSON_Data(arrayObj) {
+    /* save data back to json */
+    var tableString = JSON.stringify(arrayObj, undefined, 2);
+    filestream.writeFile('./genshin_data/genshin_wish_tables.json', tableString, 'utf-8', function(err) {
+        if (err) throw err;
+    });
 }
 
 function sec_Convert(sec_string) {
@@ -1193,91 +1297,6 @@ function update_genshin_userTag(arrayObj, cached_index) {
         if (err) throw err;
         save_JSON_Data(arrayObj);
     }, 1000);
-}
-
-function save_JSON_Data(arrayObj) {
-    /* save data back to json */
-    var tableString = JSON.stringify(arrayObj, undefined, 2);
-    filestream.writeFile('./genshin_data/genshin_wish_tables.json', tableString, 'utf-8', function(err) {
-        if (err) throw err;
-    });
-}
-
-function userHelp(message) {
-    message.channel.send({embed: {
-        author: {
-            name: 'Paimon-chan\'s Embedded Info',
-            icon_url: client.user.avatarURL,
-            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-        },
-        title: "Fuctions",
-        description: `[Currently Hosting from ${process.cwd()}]\nMusic Support Enabled!`,
-        fields: [{
-            name: "?Help",
-            value: "Display a general list of commands."
-          },
-          {
-            name: "?Join|Leave",
-            value: "Paimon will join/leave your voice channel!"
-          },
-          {
-            name: "?Play [YouTube-Link|Keyword]",
-            value: "1: Play audio from the user's provided link.\n2: Perform a search on the user's provided keyword."
-          },
-          { name: "?PlayLocal [Category]",
-            value: "Play host's local audio files."
-          },
-          {
-            name: "?Queue",
-            value: "Display server's current music queue."
-          },
-          {
-            name: "?MusicInfo",
-            value: "Fetch details of current song."
-          },
-          {
-            name: "?Pause|Resume|Skip|Stop|Loop|Shuffle",
-            value: "Music Control Logic."
-          },
-          {
-            name: "?Vol [Percent]",
-            value:"Set the current music volume."
-          },
-          {
-            name: "?Shutdown",
-            value: "Paimon shall be served as food T^T"
-          },
-          {
-            name: "?Source",
-            value: "Paimon's delicious sauce code~"
-          },
-          {
-            name: "?Clean",
-            value: "Paimon will clean up your mess!"
-          },
-          {
-            name: "?Roll",
-            value: "Random Number between 1-6."
-          },
-          {
-            name: "?MapleStory",
-            value: "MapleStory guild page."
-          },
-          {
-            name: "?g[Create|Showtable|Pity|Wish|Reset]",
-            value: "Genshin Impact's manual \'Gacha Count-Table\'."
-          },
-          {
-            name: "?Valorant [GameCode] [Sensitivity]",
-            value: "Convert other games' sensitivity ↦ Valorant's."
-          }
-        ],
-        timestamp: new Date(),
-        footer: {
-            icon_url: client.user.avatarURL,
-            text: '© Rich Embedded Frameworks'
-        }
-    }}).then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`));
 }
 
 client.login(TOKEN);
