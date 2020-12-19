@@ -38,8 +38,8 @@ Loop Support: loop current song<br>
 **\[SUPER ACCESS COMMAND\]:** Shutdown the bot from the server.
 
 # Super-Access #
-**\[SUPER ACCESS COMMAND\]:** Add a specified user to unlock SuperAccess-commands.<br>
-Usage: ?add super|superAccess \[@userTag|ID\];
+**\[SUPER ACCESS COMMAND\]:** Add|Remove a specified user from SuperAccess-commands.<br>
+Usage: ?add|remove super|superAccess \[@userTag\];
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).
