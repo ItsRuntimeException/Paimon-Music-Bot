@@ -41,14 +41,6 @@ Command | param | Description
 ?queue \[int?Optional\]  | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
-# Genshin Impact #
-Command | bannerType | operation | Description
-| :--- | :--- | :--- | :---
-?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
-?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
-?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
-
 # Super Access Commands #
 Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
 Command | param | Description
@@ -57,6 +49,14 @@ Command | param | Description
 ?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
+
+# Genshin Impact #
+Command | bannerType | operation | Description
+| :--- | :--- | :--- | :---
+?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
+?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
+?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
+?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # MapleStory #
 Give the user my maplestory guild page.
