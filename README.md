@@ -44,7 +44,7 @@ Music Control | param
 # Shutdown #
 **\[SUPER ACCESS COMMAND\]:** Shutdown the bot from the server.
 
-# Super-Access #
+# Super Access #
 **\[SUPER ACCESS COMMAND\]:** Add|Remove a specified user from SuperAccess-commands.<br/><br/>
 Usage:
 1. ?add      super | superAccess \[@userTag\]<br/>
