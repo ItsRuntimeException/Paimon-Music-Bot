@@ -1,1 +1,1 @@
-worker: node index_deployable.js
+worker: node --trace-warnings index_deployable.js
