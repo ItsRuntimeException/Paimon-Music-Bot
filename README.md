@@ -13,7 +13,6 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 **Short list of bot-commands**
 - [Help](#Help)
 - [Music Support](#Music-Support)
-- [Shutdown](#Shutdown)
 - [Super Acess](#Super-Access)
 - [Genshin Impact](#Genshin-Impact)
 - [MapleStory](#MapleStory)
@@ -43,8 +42,8 @@ Command | bannerType | operation | Description
 ?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
 ?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
-# Super Access #
-**\[SUPER ACCESS COMMAND\]:** Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
+**# SUPER ACCESS COMMAND #**
+Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
 Command | param | Description
 | :--- | :--- | :---
 ?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
