@@ -42,7 +42,7 @@ Command | bannerType | operation | Description
 ?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
 ?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
-**# SUPER ACCESS COMMAND #**
+# Super Access Commands #
 Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
 Command | param | Description
 | :--- | :--- | :---
