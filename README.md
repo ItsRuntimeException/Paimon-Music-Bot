@@ -39,7 +39,9 @@ Loop Support: loop current song<br>
 
 # Super-Access #
 **\[SUPER ACCESS COMMAND\]:** Add|Remove a specified user from SuperAccess-commands.<br>
-Usage: ?add|remove super|superAccess \[@userTag\];
+Usage:<br>
+Markup : * ?add super|superAccess \[@userTag\]
+         * ?remove super|superAccess \[@userTag\]
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).
