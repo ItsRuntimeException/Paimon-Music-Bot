@@ -26,8 +26,8 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of bot commands and its usage.
 
 # Music Support #
-Music Control | param           
-| :---: | :---:
+Music Control | param
+| :---:       | :---:
 ?play         | string: Youtube-URL \| Keywords
 ?playLocal    | string: Category
 ?pause        | N/A
@@ -45,10 +45,11 @@ Music Control | param
 **\[SUPER ACCESS COMMAND\]:** Shutdown the bot from the server.
 
 # Super Access #
-**\[SUPER ACCESS COMMAND\]:** Add|Remove a specified user from SuperAccess-commands.<br/><br/>
-Usage:
-1. ?add      super | superAccess \[@userTag\]<br/>
-2. ?remove   super | superAccess \[@userTag\]<br/>
+**\[SUPER ACCESS COMMAND\]:** Add or remove a specified user from SuperAccess-commands.
+Music Control                |    param
+| :---:                      |    :---:
+?add    super \| superAccess |    @userTag
+?remove super \| superAccess |    @userTag
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).
