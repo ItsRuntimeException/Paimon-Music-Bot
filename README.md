@@ -36,21 +36,21 @@ Display a list of bot commands and its usage.
 ?shuffle      | N/A                                                | Shuffle queue.
 
 # Genshin Impact #
-                Command                        |          bannerType         |     operation      | Description
-|                :---                          |            :---             |       :---         | :---
-?gCreate                                       |             N/A             |        N/A         | Create a default Genshin Impact Gacha Table.
-?gShowtable                                    |             N/A             |        N/A         | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\]\[operation\]\[int:num\]  | Standard \| Weapon \| Event |   Add \| Replace   | Modify the specified banner in the user's Genshin Gacha Table.
-?gReset \[bannerType\]                         | Standard \| Weapon \| Event |        N/A         | Reset the specified banner in the user's Genshin Gacha Table.
+Command | bannerType | operation | Description
+| :--- | :--- | :--- | :---
+?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
+?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
+?gWish \[bannerType\]\[operation\]\[int:num\] | Standard \| Weapon \| Event | Add \| Replace | Modify the specified banner in the user's Genshin Gacha Table.
+?gReset \[bannerType\] | Standard \| Weapon \| Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # Super Access #
 **\[SUPER ACCESS COMMAND\]:** Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
-            Command          | \[Optional?: X|O\] param        | Description
-|            :---            | :---                            | :---
-?add    super \| superAccess | \[Optional?: X\] @userTag       | Remove a specified user from SuperAccess-commands.
-?remove super \| superAccess | \[Optional?: X\] @userTag       | Add a specified user from SuperAccess-commands.
-?clean                       | \[Optional?: O\] int: numLines  | Clean channel messages.
-?shutdown                    | N/A                             | Shutdown the bot from the server.
+Command | \[Optional?: X|O\] param | Description
+| :--- | :--- | :---
+?add super \| superAccess | \[Optional?: X\] @userTag | Remove a specified user from SuperAccess-commands.
+?remove super \| superAccess | \[Optional?: X\] @userTag | Add a specified user from SuperAccess-commands.
+?clean | \[Optional?: O\] int: numLines | Clean channel messages.
+?shutdown | N/A | Shutdown the bot from the server.
 
 # MapleStory #
 Give the user my maplestory guild page.
