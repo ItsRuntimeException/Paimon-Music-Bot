@@ -26,10 +26,17 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of bot commands and its usage.
 
 # Music Support #
-- Music Controls: play | playLocal | pause | resume | skip<br/>
-- Extra Music Controls: stop | loop | queue | shuffle<br/>
-- Play Support: youtube-URL |keywords | youtube-playlist-URL<br/>
-- Loop Support: loop current song<br/>
+Music Control | param           
+| :---: | :---:
+?play         | Youtube-URL\|Keywords
+?playLocal    | Category
+?pause        | N/A
+?resume       | N/A
+?skip         | Integer: Specify skip amount
+?stop         | N/A
+?loop         | On\|Off: Loop current song
+?queue        | Int: Specify queue diplay amount
+?shuffle      | N/A
 
 # Clean #
 **\[SUPER ACCESS COMMAND\]:** Clean channel messages.
@@ -38,10 +45,10 @@ Display a list of bot commands and its usage.
 **\[SUPER ACCESS COMMAND\]:** Shutdown the bot from the server.
 
 # Super-Access #
-**\[SUPER ACCESS COMMAND\]:** Add|Remove a specified user from SuperAccess-commands.<br/>
-Usage:<br/>
-1. ?add super|superAccess \[@userTag\]<br/>
-2. ?remove super|superAccess \[@userTag\]<br/>
+**\[SUPER ACCESS COMMAND\]:** Add|Remove a specified user from SuperAccess-commands.<br/><br/>
+Usage:
+1. ?add      super | superAccess \[@userTag\]<br/>
+2. ?remove   super | superAccess \[@userTag\]<br/>
 
 # Roll #
 Roll a random number from 1-6 (Dice Function).
