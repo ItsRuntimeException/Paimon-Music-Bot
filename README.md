@@ -29,10 +29,10 @@ Command | param | Description
 ?playLocal \[string\] | Category | Play music from local_folder.
 ?pause | N/A | Pause music from playing.
 ?resume | N/A | Resume current paused music.
-?skip (int?) | skipNum | Skip current \| skipNum of songs in queue.
+?skip \[int?Optional\] | skipNum | Skip current \| skipNum of songs in queue.
 ?stop | N/A | Stop music and clear queue.
-?loop (string?) | on<br/>off | Loop current music.
-?queue (int?) | queue_display_size | Display current queue.
+?loop \[string?Optional\]  | on \| off | Loop current music.
+?queue \[int?Optional\]  | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
 # Genshin Impact #
@@ -40,16 +40,16 @@ Command | bannerType | operation | Description
 | :--- | :--- | :--- | :---
 ?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
 ?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\] \[operation\] \[int:num\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
+?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
 ?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # Super Access #
 **\[SUPER ACCESS COMMAND\]:** Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
-Command | \[Optional?: X|O\] param | Description
+Command | param | Description
 | :--- | :--- | :---
-?add super \| superAccess | \[Optional?: X\] @userTag | Remove a specified user from SuperAccess-commands.
-?remove super \| superAccess | \[Optional?: X\] @userTag | Add a specified user from SuperAccess-commands.
-?clean | \[Optional?: O\] int: numLines | Clean channel messages.
+?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
+?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
+?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
 
 # MapleStory #
