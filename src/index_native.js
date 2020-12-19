@@ -55,14 +55,15 @@ client.on("message", async message => {
         }
     }
 
+    /* if a user mentioned the bot, reply back to the user */
+    if (message.isMentioned(client.user)) {
+        message.reply("If you need help from Paimon, please try ?help");
+    }
+
     /* Ignore messages that don"t start with prefix or written by bot */
     if (!message.content.startsWith(PREFIX) || message.author.bot) return;
     const args = message.content.slice(PREFIX.length).split(/ +/);
     const command = args.shift().toLowerCase();
-    /* if a user mentioned the bot, reply back to the user */
-    if (message.isMentioned(client.user)) {
-        message.reply("Sup! How's your day Goin'?");
-    }
     /* Voice only works in guilds, if the message does not come from a guild, then ignore it */
     if (!message.guild) return;
 
@@ -1249,6 +1250,77 @@ function wishReset(message, bannerType) {
     }}).then(newMessage => newMessage.delete(5000));
 }
 
+function add_superAccess(message, userTagging) {
+    if (userTagging == undefined) {
+        return message.channel.send(`${message.author}.`
+        +"\nThis command will let [@userTag | user_ID] use SuperAccess-commands."
+        +"\n\nUsage: " + "?add super|superAccess [@userTag|ID]")
+        .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+    }
+    /* userTagging uses <@!user#tag> */
+    var userID = userTagging.toString();
+    if (userID.startsWith('<@!') && userID.endsWith('>')) {
+        userID = userID.replace(/[<@!>]/g,'');
+        //return message.channel.send('I don\'t process @user#tag');
+    }
+    /* Check adminship, then push userID as admin */
+    var this_guild = message.guild;
+    var guildmember = this_guild.member(userID);
+    if (guildmember != null) {
+        var path = './src/admins.json';
+        var text = readTextFile(path);
+        var admin_Obj = JSON.parse(text);
+        if (!admin_Obj.admins.includes(userID)) {
+            if (guildmember.user.bot) {
+                console.log(`${message.author.tag} tried to grant 'SuperAccess' permission to a bot!`)
+                return message.channel.send(`Bots don't need 'SuperAccess'!`);
+            }
+            admin_Obj.admins.push(userID);
+            /* update JSON Data */
+            setTimeout(function(err) {
+                if (err) throw err;
+                save_as_JSON(admin_Obj, path);
+            }, 1000);
+            message.channel.send('Admin successfully added!');
+            console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
+            guildmember.user.send({embed: {
+                author: {
+                    name: 'Paimon-chan\'s Embedded Info',
+                    icon_url: client.user.avatarURL,
+                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                },
+                title: "SUPER ACCESS COMMANDS",
+                description: `${message.author.tag} has granted you 'SuperAccess'.\n${guildmember.user}, You can now use SuperAccess-commands!`,
+                fields: [
+                  {
+                    name: "?add Super|SuperAccess",
+                    value: "Add a person as one of paimon's masters!"
+                  },
+                  {
+                    name: "?Shutdown|Kill",
+                    value: "Paimon shall be served as food T^T"
+                  },
+                  {
+                    name: "?Clean|Clear",
+                    value: "Paimon will clean up your mess!"
+                  }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }});
+        }
+        else {
+            message.channel.send('Admin already exist!');
+        }
+    }
+    else {
+        message.channel.send(`No such userID in [Server: ${this_guild.name}].`);
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////// HELPER FUNCTIONS ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1274,73 +1346,6 @@ function is_superAccess(message) {
         return false;
     }
     return true;
-}
-
-function add_superAccess(message, userTagging) {
-    if (userTagging == undefined) {
-        return message.channel.send(`${message.author}.`
-        +"\nThis command will let [@userTag | user_ID] use SuperAccess-commands."
-        +"\n\nUsage: " + "?add super|superAccess [@userTag|ID]")
-        .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
-    }
-    /* userTagging uses <@!user#tag> */
-    var userID = userTagging.toString();
-    if (userID.startsWith('<@!') && userID.endsWith('>')) {
-        userID = userID.replace(/[<@!>]/g,'');
-        //return message.channel.send('I don\'t process @user#tag');
-    }
-    /* Check adminship, then push userID as admin */
-    var this_guild = message.guild;
-    user = this_guild.member(userID);
-    if (user != null) {
-        var path = './src/admins.json';
-        var text = readTextFile(path);
-        var admin_Obj = JSON.parse(text);
-        if (!admin_Obj.admins.includes(userID)) {
-            admin_Obj.admins.push(userID);
-            /* update JSON Data */
-            setTimeout(function(err) {
-                if (err) throw err;
-                save_as_JSON(admin_Obj, path);
-            }, 1000);
-            message.channel.send('Admin successfully added!');
-            user.send({embed: {
-                author: {
-                    name: 'Paimon-chan\'s Embedded Info',
-                    icon_url: client.user.avatarURL,
-                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
-                },
-                title: "SUPER ACCESS COMMANDS",
-                description: `${message.author.tag} has granted you 'SuperAccess'.\n${user}, You can now use SuperAccess-commands!`,
-                fields: [
-                  {
-                    name: "?add Super|SuperAccess",
-                    value: "Add a person as one of paimon's masters!"
-                  },
-                  {
-                    name: "?Shutdown|Kill",
-                    value: "Paimon shall be served as food T^T"
-                  },
-                  {
-                    name: "?Clean|Clear",
-                    value: "Paimon will clean up your mess!"
-                  }
-                ],
-                timestamp: new Date(),
-                footer: {
-                    icon_url: client.user.avatarURL,
-                    text: '© Rich Embedded Frameworks'
-                }
-            }});
-            console.log(`Admin successfully added! ${user} now have access to SuperAccess-commands!`);
-        }
-        else {
-            message.channel.send('Admin already exist!');
-        }
-    }
-    else {
-        message.channel.send(`No such userID in [Server: ${this_guild.name}].`);
-    }
 }
 
 function objLength(obj) {
