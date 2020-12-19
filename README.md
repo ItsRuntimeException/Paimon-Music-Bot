@@ -15,7 +15,7 @@ A Discord bot with various functionalities I desired to have.<br/>
 **Short list of bot-commands**
 - [Help](#Help)
 - [Music Support](#Music-Support)
-- [Super Acess](#Super-Access)
+- [Super Access Commands](#super-access-commands)
 - [Genshin Impact](#Genshin-Impact)
 - [MapleStory](#MapleStory)
 - [Roll](#Roll)
@@ -58,6 +58,14 @@ Command | param | Description
 ?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
+
+# Genshin Impact #
+Command | bannerType | operation | Description
+| :--- | :--- | :--- | :---
+?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
+?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
+?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
+?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # MapleStory #
 Give the user my maplestory guild page.
