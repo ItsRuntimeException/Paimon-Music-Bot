@@ -5,6 +5,7 @@ const YouTube = require("discord-youtube-api");
 const Discord = require("discord.js");
 const filestream = require("fs");
 const client = new Discord.Client();
+const sauce = 'https://github.com/ItsRuntimeException/Paimon-chan';
 const DICE = 6;
 
 /* set up envrionment token for heroku deployment */
@@ -306,7 +307,7 @@ function userHelp(message) {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
             icon_url: client.user.avatarURL,
-            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            url: sauce
         },
         title: "COMMANDS",
         description: `[Currently Hosting from ${HOST_DIR}]\nMusic Support Enabled!`,
@@ -372,7 +373,7 @@ function userHelp(message) {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
             icon_url: client.user.avatarURL,
-            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            url: sauce
         },
         title: "SUPER ACCESS COMMANDS",
         description: `Can be used if 'SuperAccess' is granted by the owner | exisiting admin w/ 'SuperAcess'`,
@@ -611,7 +612,7 @@ function musicInfo_Lookup(message) {
             author: {
                 name: 'Paimon-chan\'s Embedded Info',
                 icon_url: client.user.avatarURL,
-                url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                url: sauce
             },
             title: cached[0].title,
             url: cached[0].url,
@@ -667,7 +668,7 @@ async function queueInfo(message, qNum = 10) {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
             icon_url: client.user.avatarURL,
-            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+            url: sauce
         },
         description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
         thumbnail: ((server.local) ? undefined : cached[0].thumbnail),
@@ -816,8 +817,7 @@ function resetVoice(message) {
 }
 
 function source_send(message) {
-    var paimon = 'https://github.com/ItsRuntimeException/SimpleDiscordBot';
-    message.channel.send(`Paimon's delicious source code: ${paimon}`);
+    message.channel.send(`Paimon's delicious source code: ${sauce}`);
     console.log(`${message.member.user.tag} requested Paimon as food!`);
 }
 
@@ -978,6 +978,7 @@ function showtable(message) {
                     author: {
                         name: message.member.user.tag,
                         icon_url: message.member.user.avatarURL,
+                        url: sauce
                     },
                     fields: [{
                         name: "Character Event Banner",
@@ -1034,6 +1035,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                     author: {
                         name: message.member.user.tag,
                         icon_url: message.member.user.avatarURL,
+                        url: sauce
                     },
                     fields: [{
                         name: "Character Event Banner",
@@ -1068,6 +1070,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                     author: {
                         name: message.member.user.tag,
                         icon_url: message.member.user.avatarURL,
+                        url: sauce
                     },
                     fields: [{
                         name: "Character Event Banner",
@@ -1193,6 +1196,7 @@ function wishCount(message, bannerType, commandType, nInc) {
             author: {
                 name: message.member.user.tag,
                 icon_url: message.member.user.avatarURL,
+                url: sauce
             },
             fields: [{
                 name: "Character Event Banner",
@@ -1282,6 +1286,7 @@ function wishReset(message, bannerType) {
         author: {
             name: message.member.user.tag,
             icon_url: message.member.user.avatarURL,
+            url: sauce
         },
         fields: [{
             name: "Character Event Banner",
@@ -1357,7 +1362,7 @@ function add_superAccess(message, userTag) {
                 author: {
                     name: 'Paimon-chan\'s Embedded Info',
                     icon_url: client.user.avatarURL,
-                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                    url: sauce
                 },
                 title: "SUPER ACCESS COMMANDS",
                 description: `${message.author.tag} has granted you 'SuperAccess'.\n${guildmember.user}, You can now use SuperAccess-commands!`,
