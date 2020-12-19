@@ -8,7 +8,8 @@ Step 3: Replace the text in "/source/bot_token.txt" with your own bot token.<br/
 Step 4: Run 'native_boot.bat' or you can host it online with heroku/other servers.<br/>
 
 **Command Usage**
-- \?\[command\]
+| :---
+?\[command\]
 
 **Short list of bot-commands**
 - [Help](#Help)
