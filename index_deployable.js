@@ -1258,11 +1258,11 @@ function is_superAccess(message) {
     /* create file if not exist */
     var path = './src/admins.json';
     if (!filestream.existsSync(path)) {
-        var admin_arr = {admins:[]};
+        var admin_Obj = {admins:[]};
         /* update JSON Data */
         setTimeout(function(err) {
             if (err) throw err;
-            save_as_JSON(admin_arr, path);
+            save_as_JSON(admin_Obj, path);
         }, 1000);
         console.log(`New ${path.replace(/\/|\./g,'')} json-file created!`);
     }
@@ -1301,7 +1301,7 @@ function add_superAccess(message, userTagging) {
             /* update JSON Data */
             setTimeout(function(err) {
                 if (err) throw err;
-                save_as_JSON(admin_arr, path);
+                save_as_JSON(admin_Obj, path);
             }, 1000);
             message.channel.send('Admin successfully added!');
             user.send({embed: {
