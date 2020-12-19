@@ -23,16 +23,16 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of bot commands and its usage.
 
 # Music Support #
-Command | \[Type\]<br/>param | Description
+Command | param | Description
 | :--- | :--- | :---
-?play | \[string\]<br/>Youtube-URL<br/>Keywords | Play music from youtube.
-?playLocal | \[string\]<br/>Category | Play music from local_folder.
+?play \[string\] | Youtube-URL<br/>Keywords | Play music from youtube.
+?playLocal \[string\] | Category | Play music from local_folder.
 ?pause | N/A | Pause music from playing.
 ?resume | N/A | Resume current paused music.
-?skip | \[int\]<br/>skipNum | Skip current \| skipNum of songs in queue.
+?skip (int?) | skipNum | Skip current \| skipNum of songs in queue.
 ?stop | N/A | Stop music and clear queue.
-?loop | \[string\]<br/>'on'<br\>'off' | Loop current music.
-?queue | \[int\]<br/>queue_display_size | Display current queue.
+?loop (string?) | on<br/>off | Loop current music.
+?queue (int?) | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
 # Genshin Impact #
