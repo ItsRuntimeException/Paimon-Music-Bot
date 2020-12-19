@@ -38,18 +38,20 @@ client.on("guildCreate", guild => {
 
 client.on("message", async message => {
     /* initialize music queue */
-    if (!servers[message.guild.id]) {
-        servers[message.guild.id] = {
-            queue: [],
-            cached_video_info: [],
-            volume: 0.05,
-            skipAmount: 1,
-            loop: false,
-            skip: false,
-            local: false,
-            playToggle: false,
-            dispatcher: undefined,
-            embedMessage: undefined
+    if (message.guild != null) {
+        if (!servers[message.guild.id]) {
+            servers[message.guild.id] = {
+                queue: [],
+                cached_video_info: [],
+                volume: 0.05,
+                skipAmount: 1,
+                loop: false,
+                skip: false,
+                local: false,
+                playToggle: false,
+                dispatcher: undefined,
+                embedMessage: undefined
+            }
         }
     }
 
@@ -57,7 +59,6 @@ client.on("message", async message => {
     if (!message.content.startsWith(PREFIX) || message.author.bot) return;
     const args = message.content.slice(PREFIX.length).split(/ +/);
     const command = args.shift().toLowerCase();
-
     /* if a user mentioned the bot, reply back to the user */
     if (message.isMentioned(client.user)) {
         message.reply("Sup! How's your day Goin'?");
@@ -81,14 +82,13 @@ client.on("message", async message => {
             console.log(search_string);
             /* FOUND EDGE-CASE: search_string.startsWith('?') fix -> TypeError: Cannot read property 'substr' of null */
             if (search_string == '' || search_string.startsWith('?')) {
-                console.log(`${message.member.user.tag} requested for music-playing, but reached UNDEFINED arguments.`);
                 return message.channel.send(`${message.author}.`
                     +"\nThis command plays your specified Youtube-link or keyword searched."
-                    +"\n\nUsage: " + "play [Link | Keywords]"
+                    +"\n\nUsage: " + "?play [Link | Keywords]"
                     +"\n\nLink example:\n"
                         +"\t\tyoutube.com/watch?v=oHg5SJYRHA0"
                     +"\n\nKeywords example:\n"
-                        +"\t\tPekora bgm music 1 hour");
+                        +"\t\tPekora bgm music 1 hour").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
             }
             /* IN-CHANNEL CHECK */
             if (!message.member.voiceChannel) {
@@ -115,6 +115,15 @@ client.on("message", async message => {
             }
             break;
         case "playlocal":
+            var search_string = args.toString().replace(/,/g,' ');
+            if (search_string == '' || search_string.startsWith('?')) {
+                return message.channel.send(`${message.author}.`
+                    +"\nThis command plays local_folder music, given a specified category."
+                    +"\n\nUsage: " + "?playLocal [Category]"
+                    +"\n\nCategory example:\n"
+                        +"\t\tAnime | Persona3 | Persona4 | Persona5").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
+            }
+
             var server = servers[message.guild.id];
             if (server.dispatcher != undefined) {
                 return message.channel.send('Please wait until all local music has been finished playing OR ?Stop.');
@@ -125,7 +134,6 @@ client.on("message", async message => {
 
             server.playToggle = true;
             server.local = true;
-            var search_string = args.toString().replace(/,/g,' ');
             /* https://regexr.com/ */
             if (search_string.match(/anime/gi)) {
                 queueLogic(message, './anime_music/');
@@ -249,20 +257,31 @@ client.on("message", async message => {
             wishReset(message, args[0]);
             break;
         default:
-            /* Owner Commands, etc... */
-            if (command.match(/clean|clear/)) {
-                if (isOwner(message)) {
-                    clean_messages(message, args[0]);
+            /* super commands, etc... */
+            if (command.match(/clean|clear/gi)) {
+                if (is_superAccess(message)) {
+                    return clean_messages(message, args[0]);
                 }
-            }
-            else if (command.match(/shutdown|kill/)) {
-                if (isOwner(message)) {
-                    emergency_food_time(message);
+            } else if (command.match(/shutdown|kill/gi)) {
+                if (is_superAccess(message)) {
+                    return emergency_food_time(message);
+                }
+            } else if (command.match(/add/gi)) {
+                const command2 = args.shift();
+                if (command2 != undefined) {
+                    if (command2.match(/superaccess|super/)) {
+                        if (is_superAccess(message)) {
+                            return add_superAccess(message, args[0]);
+                        }
+                    }
+                }
+                else {
+                    message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
                 }
             }
             else
                 message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
-            break;
+                break;
     }
 });
 
@@ -270,13 +289,14 @@ client.on("message", async message => {
 ///////////////////////////////////////////////////////////////////////////// HELP DISPLAY ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function userHelp(message) {
-    message.channel.send({embed: {
+    console.log(`${message.member.user.tag} requested for a general list of bot functions.`);
+    message.author.send({embed: {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
             icon_url: client.user.avatarURL,
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
-        title: "Fuctions",
+        title: "COMMANDS",
         description: `[Currently Hosting from ${process.cwd()}]\nMusic Support Enabled!`,
         fields: [{
             name: "?Help",
@@ -310,16 +330,8 @@ function userHelp(message) {
             value:"Set the current music volume."
           },
           {
-            name: "?Shutdown|Kill",
-            value: "Paimon shall be served as food T^T"
-          },
-          {
             name: "?Source",
             value: "Paimon's delicious sauce code~"
-          },
-          {
-            name: "?Clean|Clear",
-            value: "Paimon will clean up your mess!"
           },
           {
             name: "?Roll",
@@ -343,7 +355,35 @@ function userHelp(message) {
             icon_url: client.user.avatarURL,
             text: '© Rich Embedded Frameworks'
         }
-    }}).then(console.log(`${message.member.user.tag} requested for a general list of bot functions.`));
+    }});
+    message.author.send({embed: {
+        author: {
+            name: 'Paimon-chan\'s Embedded Info',
+            icon_url: client.user.avatarURL,
+            url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+        },
+        title: "SUPER ACCESS COMMANDS",
+        description: `Can be used if 'SuperAccess' is granted by the owner | exisiting admin w/ 'SuperAcess'`,
+        fields: [
+          {
+            name: "?add Super|SuperAccess",
+            value: "Add a person as one of paimon's masters!"
+          },
+          {
+            name: "?Shutdown|Kill",
+            value: "Paimon shall be served as food T^T"
+          },
+          {
+            name: "?Clean|Clear",
+            value: "Paimon will clean up your mess!"
+          }
+        ],
+        timestamp: new Date(),
+        footer: {
+            icon_url: client.user.avatarURL,
+            text: '© Rich Embedded Frameworks'
+        }
+    }});
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -809,7 +849,6 @@ function guildLink(message) {
 
 function vSens(message, gameCode, sens) {
     if (gameCode == undefined || sens == undefined) {
-        console.log(`${message.member.user.tag} requested for VALORANT sensitivity conversion, but reached UNDEFINED arguments.`);
         console.log(`\n    gameCode = ${gameCode}, sensitivity = ${sens}\n\n`);
         return message.channel.send(`${message.author}.`
             +"\nThis command converts your CSGO sensitivity to Valorant."
@@ -820,7 +859,7 @@ function vSens(message, gameCode, sens) {
                 +"\t\t[C]: CSGO\n"
                 +"\t\t[O]: OVERWATCH"
             +"\n\nSensitivity:\n"
-                +"\t\t[A Decimal Number]");
+                +"\t\t[A Decimal Number]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
     }
 
     gameCode = gameCode.toLowerCase();
@@ -863,8 +902,9 @@ function vSens(message, gameCode, sens) {
 }
 
 function create_genshin_table(message) {
-    var text = readTextFile('./genshin_data/genshin_wish_tables.json');
-    var arrayObj = JSON.parse(text);
+    var path = './genshin_data/genshin_wish_tables.json';
+    var text = readTextFile(path);
+    var array_Obj = JSON.parse(text);
 
     var new_userdata = {
         uid: message.author.id,
@@ -872,16 +912,16 @@ function create_genshin_table(message) {
         bannerTypes: { event:0, weapon:0, standard:0 }
     };
 
-    if (objLength(arrayObj.users) == 0) {
-        arrayObj.users.push(new_userdata);
+    if (objLength(array_Obj.users) == 0) {
+        array_Obj.users.push(new_userdata);
     }
-    if (objLength(arrayObj.users) > 0) {
+    if (objLength(array_Obj.users) > 0) {
         /* this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates. */
-        for (var i = 0; i < objLength(arrayObj.users); i++) {
+        for (var i = 0; i < objLength(array_Obj.users); i++) {
             /* this user table already exist. */
-            if (arrayObj.users[i].uid === message.author.id) {
+            if (array_Obj.users[i].uid === message.author.id) {
                 /* check if this user has recently changed his/her userTag. */
-                update_genshin_userTag(arrayObj, i);
+                update_genshin_userTag(array_Obj, i);
                 /* terminal logging */
                 console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] already EXIST!');
                 /* channel reply */
@@ -890,13 +930,13 @@ function create_genshin_table(message) {
             }
         }
         /* if this user does does not have an existing table, create a default table for this user. */
-        arrayObj.users.push(new_userdata);
+        array_Obj.users.push(new_userdata);
     }
 
     /* update JSON Data */
     setTimeout(function(err) {
         if (err) throw err;
-        save_JSON_Data(arrayObj);
+        save_as_JSON(array_Obj, path);
     }, 1000);
 
     /* display message */
@@ -907,17 +947,17 @@ function create_genshin_table(message) {
 
 function showtable(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
-    var arrayObj = JSON.parse(text);
-    for (var i = 0; i < objLength(arrayObj.users); i++) {
-        if (arrayObj.users[i].uid === message.author.id) {
+    var array_Obj = JSON.parse(text);
+    for (var i = 0; i < objLength(array_Obj.users); i++) {
+        if (array_Obj.users[i].uid === message.author.id) {
 	        message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
             /* check if this user has recently changed his/her userTag. */
-            update_genshin_userTag(arrayObj, i);
+            update_genshin_userTag(array_Obj, i);
             /* terminal logging */
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
-            console.log(arrayObj.users[i]);
+            console.log(array_Obj.users[i]);
             /* channel reply */
-            var bannerObj = arrayObj.users[i].bannerTypes;
+            var bannerObj = array_Obj.users[i].bannerTypes;
             return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
@@ -950,12 +990,12 @@ function showtable(message) {
 
 function genshin_pity_calculation(message) {
     var text = readTextFile('./genshin_data/genshin_wish_tables.json');
-    var arrayObj = JSON.parse(text);
-    for (var i = 0; i < objLength(arrayObj.users); i++) {
-        if (arrayObj.users[i].uid === message.author.id) {
+    var array_Obj = JSON.parse(text);
+    for (var i = 0; i < objLength(array_Obj.users); i++) {
+        if (array_Obj.users[i].uid === message.author.id) {
 	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
             /* check if this user has recently changed his/her userTag. */
-            update_genshin_userTag(arrayObj, i);
+            update_genshin_userTag(array_Obj, i);
             /* terminal logging */
             console.log('Genshin Pity Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             console.log('Pity Calculation: ');
@@ -963,9 +1003,9 @@ function genshin_pity_calculation(message) {
             const weapon_pity_goal = normal_pity_goal - 10;
             const primogem_value = 160;
             let pity_table = {
-                event: normal_pity_goal- arrayObj.users[i].bannerTypes.event, 
-                weapon: weapon_pity_goal - arrayObj.users[i].bannerTypes.weapon, 
-                standard: normal_pity_goal - arrayObj.users[i].bannerTypes.standard
+                event: normal_pity_goal- array_Obj.users[i].bannerTypes.event, 
+                weapon: weapon_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
+                standard: normal_pity_goal - array_Obj.users[i].bannerTypes.standard
             }
             /* channel reply */
             console.log(pity_table);
@@ -1002,7 +1042,6 @@ function genshin_pity_calculation(message) {
 
 function wishCount(message, bannerType, commandType, nInc) {
     if (bannerType == undefined || commandType == undefined || nInc == undefined) {
-        console.log(`${message.member.user.tag} requested for genshin wish count, but reached UNDEFINED arguments.`);
         console.log(`\n    bannerType = ${bannerType}, commandType = ${commandType}, nInc = ${nInc}\n\n`);
         return message.channel.send(`${message.author}.`
             +"\nThis command adds the number of rolls to your current Genshin Gacha Table."
@@ -1029,18 +1068,19 @@ function wishCount(message, bannerType, commandType, nInc) {
     }
     else {
         /* find user */
-        var text = readTextFile('./genshin_data/genshin_wish_tables.json');
-        var arrayObj = JSON.parse(text);
-        for (var i = 0; i < objLength(arrayObj.users); i++) {
-            if (arrayObj.users[i].uid === message.author.id) {
+        var path = './genshin_data/genshin_wish_tables.json';
+        var text = readTextFile(path);
+        var array_Obj = JSON.parse(text);
+        for (var i = 0; i < objLength(array_Obj.users); i++) {
+            if (array_Obj.users[i].uid === message.author.id) {
                 /* check if this user has recently changed his/her userTag. */
-                update_genshin_userTag(arrayObj, i);
+                update_genshin_userTag(array_Obj, i);
                 /* terminal logging */
                 console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
                 break;
             }
         }
-        if (i == objLength(arrayObj.users)) {
+        if (i == objLength(array_Obj.users)) {
             /* this user table already exist. */
             return message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
         }
@@ -1053,13 +1093,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         if (commandType === "add") {
             switch (bannerType) {
                 case "event":
-                    arrayObj.users[i].bannerTypes.event += roll_count;
+                    array_Obj.users[i].bannerTypes.event += roll_count;
                     break;
                 case "weapon":
-                    arrayObj.users[i].bannerTypes.weapon += roll_count;
+                    array_Obj.users[i].bannerTypes.weapon += roll_count;
                     break;
                 case "standard":
-                    arrayObj.users[i].bannerTypes.standard += roll_count;
+                    array_Obj.users[i].bannerTypes.standard += roll_count;
                     break;
                 default: 
                     console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
@@ -1069,13 +1109,13 @@ function wishCount(message, bannerType, commandType, nInc) {
         if (commandType === "replace") {
             switch (bannerType) {
                 case "event":
-                    arrayObj.users[i].bannerTypes.event = roll_count;
+                    array_Obj.users[i].bannerTypes.event = roll_count;
                     break;
                 case "weapon":
-                    arrayObj.users[i].bannerTypes.weapon = roll_count;
+                    array_Obj.users[i].bannerTypes.weapon = roll_count;
                     break;
                 case "standard":
-                    arrayObj.users[i].bannerTypes.standard = roll_count;
+                    array_Obj.users[i].bannerTypes.standard = roll_count;
                     break;
                 default: 
                     console.log(`${message.member.user.tag} requested for Genshin Wish Count, but reached INVALID bannerType.`);
@@ -1086,14 +1126,14 @@ function wishCount(message, bannerType, commandType, nInc) {
         /* save data back to json */
         setTimeout(function(err) {
             if (err) throw err;
-            save_JSON_Data(arrayObj);
+            save_as_JSON(array_Obj, path);
         }, 1000);
         
         /* display message */
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
-        console.log(arrayObj.users[i]);
+        console.log(array_Obj.users[i]);
         message.channel.send(`${message.author}. Your Genshin Gacha Table has been updated!`);
-        var bannerObj = arrayObj.users[i].bannerTypes;
+        var bannerObj = array_Obj.users[i].bannerTypes;
         return message.channel.send({embed: {
             author: {
                 name: message.member.user.tag,
@@ -1123,7 +1163,6 @@ function wishCount(message, bannerType, commandType, nInc) {
 
 function wishReset(message, bannerType) {
     if (bannerType == undefined) {
-        console.log(`${message.member.user.tag} requested for genshin wish reset, but reached UNDEFINED arguments.`);
         console.log(`\n    bannerType = ${bannerType}\n\n`);
         return message.channel.send(`${message.author}.`
             +"\nThis command resets the specified Genshin Gacha BannerType back to 0."
@@ -1136,18 +1175,19 @@ function wishReset(message, bannerType) {
     }
 
     /* find user */
-    var text = readTextFile('./genshin_data/genshin_wish_tables.json');
-    var arrayObj = JSON.parse(text);
-    for (var i = 0; i < objLength(arrayObj.users); i++) {
-        if (arrayObj.users[i].uid === message.author.id) {
+    var path = './genshin_data/genshin_wish_tables.json';
+    var text = readTextFile(path);
+    var array_Obj = JSON.parse(text);
+    for (var i = 0; i < objLength(array_Obj.users); i++) {
+        if (array_Obj.users[i].uid === message.author.id) {
             /* check if this user has recently changed his/her userTag. */
-            update_genshin_userTag(arrayObj, i);
+            update_genshin_userTag(array_Obj, i);
             /* terminal logging */
             console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             break;
         }
     }
-    if (i == objLength(arrayObj.users)) {
+    if (i == objLength(array_Obj.users)) {
         /* this user table already exist. */
         return message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function`);
     }
@@ -1157,15 +1197,15 @@ function wishReset(message, bannerType) {
     switch (bannerType) {
         case "event":
             bannerString = "Character Event Banner";
-            arrayObj.users[i].bannerTypes.event = 0;
+            array_Obj.users[i].bannerTypes.event = 0;
             break;
         case "weapon":
             bannerString = "Weapon Banner";
-            arrayObj.users[i].bannerTypes.weapon = 0;
+            array_Obj.users[i].bannerTypes.weapon = 0;
             break;
         case "standard":
             bannerString = "Standard Wish Banner";
-            arrayObj.users[i].bannerTypes.standard = 0;
+            array_Obj.users[i].bannerTypes.standard = 0;
             break;
         default: 
             return message.channel.send(`${message.author}. Unsupported BannerType, cannot reset your gacha data.`)
@@ -1175,14 +1215,14 @@ function wishReset(message, bannerType) {
     /* save data back to json */
     setTimeout(function(err) {
         if (err) throw err;
-        save_JSON_Data(arrayObj);
+        save_as_JSON(array_Obj, path);
     }, 1000);
 
     /* display message */
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
-    console.log(arrayObj.users[i]);
+    console.log(array_Obj.users[i]);
     message.channel.send(`${message.author}. Your GGT:${bannerString} has been reset...`);
-    var bannerObj = arrayObj.users[i].bannerTypes;
+    var bannerObj = array_Obj.users[i].bannerTypes;
     return message.channel.send({embed: {
         author: {
             name: message.member.user.tag,
@@ -1212,15 +1252,95 @@ function wishReset(message, bannerType) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////// HELPER FUNCTIONS ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function isOwner(message) {
+function is_superAccess(message) {
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
-    if (message.author.id !== readTextFile('./src/ownerID.txt')) {
-        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an owner command.');
-        message.channel.send(`${message.author}. Only Paimon's master may access this command! `, {files: [ moji_array[rand] ]});
+    /* create file if not exist */
+    var path = './src/admins.json';
+    if (!filestream.existsSync(path)) {
+        var admin_arr = {admins:[]};
+        /* update JSON Data */
+        setTimeout(function(err) {
+            if (err) throw err;
+            save_as_JSON(admin_arr, path);
+        }, 1000);
+        console.log(`New ${path.replace(/\/|\./g,'')} json-file created!`);
+    }
+    /* check for adminship */
+    var adminObj = JSON.parse(readTextFile(path));
+    if (!adminObj.admins.includes(message.author.id)) {
+        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an admin command.');
+        message.channel.send(`${message.author}. Only Paimon's masters may access this command! `, {files: [ moji_array[rand] ]});
         return false;
     }
     return true;
+}
+
+function add_superAccess(message, userTagging) {
+    if (userTagging == undefined) {
+        return message.channel.send(`${message.author}.`
+        +"\nThis command will let [@userTag | user_ID] use SuperAccess-commands."
+        +"\n\nUsage: " + "?add super|superAccess [@userTag|ID]")
+        .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+    }
+    /* userTagging uses <@!user#tag> */
+    var userID = userTagging.toString();
+    if (userID.startsWith('<@!') && userID.endsWith('>')) {
+        userID = userID.replace(/[<@!>]/g,'');
+        //return message.channel.send('I don\'t process @user#tag');
+    }
+    /* Check adminship, then push userID as admin */
+    var this_guild = message.guild;
+    user = this_guild.member(userID);
+    if (user != null) {
+        var path = './src/admins.json';
+        var text = readTextFile(path);
+        var admin_Obj = JSON.parse(text);
+        if (!admin_Obj.admins.includes(userID)) {
+            admin_Obj.admins.push(userID);
+            /* update JSON Data */
+            setTimeout(function(err) {
+                if (err) throw err;
+                save_as_JSON(admin_arr, path);
+            }, 1000);
+            message.channel.send('Admin successfully added!');
+            user.send({embed: {
+                author: {
+                    name: 'Paimon-chan\'s Embedded Info',
+                    icon_url: client.user.avatarURL,
+                    url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
+                },
+                title: "SUPER ACCESS COMMANDS",
+                description: `${message.author.tag} has granted you 'SuperAccess'.\n${user}, You can now use SuperAccess-commands!`,
+                fields: [
+                  {
+                    name: "?add Super|SuperAccess",
+                    value: "Add a person as one of paimon's masters!"
+                  },
+                  {
+                    name: "?Shutdown|Kill",
+                    value: "Paimon shall be served as food T^T"
+                  },
+                  {
+                    name: "?Clean|Clear",
+                    value: "Paimon will clean up your mess!"
+                  }
+                ],
+                timestamp: new Date(),
+                footer: {
+                    icon_url: client.user.avatarURL,
+                    text: '© Rich Embedded Frameworks'
+                }
+            }});
+            console.log(`Admin successfully added! ${user} now have access to SuperAccess-commands!`);
+        }
+        else {
+            message.channel.send('Admin already exist!');
+        }
+    }
+    else {
+        message.channel.send(`No such userID in [Server: ${this_guild.name}].`);
+    }
 }
 
 function objLength(obj) {
@@ -1238,16 +1358,16 @@ function roll(message) {
     .then(console.log(`${message.member.user.tag} rolled (${diceNum1}, ${diceNum2}) on a pair of dice. Total: ${diceNum1+diceNum2}`));
 }
 
-function readTextFile(file)
+function readTextFile(filepath)
 {
-    var text = filestream.readFileSync(file).toString('utf-8');
+    var text = filestream.readFileSync(filepath).toString('utf-8');
     return text;
 }
 
-function save_JSON_Data(arrayObj) {
+function save_as_JSON(JSON_Obj, path) {
     /* save data back to json */
-    var tableString = JSON.stringify(arrayObj, undefined, 2);
-    filestream.writeFile('./genshin_data/genshin_wish_tables.json', tableString, 'utf-8', function(err) {
+    var tableString = JSON.stringify(JSON_Obj, undefined, 2);
+    filestream.writeFile(path, tableString, 'utf-8', function(err) {
         if (err) throw err;
     });
 }
@@ -1277,18 +1397,19 @@ function sec_Convert(sec_string) {
     return time_string;
 }
 
-function update_genshin_userTag(arrayObj, cached_index) {
-    var uniqueID = arrayObj.users[cached_index].uid;
+function update_genshin_userTag(array_Obj, cached_index) {
+    var path = './genshin_data/genshin_wish_tables.json';
+    var uniqueID = array_Obj.users[cached_index].uid;
     var current_userTag = client.users.get(uniqueID).tag;
-    var cached_userTag = arrayObj.users[cached_index].username;
+    var cached_userTag = array_Obj.users[cached_index].username;
 
     if (cached_userTag !== current_userTag) {
-        arrayObj.users[cached_index].username = current_userTag;
+        array_Obj.users[cached_index].username = current_userTag;
     }
     /* update JSON Data */
     setTimeout(function(err) {
         if (err) throw err;
-        save_JSON_Data(arrayObj);
+        save_as_JSON(array_Obj, path);
     }, 1000);
 }
 
