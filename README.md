@@ -8,9 +8,9 @@ A Discord bot with various functionalities I desired to have.<br/>
 
 **Steps**
 1. Make sure to have npm and nodeJS installed.<br/>
-2. Run "install_dependencies.bat".<br/>
+2. Run "1 install_dependencies.bat".<br/>
 3. Replace the text in "/source/bot_token.txt" with your own bot token.<br/>
-4. Run 'native_boot.bat' or you can host it online with heroku/other servers.<br/>
+4. Run '2 start.bat' or you can host it online with heroku/other servers.<br/>
 
 **Short list of bot-commands**
 - [Help](#Help)
