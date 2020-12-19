@@ -54,7 +54,6 @@ client.on("message", async message => {
             }
         }
     }
-
     /* if a user mentioned the bot, reply back to the user */
     if (message.isMentioned(client.user)) {
         message.reply("If you need help from Paimon, please try ?help");
@@ -279,8 +278,19 @@ client.on("message", async message => {
                 else {
                     message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
                 }
-            }
-            else
+            } else if (command.match(/remove/gi)) {
+                const command2 = args.shift();
+                if (command2 != undefined) {
+                    if (command2.match(/superaccess|super/)) {
+                        if (is_superAccess(message)) {
+                            return remove_superAccess(message, args[0]);
+                        }
+                    }
+                }
+                else {
+                    message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
+                }
+            } else
                 message.channel.send(`${message.author}. You didn't provide a VALID function argument!`);
                 break;
     }
@@ -367,8 +377,12 @@ function userHelp(message) {
         description: `Can be used if 'SuperAccess' is granted by the owner | exisiting admin w/ 'SuperAcess'`,
         fields: [
           {
-            name: "?add Super|SuperAccess",
-            value: "Add a person as one of paimon's masters!"
+            name: "?add Super|SuperAccess [@userTag]",
+            value: "Add a user as one of paimon's masters!"
+          },
+          {
+            name: "?remove Super|SuperAccess [@userTag]",
+            value: "Remove a user from one of paimon's masters!"
           },
           {
             name: "?Shutdown|Kill",
@@ -1250,37 +1264,53 @@ function wishReset(message, bannerType) {
     }}).then(newMessage => newMessage.delete(5000));
 }
 
-function add_superAccess(message, userTagging) {
-    if (userTagging == undefined) {
+function add_superAccess(message, userTag) {
+    if (userTag == undefined) {
         return message.channel.send(`${message.author}.`
-        +"\nThis command will let [@userTag | user_ID] use SuperAccess-commands."
-        +"\n\nUsage: " + "?add super|superAccess [@userTag|ID]")
+        +"\nThis command will let [@userTag] use SuperAccess-commands."
+        +"\n\nUsage: " + "?add super|superAccess [@userTag]")
         .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
-    /* userTagging uses <@!user#tag> */
-    var userID = userTagging.toString();
-    if (userID.startsWith('<@!') && userID.endsWith('>')) {
-        userID = userID.replace(/[<@!>]/g,'');
-        //return message.channel.send('I don\'t process @user#tag');
+    /* userTag uses <@!user#tag> */
+    if (userTag.startsWith('<@!') && userTag.endsWith('>')) {
+        userTag = userTag.replace(/[<@!>]/g,'');
     }
-    /* Check adminship, then push userID as admin */
-    var this_guild = message.guild;
-    var guildmember = this_guild.member(userID);
+
+    /* Check adminship, then push user_id as admin */
+    var this_guild = client.guilds.get(message.guild.id);
+    var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
         var path = './src/admins.json';
-        var text = readTextFile(path);
-        var admin_Obj = JSON.parse(text);
-        if (!admin_Obj.admins.includes(userID)) {
+        var servers_Obj = JSON.parse(readTextFile(path));
+        var index = -1;
+
+        /* find object index */
+        if (servers_Obj.servers.some(item => item.server_id === message.guild.id)) {
+            /* try to find if this server is already in the json data */
+            var filter_Obj = servers_Obj.servers.find(
+                function(item, i) {
+                    index = i;
+                    return item.server_id === message.guild.id;
+                });
+        }
+        
+        /* Check if this server already has this user as admin, if not then add it */
+        if (!filter_Obj.admins.includes(userTag)) {
             if (guildmember.user.bot) {
                 console.log(`${message.author.tag} tried to grant 'SuperAccess' permission to a bot!`)
                 return message.channel.send(`Bots don't need 'SuperAccess'!`);
             }
-            admin_Obj.admins.push(userID);
+            servers_Obj.servers[index].admins.push(userTag);
+            servers_Obj.servers[index].admins.sort();
             /* update JSON Data */
             setTimeout(function(err) {
                 if (err) throw err;
-                save_as_JSON(admin_Obj, path);
+                save_as_JSON(servers_Obj, path);
             }, 1000);
+            /* grant admin role to user */
+            var admin_role = this_guild.roles.find(role => role.name.match(/admin|Admin/g));
+            guildmember.addRole(admin_role);
+            /* reply */
             message.channel.send('Admin successfully added!');
             console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
             guildmember.user.send({embed: {
@@ -1317,30 +1347,134 @@ function add_superAccess(message, userTagging) {
         }
     }
     else {
-        message.channel.send(`No such userID in [Server: ${this_guild.name}].`);
+        message.channel.send(`No such user in [Server: ${this_guild.name}].`);
     }
 }
 
+function remove_superAccess(message, userTag) {
+    if (userTag == undefined) {
+        return message.channel.send(`${message.author}.`
+        +"\nThis command will remove [@userTag] from SuperAccess-commands."
+        +"\n\nUsage: " + "?remove super|superAccess [@userTag]")
+        .then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+    }
+    /* userTag uses <@!user#tag> */
+    if (userTag.startsWith('<@!') && userTag.endsWith('>')) {
+        userTag = userTag.replace(/[<@!>]/g,'');
+    }
+
+    /* Check adminship, then push user_id as admin */
+    var this_guild = client.guilds.get(message.guild.id);
+    var guildmember = this_guild.member(userTag);
+    if (guildmember != null) {
+        var path = './src/admins.json';
+        var servers_Obj = JSON.parse(readTextFile(path));
+        var index = -1;
+
+        /* find object index */
+        if (servers_Obj.servers.some(item => item.server_id === message.guild.id)) {
+            /* try to find if this server is already in the json data */
+            var filter_Obj = servers_Obj.servers.find(
+                function(item, i) {
+                    index = i;
+                    return item.server_id === message.guild.id;
+                });
+        }
+        
+        /* Check if this server already has this user as admin, if found then remove it */
+        if (filter_Obj.admins.includes(userTag)) {
+            /* exceptions */
+            if (guildmember.user.bot) {
+                console.log(`${message.author.tag} tried to grant 'SuperAccess' permission to a bot!`);
+                return message.channel.send(`Bots don't need 'SuperAccess'!`);
+            }
+            if (guildmember.user.id === message.author.id) {
+                console.log(`You cannot remove 'SuperAccess' from yourself!`);
+                return message.channel.send(`You cannot remove 'SuperAccess' from yourself!`);
+            }
+            if (guildmember.user.id === this_guild.ownerID) {
+                console.log(`${message.author.tag} tried to remove 'SuperAccess' permission from server admin!`);
+                return message.channel.send(`You cannot remove 'SuperAccess' from [Server Admin: ${this_guild.owner}]!`);
+            }
+            /* remove from 'SuperAccess' */
+            let temp_index = servers_Obj.servers[index].admins.indexOf(userTag);
+            servers_Obj.servers[index].admins.splice(temp_index, 1);
+            /* update JSON Data */
+            setTimeout(function(err) {
+                if (err) throw err;
+                save_as_JSON(servers_Obj, path);
+            }, 1000);
+            /* grant admin role to user */
+            var admin_role = this_guild.roles.find(role => role.name.match(/admin|Admin/g));
+            try {
+                guildmember.removeRole(admin_role);
+            } catch (error) {
+                console.log(error);
+            }
+            /* reply */
+            message.channel.send('Admin successfully removed!');
+            console.log(`Admin successfully removed! ${guildmember.user} no longer has access to SuperAccess-commands!`);
+        }
+        else {
+            message.channel.send(`This user does not have 'SuperAccess' permission!`);
+        }
+    }
+    else {
+        message.channel.send(`No such user in [Server: ${this_guild.name}].`);
+    }
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////// HELPER FUNCTIONS ////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function is_superAccess(message) {
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
+    var servers_Obj = undefined;
     /* create file if not exist */
     var path = './src/admins.json';
     if (!filestream.existsSync(path)) {
-        var admin_Obj = {admins:[]};
+        servers_Obj = {
+            servers: [
+                {
+                    server_id : message.guild.id,
+                    admins: []
+                }
+            ]
+        };
         /* update JSON Data */
         setTimeout(function(err) {
             if (err) throw err;
-            save_as_JSON(admin_Obj, path);
+            save_as_JSON(servers_Obj, path);
         }, 1000);
         console.log(`New ${path.replace(/\/|\./g,'')} json-file created!`);
     }
+    /** 
+    *  Object Overview:
+    *  servers_Obj = { server[ a list of specific guild objects -> {server_id, admin_arr: [a list of admin_id]} ] }
+    */
+    var filter_Obj = undefined;
+    servers_Obj = JSON.parse(readTextFile(path));
+    var index = -1;
+    if (servers_Obj.servers.some(item => item.server_id === message.guild.id)) {
+        /* try to find if this server is already in the json data */
+        filter_Obj = servers_Obj.servers.find(
+            function(item, i) {
+                index = i;
+                return item.server_id === message.guild.id;
+            });
+    }
+    else {
+        /* if not found, create one */
+        filter_Obj = {
+            server_id : message.guild.id,
+            admins: []
+        };
+        /* index = servers_Obj.servers.length()-1; */
+        servers_Obj.servers.push(filter_Obj);
+        index += objLength(servers_Obj.servers);
+    }
     /* check for adminship */
-    var adminObj = JSON.parse(readTextFile(path));
-    if (!adminObj.admins.includes(message.author.id)) {
+    if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
         console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an admin command.');
         message.channel.send(`${message.author}. Only Paimon's masters may access this command! `, {files: [ moji_array[rand] ]});
         return false;
