@@ -9,8 +9,8 @@ const DICE = 6;
 
 /* set up envrionment token for heroku deployment website. */
 const TOKEN = process.env.BOT_TOKEN;
+const HOST_DIR = process.env.URL;
 const youtube = new YouTube(process.env.YOUTUBE_API_KEY); /* Personal Youtube-API key */
-
 /* music variables */
 var servers = {};
 
@@ -298,7 +298,7 @@ function userHelp(message) {
             url: 'https://github.com/ItsRuntimeException/SimpleDiscordBot'
         },
         title: "COMMANDS",
-        description: `[Currently Hosting from ${process.cwd()}]\nMusic Support Enabled!`,
+        description: `[Currently Hosting from ${HOST_DIR}]\nMusic Support Enabled!`,
         fields: [{
             name: "?Help",
             value: "Display a general list of commands."
