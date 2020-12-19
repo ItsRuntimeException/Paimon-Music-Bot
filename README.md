@@ -1,5 +1,5 @@
 ***Personal Project; Last Updated: December 19, 2020***
-# Random Functionality (Discord) Bot #
+# Paimon (Discord) Bot #
 A Discord bot with various random functionalities.
 
 **Steps**
