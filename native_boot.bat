@@ -1,1 +1,1 @@
-node .\src\index_native.js
+node --trace-warnings ./src/index_native.js
