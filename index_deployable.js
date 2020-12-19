@@ -7,7 +7,7 @@ const filestream = require("fs");
 const client = new Discord.Client();
 const DICE = 6;
 
-/* set up envrionment token for heroku deployment website. */
+/* set up envrionment token for heroku deployment */
 const TOKEN = process.env.BOT_TOKEN;
 const HOST_DIR = process.env.URL;
 const youtube = new YouTube(process.env.YOUTUBE_API_KEY); /* Personal Youtube-API key */
@@ -918,7 +918,7 @@ function vSens(message, gameCode, sens) {
 }
 
 function create_genshin_table(message) {
-    var path = './genshin_data/genshin_wish_tables.json';
+    var path = './json_data/genshin_wish_tables.json';
     var text = readTextFile(path);
     var array_Obj = JSON.parse(text);
 
@@ -962,7 +962,7 @@ function create_genshin_table(message) {
 }
 
 function showtable(message) {
-    var text = readTextFile('./genshin_data/genshin_wish_tables.json');
+    var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
     for (var i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
@@ -1005,7 +1005,7 @@ function showtable(message) {
 }
 
 function genshin_pity_calculation(message) {
-    var text = readTextFile('./genshin_data/genshin_wish_tables.json');
+    var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
     for (var i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
@@ -1084,7 +1084,7 @@ function wishCount(message, bannerType, commandType, nInc) {
     }
     else {
         /* find user */
-        var path = './genshin_data/genshin_wish_tables.json';
+        var path = './json_data/genshin_wish_tables.json';
         var text = readTextFile(path);
         var array_Obj = JSON.parse(text);
         for (var i = 0; i < objLength(array_Obj.users); i++) {
@@ -1191,7 +1191,7 @@ function wishReset(message, bannerType) {
     }
 
     /* find user */
-    var path = './genshin_data/genshin_wish_tables.json';
+    var path = './json_data/genshin_wish_tables.json';
     var text = readTextFile(path);
     var array_Obj = JSON.parse(text);
     for (var i = 0; i < objLength(array_Obj.users); i++) {
@@ -1281,7 +1281,7 @@ function add_superAccess(message, userTag) {
     var this_guild = client.guilds.get(message.guild.id);
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
-        var path = './src/admins.json';
+        var path = './json_data/admins.json';
         var servers_Obj = JSON.parse(readTextFile(path));
         var index = -1;
 
@@ -1368,7 +1368,7 @@ function remove_superAccess(message, userTag) {
     var this_guild = client.guilds.get(message.guild.id);
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
-        var path = './src/admins.json';
+        var path = './json_data/admins.json';
         var servers_Obj = JSON.parse(readTextFile(path));
         var index = -1;
 
@@ -1432,7 +1432,7 @@ function is_superAccess(message) {
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
     var servers_Obj = undefined;
     /* create file if not exist */
-    var path = './src/admins.json';
+    var path = './json_data/admins.json';
     if (!filestream.existsSync(path)) {
         servers_Obj = {
             servers: [
@@ -1538,7 +1538,7 @@ function sec_Convert(sec_string) {
 }
 
 function update_genshin_userTag(array_Obj, cached_index) {
-    var path = './genshin_data/genshin_wish_tables.json';
+    var path = './json_data/genshin_wish_tables.json';
     var uniqueID = array_Obj.users[cached_index].uid;
     var current_userTag = client.users.get(uniqueID).tag;
     var cached_userTag = array_Obj.users[cached_index].username;

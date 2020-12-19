@@ -1,1 +1,0 @@
-node --trace-warnings ./src/index_native.js
