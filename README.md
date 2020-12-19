@@ -55,8 +55,8 @@ Command | bannerType | pityType | Operation | Description
 | :--- | :--- | :--- | :--- | :---
 ?gCreate | N/A | N/A | N/A | Create a default Genshin Impact Gacha Table.
 ?gShowtable | N/A | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gPity \[pityType: string?Optional\] | N/A | Normal<br/>Soft | Display the calculated wishes (or primogem) until your next 5-star pity item.
-?gWish \[bannerType: string\] \[Operation\] \[int\] | Standard<br/>Weapon<br/>Event | N/A | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
+?gPity \[pityType: string?Optional\] | N/A | Normal<br/>Soft | N/A | Display the calculated wishes (or primogem) until your next 5-star pity item.
+?gWish<br/>\[bannerType: string\]<br/>\[Operation\]<br/>\[int\] | Standard<br/>Weapon<br/>Event | N/A | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
 ?gReset \[bannerType: string\] | Standard<br/>Weapon<br/>Event | N/A | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
 
 # MapleStory #
