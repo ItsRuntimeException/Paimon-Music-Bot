@@ -15,7 +15,7 @@ A Discord bot with various functionalities I desired to have.<br/>
 **Short list of bot-commands**
 - [Help](#Help)
 - [Music Support](#Music-Support)
-- [Super Access Commands](#super-access-commands)
+- [Super Access](#Super-Access-Commands)
 - [Genshin Impact](#Genshin-Impact)
 - [MapleStory](#MapleStory)
 - [Roll](#Roll)
@@ -42,13 +42,13 @@ Command | param | Description
 ?shuffle | N/A | Shuffle queue.
 
 # Genshin Impact #
-Command | bannerType | operation | Description
-| :--- | :--- | :--- | :---
-?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
-?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gPity | N/A | N/A | Display the calculated wishes (or primogem) until your next 5-star pity item.
-?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
-?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
+Command | bannerType | pityType | Operation | Description
+| :--- | :--- | :--- | :--- | :---
+?gCreate | N/A | N/A | N/A | Create a default Genshin Impact Gacha Table.
+?gShowtable | N/A | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
+?gPity \[pityType: string?Optional\] | N/A | Normal<br/>Soft | Display the calculated wishes (or primogem) until your next 5-star pity item.
+?gWish \[bannerType: string\] \[Operation\] \[int\] | Standard<br/>Weapon<br/>Event | N/A | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
+?gReset \[bannerType: string\] | Standard<br/>Weapon<br/>Event | N/A | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
 
 # Super Access Commands #
 Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
@@ -58,14 +58,6 @@ Command | param | Description
 ?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
-
-# Genshin Impact #
-Command | bannerType | operation | Description
-| :--- | :--- | :--- | :---
-?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
-?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
-?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # MapleStory #
 Give the user my maplestory guild page.
