@@ -1015,12 +1015,18 @@ function genshin_pity_calculation(message) {
             console.log('Genshin Pity Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
             console.log('Pity Calculation: ');
             const normal_pity_goal = 90;
+            const soft_pity_goal = normal_pity_goal - 15;
             const weapon_pity_goal = normal_pity_goal - 10;
             const primogem_value = 160;
-            let pity_table = {
-                event: normal_pity_goal- array_Obj.users[i].bannerTypes.event, 
+            let hard_pity_table = {
+                event: normal_pity_goal - array_Obj.users[i].bannerTypes.event, 
                 weapon: weapon_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
                 standard: normal_pity_goal - array_Obj.users[i].bannerTypes.standard
+            }
+            let soft_pity_table = {
+                event: soft_pity_goal - array_Obj.users[i].bannerTypes.event, 
+                weapon: soft_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
+                standard: soft_pity_goal - array_Obj.users[i].bannerTypes.standard
             }
             /* channel reply */
             console.log(pity_table);
@@ -1032,15 +1038,21 @@ function genshin_pity_calculation(message) {
                 },
                 fields: [{
                     name: "Character Event Banner",
-                    value: `${pity_table.event} ${((pity_table.event > 1) ? 'wishes' : 'wish')} until pity goal.\n(${pity_table.event*primogem_value} primo-gems)`
+                    value: `${hard_pity_table.event} ${((hard_pity_table.event > 1) ? 'wishes' : 'wish')} until hard-pity(90) goal.\n(${hard_pity_table.event*primogem_value} primo-gems)
+
+                    ${soft_pity_table.event} ${((soft_pity_table.event > 1) ? 'wishes' : 'wish')} until soft-pity(75) goal.\n(${soft_pity_table.event*primogem_value} primo-gems)`
                   },
                   {
                     name: "Weapon Banner",
-                    value: `${pity_table.weapon} ${((pity_table.weapon > 1) ? 'wishes' : 'wish')} until pity goal.\n(${pity_table.weapon*primogem_value} primo-gems)`
+                    value: `${hard_pity_table.weapon} ${((hard_pity_table.weapon > 1) ? 'wishes' : 'wish')} until hard-pity(90) goal.\n(${hard_pity_table.weapon*primogem_value} primo-gems)
+
+                    ${soft_pity_table.weapon} ${((soft_pity_table.weapon > 1) ? 'wishes' : 'wish')} until soft-pity(75) goal.\n(${soft_pity_table.weapon*primogem_value} primo-gems)`
                   },
                   {
                     name: "Standard Permanent Banner",
-                    value: `${pity_table.standard} ${((pity_table.standard > 1) ? 'wishes' : 'wish')} until pity goal.\n(${pity_table.standard*primogem_value} primo-gems)`
+                    value: `${hard_pity_table.standard} ${((hard_pity_table.standard > 1) ? 'wishes' : 'wish')} until hard-pity(90) goal.\n(${hard_pity_table.standard*primogem_value} primo-gems)
+                    
+                    ${soft_pity_table.standard} ${((soft_pity_table.standard > 1) ? 'wishes' : 'wish')} until soft-pity(75) goal.\n(${soft_pity_table.standard*primogem_value} primo-gems)`
                   }
                 ],
                 timestamp: new Date(),

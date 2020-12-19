@@ -46,8 +46,9 @@ Command | bannerType | operation | Description
 | :--- | :--- | :--- | :---
 ?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
 ?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
-?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
+?gPity | N/A | N/A | Display the calculated wishes (or primogem) until your next 5-star pity item.
+?gWish \[bannerType\] \[operation\] \[int\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
+?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
 
 # Super Access Commands #
 Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
