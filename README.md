@@ -2,14 +2,11 @@
 # Random Functionality (Discord) Bot #
 A Discord bot with various random functionalities.
 
-Step 1: Make sure to have npm and nodeJS installed.<br/>
-Step 2: Run "install_dependencies.bat".<br/>
-Step 3: Replace the text in "/source/bot_token.txt" with your own bot token.<br/>
-Step 4: Run 'native_boot.bat' or you can host it online with heroku/other servers.<br/>
-
-**Example Usage**
-| :---
-?\[command\]
+**Steps**
+1. Make sure to have npm and nodeJS installed.<br/>
+2. Run "install_dependencies.bat".<br/>
+3. Replace the text in "/source/bot_token.txt" with your own bot token.<br/>
+4. Run 'native_boot.bat' or you can host it online with heroku/other servers.<br/>
 
 **Short list of bot-commands**
 - [Help](#Help)
@@ -21,6 +18,9 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 
 # Help #
 Display a list of bot commands and its usage.
+**Example Usage**
+| :---
+?Help
 
 # Music Support #
 Command | param | Description
