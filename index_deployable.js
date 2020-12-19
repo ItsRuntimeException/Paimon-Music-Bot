@@ -249,7 +249,7 @@ client.on("message", async message => {
             showtable(message);
             break;
         case "gpity":
-            genshin_pity_calculation(message);
+            genshin_pity_calculation(message, args[0]);
             break;
         case "gwish":
             wishCount(message, args[0], args[1], args[2]);
@@ -1004,7 +1004,7 @@ function showtable(message) {
     message.channel.send(`${message.author}. Please initialize your Genshin Gacha Table by using the '${PREFIX}gcreate' function!`);
 }
 
-function genshin_pity_calculation(message) {
+function genshin_pity_calculation(message, pityType = 'normal') {
     var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
     for (var i = 0; i < objLength(array_Obj.users); i++) {
@@ -1017,51 +1017,82 @@ function genshin_pity_calculation(message) {
             console.log('Pity Calculation: ');
             const normal_pity_goal = 90;
             const soft_pity_goal = normal_pity_goal - 15;
-            const weapon_pity_goal = normal_pity_goal - 10;
+            const weapon_normal_pity_goal = normal_pity_goal - 10;
+            const weapon_soft_pity_goal = weapon_normal_pity_goal - 15;
             const primogem_value = 160;
-            let hard_pity_table = {
-                event: normal_pity_goal - array_Obj.users[i].bannerTypes.event, 
-                weapon: weapon_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
-                standard: normal_pity_goal - array_Obj.users[i].bannerTypes.standard
-            }
-            let soft_pity_table = {
-                event: soft_pity_goal - array_Obj.users[i].bannerTypes.event, 
-                weapon: soft_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
-                standard: soft_pity_goal - array_Obj.users[i].bannerTypes.standard
-            }
-            /* channel reply */
-            console.log(pity_table);
-            console.log('\n');
-            return message.channel.send({embed: {
-                author: {
-                    name: message.member.user.tag,
-                    icon_url: message.member.user.avatarURL,
-                },
-                fields: [{
-                    name: "Character Event Banner",
-                    value: `${hard_pity_table.event} ${((hard_pity_table.event > 1) ? 'wishes' : 'wish')} until hard-pity(90) goal.\n(${hard_pity_table.event*primogem_value} primo-gems)
 
-                    ${soft_pity_table.event} ${((soft_pity_table.event > 1) ? 'wishes' : 'wish')} until soft-pity(75) goal.\n(${soft_pity_table.event*primogem_value} primo-gems)`
-                  },
-                  {
-                    name: "Weapon Banner",
-                    value: `${hard_pity_table.weapon} ${((hard_pity_table.weapon > 1) ? 'wishes' : 'wish')} until hard-pity(90) goal.\n(${hard_pity_table.weapon*primogem_value} primo-gems)
-
-                    ${soft_pity_table.weapon} ${((soft_pity_table.weapon > 1) ? 'wishes' : 'wish')} until soft-pity(75) goal.\n(${soft_pity_table.weapon*primogem_value} primo-gems)`
-                  },
-                  {
-                    name: "Standard Permanent Banner",
-                    value: `${hard_pity_table.standard} ${((hard_pity_table.standard > 1) ? 'wishes' : 'wish')} until hard-pity(90) goal.\n(${hard_pity_table.standard*primogem_value} primo-gems)
-                    
-                    ${soft_pity_table.standard} ${((soft_pity_table.standard > 1) ? 'wishes' : 'wish')} until soft-pity(75) goal.\n(${soft_pity_table.standard*primogem_value} primo-gems)`
-                  }
-                ],
-                timestamp: new Date(),
-                footer: {
-                    icon_url: client.user.avatarURL,
-                    text: '© Rich Embedded Frameworks'
+            pityType = pityType.toLowerCase();
+            if (pityType.match(/normal/g)) {
+                let hard_pity_table = {
+                    event: normal_pity_goal - array_Obj.users[i].bannerTypes.event, 
+                    weapon: weapon_normal_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
+                    standard: normal_pity_goal - array_Obj.users[i].bannerTypes.standard
                 }
-            }});
+                console.log('Hard Pity:')
+                console.log(hard_pity_table);
+                console.log('\n');
+                return message.channel.send({embed: {
+                    author: {
+                        name: message.member.user.tag,
+                        icon_url: message.member.user.avatarURL,
+                    },
+                    fields: [{
+                        name: "Character Event Banner",
+                        value: `${hard_pity_table.event} ${((hard_pity_table.event > 1) ? 'wishes' : 'wish')} until 5* item.\n(${hard_pity_table.event*primogem_value} primo-gems)`
+                      },
+                      {
+                        name: "Weapon Banner",
+                        value: `${hard_pity_table.weapon} ${((hard_pity_table.weapon > 1) ? 'wishes' : 'wish')} until 5* item.\n(${hard_pity_table.weapon*primogem_value} primo-gems)`
+                      },
+                      {
+                        name: "Standard Permanent Banner",
+                        value: `${hard_pity_table.standard} ${((hard_pity_table.standard > 1) ? 'wishes' : 'wish')} until 5* item.\n(${hard_pity_table.standard*primogem_value} primo-gems)`
+                      }
+                    ],
+                    timestamp: new Date(),
+                    footer: {
+                        icon_url: client.user.avatarURL,
+                        text: '© Rich Embedded Frameworks'
+                    }
+                }});
+            }
+            if (pityType.match(/soft/g)) {
+                let soft_pity_table = {
+                    event: soft_pity_goal - array_Obj.users[i].bannerTypes.event, 
+                    weapon: weapon_soft_pity_goal - array_Obj.users[i].bannerTypes.weapon, 
+                    standard: soft_pity_goal - array_Obj.users[i].bannerTypes.standard
+                }
+                console.log('Soft Pity:')
+                console.log(soft_pity_table);
+                console.log('\n');
+                return message.channel.send({embed: {
+                    author: {
+                        name: message.member.user.tag,
+                        icon_url: message.member.user.avatarURL,
+                    },
+                    fields: [{
+                        name: "Character Event Banner",
+                        value: `Hard Pity: ${hard_pity_table.event} ${((hard_pity_table.event > 1) ? 'wishes' : 'wish')} until 5* item.\n(${hard_pity_table.event*primogem_value} primo-gems)\n
+                        Soft Pity: ${soft_pity_table.event} ${((soft_pity_table.event > 1) ? 'wishes' : 'wish')} until 5* item.\n(${soft_pity_table.event*primogem_value} primo-gems)`
+                      },
+                      {
+                        name: "Weapon Banner",
+                        value: `Hard Pity: ${hard_pity_table.weapon} ${((hard_pity_table.weapon > 1) ? 'wishes' : 'wish')} until 5* item.\n(${hard_pity_table.weapon*primogem_value} primo-gems)\n
+                        Soft Pity: ${soft_pity_table.weapon} ${((soft_pity_table.weapon > 1) ? 'wishes' : 'wish')} until 5* item..\n(${soft_pity_table.weapon*primogem_value} primo-gems)`
+                      },
+                      {
+                        name: "Standard Permanent Banner",
+                        value: `Hard Pity: ${hard_pity_table.standard} ${((hard_pity_table.standard > 1) ? 'wishes' : 'wish')} until 5* item.\n(${hard_pity_table.standard*primogem_value} primo-gems)\n
+                        Soft Pity: ${soft_pity_table.standard} ${((soft_pity_table.standard > 1) ? 'wishes' : 'wish')} until 5* item.\n(${soft_pity_table.standard*primogem_value} primo-gems)`
+                      }
+                    ],
+                    timestamp: new Date(),
+                    footer: {
+                        icon_url: client.user.avatarURL,
+                        text: '© Rich Embedded Frameworks'
+                    }
+                }});
+            }
         }
     }
     /* this user table already exist. */
