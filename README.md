@@ -85,7 +85,7 @@ Command | bannerType | pityType | Operation | Description
 Command | Description
 | :--- | :---
 ?mapleStory | Give the user my maplestory guild page.
-?roll | Roll a random number from 1-6 (Dice Function).
+?roll | Roll two random numbers from 1-6 (Dice Function).
 
 **Examples:**
 
