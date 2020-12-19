@@ -15,7 +15,7 @@ A Discord bot with various functionalities I desired to have.<br/>
 **Short list of bot-commands**
 - [Help](#Help)
 - [Music Support](#Music-Support)
-- [Super Acess](#super-access-commands)
+- [Super Access Commands](#super-access-commands)
 - [Genshin Impact](#Genshin-Impact)
 - [MapleStory](#MapleStory)
 - [Roll](#Roll)
