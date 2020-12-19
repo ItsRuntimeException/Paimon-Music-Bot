@@ -25,15 +25,15 @@ Display a list of bot commands and its usage.
 # Music Support #
 Command | \[Optional?: X|O\] param | Description
 | :--- | :--- | :---
-?play         | \[Optional?: X\] string: Youtube-URL \| Keywords   | Play music from youtube.
-?playLocal    | \[Optional?: X\] string: Category                  | Play music from local_folder.
-?pause        | N/A                                                | Pause music from playing.
-?resume       | N/A                                                | Resume current paused music.
-?skip         | \[Optional: O\] int: skipNum                       | Skip current \| skipNum of songs in queue.
-?stop         | N/A                                                | Stop music and clear queue.
-?loop         | \[Optional?: X\] string: 'on' \| 'off'             | Loop current music.
-?queue        | \[Optional?: O\] int: queue_display_size           | Display current queue.
-?shuffle      | N/A                                                | Shuffle queue.
+?play | \[Optional?: X\] string: Youtube-URL<br/>Keywords | Play music from youtube.
+?playLocal | \[Optional?: X\] string: Category | Play music from local_folder.
+?pause | N/A | Pause music from playing.
+?resume | N/A | Resume current paused music.
+?skip | \[Optional: O\] int: skipNum | Skip current \| skipNum of songs in queue.
+?stop | N/A | Stop music and clear queue.
+?loop | \[Optional?: X\] string: 'on' \| 'off' | Loop current music.
+?queue | \[Optional?: O\] int: queue_display_size | Display current queue.
+?shuffle | N/A | Shuffle queue.
 
 # Genshin Impact #
 Command | bannerType | operation | Description
