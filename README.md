@@ -23,8 +23,8 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 Display a list of bot commands and its usage.
 
 # Music Support #
-    Command   | \[Optional?: X|O\] param                           | Description
-|    :---     | :---                                               | :---
+Command | \[Optional?: X|O\] param | Description
+| :--- | :--- | :---
 ?play         | \[Optional?: X\] string: Youtube-URL \| Keywords   | Play music from youtube.
 ?playLocal    | \[Optional?: X\] string: Category                  | Play music from local_folder.
 ?pause        | N/A                                                | Pause music from playing.
@@ -40,8 +40,8 @@ Command | bannerType | operation | Description
 | :--- | :--- | :--- | :---
 ?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
 ?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\] \[operation\] \[int:num\] | Standard<br/>\| Weapon<br/> \| Event<br/> | Add \| Replace | Modify the specified banner in the user's Genshin Gacha Table.
-?gReset \[bannerType\] | Standard \| Weapon \| Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
+?gWish \[bannerType\] \[operation\] \[int:num\] | Standard<br/>Weapon<br/>Event | Add<br/>Replace | Modify the specified banner in the user's Genshin Gacha Table.
+?gReset \[bannerType\] | Standard<br/>Weapon<br/>Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # Super Access #
 **\[SUPER ACCESS COMMAND\]:** Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
