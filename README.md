@@ -27,7 +27,7 @@ Display a list of bot commands and its usage.
 
 # Music Support #
 Music Control | param
-| :---:       | :---:
+| :---        | :---
 ?play         | string: Youtube-URL \| Keywords
 ?playLocal    | string: Category
 ?pause        | N/A
@@ -47,7 +47,7 @@ Music Control | param
 # Super Access #
 **\[SUPER ACCESS COMMAND\]:** Add or remove a specified user from SuperAccess-commands.
 Music Control                |    param
-| :---:                      |    :---:
+| :---                       |    :---
 ?add    super \| superAccess |    @userTag
 ?remove super \| superAccess |    @userTag
 
