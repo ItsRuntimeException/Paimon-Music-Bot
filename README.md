@@ -32,7 +32,7 @@ Command | param | Description
 ?play \[string\] | Youtube-URL<br/>Keywords | Play music from youtube.
 ?playLocal \[string\] | Category | Play music from local_folder.
 ?musicInfo | N/A | Fetch details of current song.
-?vol \[int?Percent\] | server.volume | Change the volume of the server's dispatcher.
+?vol \[int?Optional\] | server.volume | Change the volume of the server's dispatcher.
 ?pause | N/A | Pause music from playing.
 ?resume | N/A | Resume current paused music.
 ?skip \[int?Optional\] | skipNum | Skip current \| skipNum of songs in queue.
