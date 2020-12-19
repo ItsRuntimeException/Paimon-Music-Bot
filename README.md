@@ -15,56 +15,45 @@ Step 4: Run 'native_boot.bat' or you can host it online with heroku/other server
 - [Music Support](#Music-Support)
 - [Shutdown](#Shutdown)
 - [Super Acess](#Super-Access)
-- [Roll](#Roll)
+- [Genshin Impact](#Genshin-Impact)
 - [MapleStory](#MapleStory)
-- [gCreate](#gCreate)
-- [gShowtable](#gShowtable)
-- [gWish](#gWish)
-- [gReset](#gReset)
+- [Roll](#Roll)
 
 # Help #
 Display a list of bot commands and its usage.
 
 # Music Support #
-Music Control | param
-| :---        | :---
-?play         | string: Youtube-URL \| Keywords
-?playLocal    | string: Category
-?pause        | N/A
-?resume       | N/A
-?skip         | int: num_Skip
-?stop         | N/A
-?loop         | string: 'on' \| 'off'
-?queue        | int: queue_display_size
-?shuffle      | N/A
+    Command   | \[Optional?: X|O\] param                           | Description
+|    :---     | :---                                               | :---
+?play         | \[Optional?: X\] string: Youtube-URL \| Keywords   | Play music from youtube.
+?playLocal    | \[Optional?: X\] string: Category                  | Play music from local_folder.
+?pause        | N/A                                                | Pause music from playing.
+?resume       | N/A                                                | Resume current paused music.
+?skip         | \[Optional: O\] int: skipNum                       | Skip current \| skipNum of songs in queue.
+?stop         | N/A                                                | Stop music and clear queue.
+?loop         | \[Optional?: X\] string: 'on' \| 'off'             | Loop current music.
+?queue        | \[Optional?: O\] int: queue_display_size           | Display current queue.
+?shuffle      | N/A                                                | Shuffle queue.
 
-# Clean #
-**\[SUPER ACCESS COMMAND\]:** Clean channel messages.
-
-# Shutdown #
-**\[SUPER ACCESS COMMAND\]:** Shutdown the bot from the server.
+# Genshin Impact #
+                Command                        |          bannerType         |     operation      | Description
+|                :---                          |            :---             |       :---         | :---
+?gCreate                                       |             N/A             |        N/A         | Create a default Genshin Impact Gacha Table.
+?gShowtable                                    |             N/A             |        N/A         | Display the user's current Genshin Impact Gacha Table.
+?gWish \[bannerType\]\[operation\]\[int:num\]  | Standard \| Weapon \| Event |   Add \| Replace   | Modify the specified banner in the user's Genshin Gacha Table.
+?gReset \[bannerType\]                         | Standard \| Weapon \| Event |        N/A         | Reset the specified banner in the user's Genshin Gacha Table.
 
 # Super Access #
-**\[SUPER ACCESS COMMAND\]:** Add or remove a specified user from SuperAccess-commands.
-Music Control                |    param
-| :---                       |    :---
-?add    super \| superAccess |    @userTag
-?remove super \| superAccess |    @userTag
-
-# Roll #
-Roll a random number from 1-6 (Dice Function).
+**\[SUPER ACCESS COMMAND\]:** Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
+            Command          | \[Optional?: X|O\] param        | Description
+|            :---            | :---                            | :---
+?add    super \| superAccess | \[Optional?: X\] @userTag       | Remove a specified user from SuperAccess-commands.
+?remove super \| superAccess | \[Optional?: X\] @userTag       | Add a specified user from SuperAccess-commands.
+?clean                       | \[Optional?: O\] int: numLines  | Clean channel messages.
+?shutdown                    | N/A                             | Shutdown the bot from the server.
 
 # MapleStory #
 Give the user my maplestory guild page.
 
-# gCreate #
-Create a default Genshin Impact Gacha Table that initializes all banner counts to 0.
-
-# gShowtable #
-Show the user their current Genshin Impact Gacha Table.
-
-# gWish #
-Modify the specified banner-count in the user's Genshin Gacha Table.
-
-# gReset #
-Reset the specified banner-count in the user's Genshin Gacha Table.
+# Roll #
+Roll a random number from 1-6 (Dice Function).
