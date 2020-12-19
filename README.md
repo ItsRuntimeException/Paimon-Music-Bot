@@ -1,6 +1,6 @@
 ***Personal Project; Last Updated: December 19, 2020***
-# Random Functionality (Discord) Bot #
-A Discord bot with various random functionalities.
+# [Discord Bot] Paimon-chan #
+A Discord bot with various functionalities I desired to have.
 
 **Steps**
 1. Make sure to have npm and nodeJS installed.<br/>
