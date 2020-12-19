@@ -40,7 +40,7 @@ Command | bannerType | operation | Description
 | :--- | :--- | :--- | :---
 ?gCreate | N/A | N/A | Create a default Genshin Impact Gacha Table.
 ?gShowtable | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gWish \[bannerType\]\[operation\]\[int:num\] | Standard \| Weapon \| Event | Add \| Replace | Modify the specified banner in the user's Genshin Gacha Table.
+?gWish \[bannerType\] \[operation\] \[int:num\] | Standard<br/>\| Weapon<br/> \| Event<br/> | Add \| Replace | Modify the specified banner in the user's Genshin Gacha Table.
 ?gReset \[bannerType\] | Standard \| Weapon \| Event | N/A | Reset the specified banner in the user's Genshin Gacha Table.
 
 # Super Access #
