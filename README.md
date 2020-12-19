@@ -1,7 +1,11 @@
 ***Personal Project; Last Updated: December 19, 2020***
 # [Discord Bot] Paimon-chan #
-A Discord bot with various functionalities I desired to have.
-<img src="moji/PaimonCookies.gif" width="30%">
+A Discord bot with various functionalities I desired to have.<br/>
+<img src="moji/PaimonCookies.gif">
+<img src="moji/PaimonAngry.gif">
+<img src="moji/PaimonNani.gif">
+<img src="moji/PaimonNoms.gif">
+
 
 **Steps**
 1. Make sure to have npm and nodeJS installed.<br/>
