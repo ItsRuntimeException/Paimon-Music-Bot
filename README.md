@@ -28,14 +28,14 @@ Display a list of bot commands and its usage.
 # Music Support #
 Music Control | param           
 | :---: | :---:
-?play         | Youtube-URL\|Keywords
-?playLocal    | Category
+?play         | string: Youtube-URL \| Keywords
+?playLocal    | string: Category
 ?pause        | N/A
 ?resume       | N/A
-?skip         | Integer: Specify skip amount
+?skip         | int: num_Skip
 ?stop         | N/A
-?loop         | On\|Off: Loop current song
-?queue        | Int: Specify queue diplay amount
+?loop         | string: 'on' \| 'off'
+?queue        | int: queue_display_size
 ?shuffle      | N/A
 
 # Clean #
