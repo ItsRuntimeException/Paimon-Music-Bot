@@ -1482,6 +1482,7 @@ function is_superAccess(message) {
             servers: [
                 {
                     server_id : message.guild.id,
+                    server_name: message.guild.name,
                     admins: []
                 }
             ]
@@ -1507,17 +1508,27 @@ function is_superAccess(message) {
                 index = i;
                 return item.server_id === message.guild.id;
             });
+        /* try to update server_name */
+        if (filter_Obj.server_name != message.guild.name) {
+            servers_Obj.servers[index].server_name = message.guild.name;
+        }
     }
     else {
         /* if not found, create one */
         filter_Obj = {
             server_id : message.guild.id,
+            server_name: message.guild.name,
             admins: []
         };
         /* index = servers_Obj.servers.length()-1; */
         servers_Obj.servers.push(filter_Obj);
         index += objLength(servers_Obj.servers);
     }
+    /* update JSON Data */
+    setTimeout(function(err) {
+        if (err) throw err;
+        save_as_JSON(servers_Obj, path);
+    }, 1000);
     /* check for adminship */
     if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
         console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an admin command.');
