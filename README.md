@@ -1,10 +1,10 @@
 ***Personal Project; Last Updated: December 19, 2020***
 # [Discord Bot] Paimon-chan #
 A Discord bot with various functionalities I desired to have.<br/>
-<img src="moji/PaimonRub.gif">
-<img src="moji/PaimonPeeks.gif">
-<img src="moji/PaimonSpins.gif">
-<img src="moji/PaimonCookies.gif">
+<img src="moji/PaimonRub.gif" width="128" height="128">
+<img src="moji/PaimonPeeks.gif" width="128" height="128">
+<img src="moji/PaimonSpins.gif" width="128" height="128">
+<img src="moji/PaimonCookies.gif" width="128" height="128">
 
 **Steps**
 1. Make sure to have npm and nodeJS installed.<br/>
@@ -17,12 +17,12 @@ A Discord bot with various functionalities I desired to have.<br/>
 - [Music Support](#Music-Support)
 - [Super Access Commands](#Super-Access-Commands)
 - [Genshin Impact](#Genshin-Impact)
-- [MapleStory](#MapleStory)
-- [Roll](#Roll)
+- [ETC](#Other-Commands)
 
 # Help #
 Display a list of bot commands and its usage.
-**Example Usage**
+
+Example Usage |
 | :---
 ?Help
 
@@ -41,14 +41,31 @@ Command | param | Description
 ?queue \[int?Optional\]  | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
+**Paimon in action:**
+
+<img src="examples/music_example_1.png" width="700"><br/>
+
+<img src="examples/music_example_2.png" width="700"><br/>
+<img src="examples/music_example_3.png" width="700"><br/>
+<img src="examples/music_example_4.png" width="700"><br/>
+
 # Super Access Commands #
-Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.
+Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'SuperAcess'.<br/>
+
 Command | param | Description
 | :--- | :--- | :---
 ?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
 ?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
+
+**Test Run:**
+
+ <img src="examples/superAccess_example_1.png" width="728">
+
+admins.json (Before) | admins.json (After)
+| :---: | :---:
+<img src="examples/superAccess_before.png" width="364"> | <img src="examples/superAccess_after.png" width="364">
 
 # Genshin Impact #
 Command | bannerType | pityType | Operation | Description
@@ -59,8 +76,17 @@ Command | bannerType | pityType | Operation | Description
 ?gWish<br/>\[bannerType: string\]<br/>\[Operation\]<br/>\[int\] | Standard<br/>Weapon<br/>Event | N/A | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
 ?gReset<br/>\[bannerType: string\] | Standard<br/>Weapon<br/>Event | N/A | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
 
-# MapleStory #
-Give the user my maplestory guild page.
+**Test Run:**
 
-# Roll #
-Roll a random number from 1-6 (Dice Function).
+ <img src="examples/genshin_example_1.png" width="700"><br/>
+ <img src="examples/genshin_example_2.png" width="700"><br/>
+
+# Other Commands #
+Command | Description
+| :--- | :---
+?mapleStory | Give the user my maplestory guild page.
+?roll | Roll a random number from 1-6 (Dice Function).
+
+**Examples:**
+
+ <img src="examples/etc_example.png" width="700"><br/>
