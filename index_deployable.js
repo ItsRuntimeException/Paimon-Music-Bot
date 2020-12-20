@@ -224,7 +224,7 @@ client.on("message", async message => {
             else {
                 message.channel.send('There is nothing to stop.');
             }
-            console.log('[Server: '+message.guild.id+'] [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to skip music.');
+            console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to skip music.`);
             break;
         case "leave":
             leave(message);
@@ -550,13 +550,15 @@ async function queueLogic(message, search_string) {
 function download_music(message) {
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
+    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
+
     if (!filestream.existsSync(cached_path)){
         filestream.mkdirSync(cached_path);
     }
 
-    console.log(`[Server: ${message.guild.id}] [tag: ${message.member.user.tag} | uid: ${message.author}] requested to download cached music.`);
-    if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-        message.channel.send({files:[`${cached_path}${server.cached_video_info[0].title}.mp3`]});
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to download cached music.`);
+    if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+        message.channel.send({files:[`${cached_path}${audio_title}.mp3`]});
     }
     else {
         console.log('Unable to download music, current music is not cached!');
@@ -567,14 +569,15 @@ function download_music(message) {
 async function play_music_cached(message) {
     var server = servers[message.guild.id];
     var connection = await message.member.voice.channel.join();
+    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
 
     /* PLAY MUSIC VIA CACHED_MODE */
     var cached_path = './stream_fetched_audio/';
     if (!filestream.existsSync(cached_path)){
         filestream.mkdirSync(cached_path);
     }
-    if (!server.loop || !filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-        var audio_WritableStream = filestream.createWriteStream(`${cached_path}${server.cached_video_info[0].title}.mp3`)
+    if (!server.loop || !filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+        var audio_WritableStream = filestream.createWriteStream(`${cached_path}${audio_title}.mp3`)
         var audio_ReadableStream = ytdl(server.queue[0], { filter: 'audioonly' });
         console.log(`Caching audio file to ${cached_path}; hopefully less lag`);
         var stream = audio_ReadableStream.pipe(audio_WritableStream);
@@ -582,8 +585,8 @@ async function play_music_cached(message) {
     stream.on('finish', function () {
         queueInfo(message);
         musicInfo_Lookup(message);
-        server.dispatcher = connection.play(`${cached_path}${server.cached_video_info[0].title}.mp3`, {volume: server.volume});
-        console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
+        server.dispatcher = connection.play(`${cached_path}${audio_title}.mp3`, {volume: server.volume});
+        console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${audio_title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         
         /* cached_audio dispatcher */
         server.dispatcher.on('finish', function() {
@@ -592,8 +595,8 @@ async function play_music_cached(message) {
                 server.embedMessage.delete();
             /* music 'end' logic */
             if (server.skip) {
-                if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-                    filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+                    filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                         if (err) return console.log(err);
                         console.log('file deleted successfully');
                     });
@@ -617,8 +620,8 @@ async function play_music_cached(message) {
             }
             else
                 if (server.queue.length > 0) {
-                    if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-                        filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                    if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+                        filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                             if (err) return console.log(err);
                             console.log('file deleted successfully');
                         });
@@ -650,7 +653,8 @@ async function play_music(message, soundPath = '') {
     var server = servers[message.guild.id];
     var connection = await message.member.voice.channel.join();
     var cached_path = './stream_fetched_audio/';
-    
+    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
+
     if (server.local) {
         /* PLAY MUSIC LOCAL */
         if (server.queue[0] != undefined) {
@@ -677,8 +681,8 @@ async function play_music(message, soundPath = '') {
             server.embedMessage.delete();
         /* music 'end' logic */
         if (server.skip) {
-            if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-                filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+            if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+                filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                     if (err) return console.log(err);
                     console.log('file deleted successfully');
                 });
@@ -702,8 +706,8 @@ async function play_music(message, soundPath = '') {
         }
         else
             if (server.queue.length > 0) {
-                if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-                    filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+                    filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                         if (err) return console.log(err);
                         console.log('file deleted successfully');
                     });
@@ -822,7 +826,7 @@ function vol_music(message, num) {
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
-        console.log(`${message.member.user.tag} requested for [Server: ${message.guild.id}] volume change, but reached INVALID number.`);
+        console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested for volume change, but reached INVALID number.`);
         return message.channel.send(`${message.author}. You need to supply a VALID number!`);
     }
     if (server.dispatcher != undefined) {
@@ -910,7 +914,7 @@ function pause_music(message) {
     else {
         message.channel.send('There is nothing to pause.');
     }
-    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to pause music.');
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to pause music.`);
 }
 
 function resume_music(message) {
@@ -922,7 +926,7 @@ function resume_music(message) {
     else {
         message.channel.send('There is nothing to resume.');
     }
-    console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested to resume music.');
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to resume music.`);
 }
 
 function skip_music(message, sNum) {
@@ -979,7 +983,7 @@ function resetVoice(message) {
     server.playToggle = false;
     server.embedMessage = undefined;
 
-    console.log(`[Server: ${message.guild.id}] requested to reset variables!`);
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset variables!`);
     message.channel.send('Bot Reset Complete!');
 }
 
@@ -1088,7 +1092,7 @@ function create_genshin_table(message) {
                 /* check if this user has recently changed his/her userTag. */
                 update_genshin_userTag(array_Obj, i);
                 /* terminal logging */
-                console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] already EXIST!');
+                console.log(`Genshin Gacha Table for user: [tag: ${message.member.user.tag}] already EXIST!`);
                 /* channel reply */
                 message.channel.send(`${message.author}. Your Genshin Gacha Table aready exist!`);
                 return;
@@ -1102,7 +1106,7 @@ function create_genshin_table(message) {
     save_as_JSON(array_Obj, path);
 
     /* display message */
-    console.log('Finished creating Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
+    console.log(`Finished creating Genshin Gacha Table for user: [tag: ${message.member.user.tag}].`);
     console.log(new_userdata);
     message.channel.send(`${message.author}. Your Genshin Gacha Table has been created!`);
 }
@@ -1116,7 +1120,7 @@ function showtable(message) {
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
             /* terminal logging */
-            console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+            console.log(`Genshin Gacha Table for user: [tag: ${message.member.user.tag}] requested!`);
             console.log(array_Obj.users[i]);
             /* channel reply */
             var bannerObj = array_Obj.users[i].bannerTypes;
@@ -1160,7 +1164,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
             /* terminal logging */
-            console.log('Genshin Pity Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+            console.log(`Genshin Pity Table for user: [tag: ${message.member.user.tag}] requested!`);
             const normal_pity_goal = 90;
             const soft_pity_goal = normal_pity_goal - 15;
             const weapon_normal_pity_goal = normal_pity_goal - 10;
@@ -1280,7 +1284,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 /* check if this user has recently changed his/her userTag. */
                 update_genshin_userTag(array_Obj, i);
                 /* terminal logging */
-                console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+                console.log(`Genshin Gacha Table for user: [tag: ${message.member.user.tag}] requested!`);
                 break;
             }
         }
@@ -1331,7 +1335,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         save_as_JSON(array_Obj, path);
         
         /* display message */
-        console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
+        console.log(`Genshin Gacha Table for user: [tag: ${message.member.user.tag}] updated!`);
         console.log(array_Obj.users[i]);
         message.channel.send(`${message.author}. Your Genshin Gacha Table has been updated!`);
         var bannerObj = array_Obj.users[i].bannerTypes;
@@ -1385,7 +1389,7 @@ function wishReset(message, bannerType) {
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
             /* terminal logging */
-            console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] requested!');
+            console.log(`Genshin Gacha Table for user: [tag: ${message.member.user.tag}] requested!`);
             break;
         }
     }
@@ -1418,7 +1422,7 @@ function wishReset(message, bannerType) {
     save_as_JSON(array_Obj, path);
 
     /* display message */
-    console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
+    console.log(`Genshin Gacha Table for user: [tag: ${message.member.user.tag}] updated!`);
     console.log(array_Obj.users[i]);
     message.channel.send(`${message.author}. Your GGT:${bannerString} has been reset...`);
     var bannerObj = array_Obj.users[i].bannerTypes;
@@ -1655,7 +1659,7 @@ function is_superAccess(message) {
 
     /* check for adminship */
     if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
-        console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an admin command.');
+        console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an admin command.`);
         message.channel.send(`${message.author}. Only Paimon's masters may access this command! `, {files: [ moji_array[rand] ]});
         return false;
     }
@@ -1740,8 +1744,7 @@ function emergency_food_time(message) {
     /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
     .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
-    
-    /* fix error: 'Request to use token, but token was unavailable to the client' */
+
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
