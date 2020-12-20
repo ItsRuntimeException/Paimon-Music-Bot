@@ -548,6 +548,7 @@ async function queueLogic(message, search_string) {
 }
 
 function download_music(message) {
+    var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
     if (!filestream.existsSync(cached_path)){
         filestream.mkdirSync(cached_path);
