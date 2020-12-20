@@ -38,6 +38,7 @@ Command | param | Description
 ?skip \[int?Optional\] | skipNum | Skip current \| skipNum of songs in queue.
 ?stop | N/A | Stop music and clear queue.
 ?loop \[string?Optional\]  | on \| off | Loop current music.
+
 ?queue \[int?Optional\]  | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
@@ -57,7 +58,10 @@ Command | param | Description
 ?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
 ?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
+?caching \[string?Optional\] | on \| off | 'FWTP'-method, very bad & slow performance!
+?dlmusic | N/A | Download music from pre-cached music file.
 ?shutdown | N/A | Shutdown the bot from the server.
+
 
 **Test Run:**
 
