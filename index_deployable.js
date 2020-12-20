@@ -261,26 +261,26 @@ client.on("message", async message => {
             break;
         default:
             /* Super Access Commands, etc... */
-            if (command.match(/clean|clear/gi)) {
+            if (command.match(/clean|clear/g)) {
                 if (is_superAccess(message)) {
                     return clean_messages(message, args[0]);
                 }
-            } else if (command.match(/shutdown|kill/gi)) {
+            } else if (command.match(/shutdown|kill/g)) {
                 if (is_superAccess(message)) {
                     return emergency_food_time(message);
                 }
-            } else if (command.match(/caching/)) {
+            } else if (command.match(/caching/g)) {
                 if (is_superAccess(message)) {
                     set_cached_audio_mode(message, args[0]);
                 }
-            } else if (command.match(/dlmusic/)) {
+            } else if (command.match(/dlmusic/g)) {
                 if (is_superAccess(message)) {
                     download_music(message);
                 }
-            } else if (command.match(/add/gi)) {
-                const command2 = args.shift();
+            } else if (command.match(/add/g)) {
+                const command2 = args.shift().toLowerCase();
                 if (command2 != undefined) {
-                    if (command2.match(/superaccess|super/)) {
+                    if (command2.match(/superaccess|super/g)) {
                         if (is_superAccess(message)) {
                             return add_superAccess(message, args[0]);
                         }
