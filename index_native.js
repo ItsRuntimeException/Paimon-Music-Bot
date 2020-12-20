@@ -1461,20 +1461,6 @@ async function add_superAccess(message, userTag) {
                 });
         }
 
-        /* grant admin role to user */
-        var admin_role = this_guild.roles.cache.find(role => role.name.match(/admin|mod/gi));
-        try {
-            if (admin_role != undefined) {
-                /* check if user already have this role, if not then add it */
-                let get_adminRoles = guildmember.roles.cache.find(role => role.name.match(/admin|mod/gi));
-                if (get_adminRoles == undefined)
-                    await guildmember.roles.add(admin_role);
-            }
-        } catch (error) {
-            console.log(`${error}: I probably do not have 'Manage Role' permission.`);
-            message.channel.send(`${error}: I probably do not have 'Manage Role' permission.`);
-        }
-
         /* Check if this server already has this user as admin, if not then add it */
         if (!filter_Obj.admins.includes(userTag)) {
             if (guildmember.user.bot) {
@@ -1557,20 +1543,6 @@ async function remove_superAccess(message, userTag) {
                     index = i;
                     return item.server_id === message.guild.id;
                 });
-        }
-        
-        /* remove admin role from user */
-        var admin_role = this_guild.roles.cache.find(role => role.name.match(/admin|mod/gi));
-        try {
-            if (admin_role != undefined) {
-                /* check if user have this role, if not then remove it */
-                let get_adminRoles = guildmember.roles.cache.find(role => role.name.match(/admin|mod/gi));
-                if (get_adminRoles != undefined)
-                    await guildmember.roles.remove(admin_role);
-            }
-        } catch (error) {
-            console.log(`${error}: I probably do not have 'Manage Role' permission.`);
-            message.channel.send(`${error}: I probably do not have 'Manage Role' permission.`);
         }
 
         /* Check if this server already has this user as admin, if found then remove it */
