@@ -55,7 +55,7 @@ Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'Supe
 
 Command | param | Description
 | :--- | :--- | :---
-?caching \[string?Optional\] | on \| off | 'FWTP'-method, very bad & slow performance!
+?caching \[string?Optional\] | on \| off | Preload audio into file, then stream it.
 ?dlmusic | N/A | Download music from pre-cached music file.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
