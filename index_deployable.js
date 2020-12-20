@@ -43,15 +43,16 @@ client.on("message", async message => {
     if (message.guild != null) {
         if (!servers[message.guild.id]) {
             servers[message.guild.id] = {
+                dispatcher: undefined,
                 queue: [],
                 cached_video_info: [],
+                cached_audio_mode: false,
                 volume: 0.05,
                 skipAmount: 1,
                 loop: false,
                 skip: false,
                 local: false,
                 playToggle: false,
-                dispatcher: undefined,
                 embedMessage: undefined
             }
         }
@@ -201,6 +202,11 @@ client.on("message", async message => {
         case "loop":
             loop_music(message, args[0]);
             break;
+        case "caching":
+            set_cached_audio_mode(message, args[0]);
+            break;
+        case "dlmusic":
+            download_music(message);
         case "pause":
             pause_music(message);
             break;
@@ -335,8 +341,12 @@ function userHelp(message) {
             value: "Fetch details of current song."
           },
           {
-            name: "?Pause|Resume|Skip|Stop|Loop|Shuffle",
+            name: "?Pause|Resume|Skip|Stop|Shuffle",
             value: "Music Control Logic."
+          },
+          {
+            name: "?Loop|Caching|Dlmusic",
+            value: "Extra Music Control Logic."
           },
           {
             name: "?Vol [Percent]",
@@ -516,33 +526,112 @@ async function queueLogic(message, search_string) {
             console.log(server.queue);
         }
         if (server.queue.length > 1) {
-            if (!validate_playlist) {
-                if (!validateURL) {
-                    message.channel.send(`Your query: '${search_string}' have been queued.\n`);
-                }
-                else if (validateURL) {
-                    message.channel.send(`Your link have been queued.\n`);
-                }
-            }
-            else if (validate_playlist) {
-                message.channel.send(`Your playlist have been queued.\n`);
-            }
+            queueInfo(message);
         }
         /* 
         *  server.queue only seems to have updated inside this function instead of client.on(...), 
         *  call play_music here to avoid playing [undefined] song.
         */
         if (server.playToggle) {
-            play_music(message, '');
+            console.log(server.cached_audio_mode);
+            if (server.cached_audio_mode == true) {
+                play_music_cached(message);
+            }
+            else {
+                play_music(message);
+            }
         }
     }
 }
 
-async function play_music(message, soundPath) {
+async function play_music_cached(message) {
     var server = servers[message.guild.id];
     var connection = await message.member.voiceChannel.join();
 
+    /* PLAY MUSIC VIA CACHED_MODE */
+    var cached_path = './stream_fetched_audio/';
+    if (!filestream.existsSync(cached_path)){
+        filestream.mkdirSync(cached_path);
+    }
+    if (!server.loop || !filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+        var audio_WritableStream = filestream.createWriteStream(`${cached_path}${server.cached_video_info[0].title}.mp3`)
+        var audio_ReadableStream = ytdl(server.queue[0], { filter: 'audioonly' });
+        console.log(`Caching audio file to ${cached_path}; hopefully less lag`);
+        var stream = audio_ReadableStream.pipe(audio_WritableStream);
+    }
+    stream.on('finish', function () {
+        queueInfo(message);
+        musicInfo_Lookup(message);
+        server.dispatcher = connection.playStream(`${cached_path}${server.cached_video_info[0].title}.mp3`, {volume: server.volume});
+        console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
+        
+        /* cached_audio dispatcher */
+        server.dispatcher.on('end', function() {
+            /* delete old embedMessage */
+            if (server.embedMessage != undefined)
+                server.embedMessage.delete();
+            /* music 'end' logic */
+            if (server.skip) {
+                if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+                    filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                        if (err) return console.log(err);
+                        console.log('file deleted successfully');
+                    });
+                }
+                server.skip = false;
+                var count = 0;
+                for (var i = 0; i < server.skipAmount; i++) {
+                    if (server.queue.length > 0) {
+                        server.queue.shift();
+                        server.cached_video_info.shift();
+                        count++;
+                    }
+                    else
+                        break; /* stop unnecessary iteration */
+                }
+                console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+                message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+            }
+            else if (server.loop) {
+                console.log('Loop Mode: ON, replaying song.');
+            }
+            else
+                if (server.queue.length > 0) {
+                    if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+                        filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                            if (err) return console.log(err);
+                            console.log('file deleted successfully');
+                        });
+                    }
+                    server.queue.shift();
+                    server.cached_video_info.shift();
+                }
+
+            if (server.queue.length > 0) {
+                if (server.local)
+                    play_music(message, soundPath);
+                else {
+                    if (server.cached_audio_mode)
+                        play_music_cached(message);
+                    else
+                        play_music(message);
+                }
+            }
+            else if (server.queue.length == 0) {
+                server.dispatcher = undefined;
+                leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
+            }
+        });
+    });
+}
+
+async function play_music(message, soundPath = '') {
+    var server = servers[message.guild.id];
+    var connection = await message.member.voiceChannel.join();
+    var cached_path = './stream_fetched_audio/';
+    
     if (server.local) {
+        /* PLAY MUSIC LOCAL */
         if (server.queue[0] != undefined) {
             let song = soundPath + server.queue[0];
             let songName = server.queue[0].split('.mp3')[0];
@@ -552,20 +641,27 @@ async function play_music(message, soundPath) {
         }
     }
     else {
-        /* PLAY MUSIC */
+        /* PLAY MUSIC VIA STREAM_MODE */
         var stream = ytdl(server.queue[0], { filter: 'audioonly' });
-        server.dispatcher = connection.playStream(stream, {volume: server.volume});
-        console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         queueInfo(message);
         musicInfo_Lookup(message);
+        server.dispatcher = connection.playStream(stream, {volume: server.volume});
+        console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
     }
 
+    /* stream dispatcher */
     server.dispatcher.on('end', function() {
         /* delete old embedMessage */
         if (server.embedMessage != undefined)
             server.embedMessage.delete();
         /* music 'end' logic */
         if (server.skip) {
+            if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+                filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                    if (err) return console.log(err);
+                    console.log('file deleted successfully');
+                });
+            }
             server.skip = false;
             var count = 0;
             for (var i = 0; i < server.skipAmount; i++) {
@@ -585,23 +681,31 @@ async function play_music(message, soundPath) {
         }
         else
             if (server.queue.length > 0) {
+                if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+                    filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+                        if (err) return console.log(err);
+                        console.log('file deleted successfully');
+                    });
+                }
                 server.queue.shift();
                 server.cached_video_info.shift();
             }
 
         if (server.queue.length > 0) {
-            if (server.local) {
+            if (server.local)
                 play_music(message, soundPath);
-            }
             else {
-                play_music(message, '');
+                if (server.cached_audio_mode)
+                    play_music_cached(message);
+                else
+                    play_music(message);
             }
         }
         else if (server.queue.length == 0) {
             server.dispatcher = undefined;
             leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
         }
-    })
+    });
 }
 
 function musicInfo_Lookup(message) {
@@ -747,6 +851,35 @@ function loop_music(message, switcher) {
     }
 }
 
+function set_cached_audio_mode (message, switcher) {
+    var server = servers[message.guild.id];
+    if (switcher == undefined) {
+        if (server.cached_audio_mode) {
+            return message.channel.send('Audio Caching: ON').then(newMessage => newMessage.delete(5000));
+        }
+        else {
+            return message.channel.send('Audio Caching: OFF').then(newMessage => newMessage.delete(5000));
+        }
+    }
+
+    switcher = switcher.toLowerCase();
+    switch (switcher) {
+        case 'on':
+            server.cached_audio_mode = true;
+            console.log(`[Server: ${message.guild.id}] Audio Caching is turned ON`);
+            message.channel.send('Audio Caching is turned ON');
+            break;
+        case 'off':
+            server.cached_audio_mode = false;
+            console.log(`[Server: ${message.guild.id}] Audio Caching is turned OFF`);
+            message.channel.send('Audio Caching is turned OFF');
+            break;
+        default:
+            message.channel.send('Usage: ?caching ON|OFF');
+            break;
+    }
+}
+
 function pause_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != undefined) {
@@ -801,16 +934,29 @@ function stop_music(message) {
 
 function resetVoice(message) {
     var server = servers[message.guild.id];
+    var cached_path = './stream_fetched_audio/';
+    if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+        filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
+            if (err) return console.log(err);
+            console.log('file deleted successfully');
+        });
+    }
     /* clear server.queue & set server.dispatcher = undefined */
     while (server.queue.length > 0) {
         server.queue.shift();
         server.cached_video_info.shift();
     }
-    server.dispatcher = undefined
+    server.dispatcher = undefined;
+    server.queue = [];
+    server.cached_video_info = [];
     server.volume = 0.50;
     server.loop = false;
     server.skip = false;
     server.skipAmount = 1;
+    server.cached_audio_mode = false;
+    server.local = false;
+    server.playToggle = false;
+    server.embedMessage = undefined;
 
     console.log(`[Server: ${message.guild.id}] requested to reset variables!`);
     message.channel.send('Bot Reset Complete!');
