@@ -56,8 +56,8 @@ client.on("message", async message => {
             }
         }
     }
-    /* if a user mentioned the bot, reply back to the user */
-    if (message.isMentioned(client.user)) {
+
+    if (message.mentions.has(client.user)) {
         message.reply("If you need help from Paimon, please try ?help");
     }
 
@@ -93,7 +93,7 @@ client.on("message", async message => {
                         +"\t\tPekora bgm music 1 hour").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
             }
             /* IN-CHANNEL CHECK */
-            if (!message.member.voiceChannel) {
+            if (!message.member.voice.channel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
             if (server.local && server.queue.length > 0) {
@@ -153,11 +153,11 @@ client.on("message", async message => {
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
-                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete(5000));
+                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
             }
             else {
                 console.log('playLocal: Category does not exist!');
-                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete(5000));
+                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
             }
             break;
         case "shuffle":
@@ -209,7 +209,7 @@ client.on("message", async message => {
             break;
         case "skip":
             /* IN-CHANNEL CHECK */
-            if (!message.member.voiceChannel) {
+            if (!message.member.voice.channel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
             }
             skip_music(message, args[0]);
@@ -314,7 +314,7 @@ function userHelp(message) {
     message.author.send({embed: {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             url: sauce
         },
         title: "COMMANDS",
@@ -373,14 +373,14 @@ function userHelp(message) {
         ],
         timestamp: new Date(),
         footer: {
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             text: '© Rich Embedded Frameworks'
         }
     }});
     message.author.send({embed: {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             url: sauce
         },
         title: "SUPER ACCESS COMMANDS",
@@ -409,7 +409,7 @@ function userHelp(message) {
         ],
         timestamp: new Date(),
         footer: {
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             text: '© Rich Embedded Frameworks'
         }
     }});
@@ -424,12 +424,12 @@ async function join(message) {
         return message.reply("please join a voice channel first!");
     }
     else {
-        message.member.voiceChannel.join();
+        message.member.voice.channel.join();
     }
 }
 
 async function leave(message) {
-    let clientVoiceConnection = message.guild.voiceConnection;
+    let clientVoiceConnection = message.guild.voice.connection;
     if (clientVoiceConnection == undefined){
         message.channel.send("I'm not in a channel!", {files: ['./moji/PaimonAngry.png']});
     }
@@ -500,7 +500,7 @@ async function queueLogic(message, search_string) {
         else if (validate_playlist) {
             /* PRELOAD PLAYLIST */
             try {
-                message.channel.send(`Fetching only up to 50 videos, please be patient if this takes awhile...`).then(newMessage => newMessage.delete(5000));
+                message.channel.send(`Fetching only up to 50 videos, please be patient if this takes awhile...`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
                 var yt_playlist = await youtube.getPlaylist(search_string);
             } catch (error) {
                 console.log(error);
@@ -548,7 +548,7 @@ async function queueLogic(message, search_string) {
 
 async function play_music_cached(message) {
     var server = servers[message.guild.id];
-    var connection = await message.member.voiceChannel.join();
+    var connection = await message.member.voice.channel.join();
 
     /* PLAY MUSIC VIA CACHED_MODE */
     var cached_path = './stream_fetched_audio/';
@@ -564,11 +564,11 @@ async function play_music_cached(message) {
     stream.on('finish', function () {
         queueInfo(message);
         musicInfo_Lookup(message);
-        server.dispatcher = connection.playStream(`${cached_path}${server.cached_video_info[0].title}.mp3`, {volume: server.volume});
+        server.dispatcher = connection.play(`${cached_path}${server.cached_video_info[0].title}.mp3`, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         
         /* cached_audio dispatcher */
-        server.dispatcher.on('end', function() {
+        server.dispatcher.on('finish', function() {
             /* delete old embedMessage */
             if (server.embedMessage != undefined)
                 server.embedMessage.delete();
@@ -620,6 +620,7 @@ async function play_music_cached(message) {
                 }
             }
             else if (server.queue.length == 0) {
+                server.dispatcher.destroy();
                 server.dispatcher = undefined;
                 leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
             }
@@ -629,7 +630,7 @@ async function play_music_cached(message) {
 
 async function play_music(message, soundPath = '') {
     var server = servers[message.guild.id];
-    var connection = await message.member.voiceChannel.join();
+    var connection = await message.member.voice.channel.join();
     var cached_path = './stream_fetched_audio/';
     
     if (server.local) {
@@ -637,7 +638,7 @@ async function play_music(message, soundPath = '') {
         if (server.queue[0] != undefined) {
             let song = soundPath + server.queue[0];
             let songName = server.queue[0].split('.mp3')[0];
-            server.dispatcher = connection.playStream(song, {volume: server.volume});
+            server.dispatcher = connection.play(song, {volume: server.volume});
             console.log('[Local-Mode][Server: '+message.guild.id+'] Now Playing: ' + songName);
             queueInfo(message);
         }
@@ -647,12 +648,12 @@ async function play_music(message, soundPath = '') {
         var stream = ytdl(server.queue[0], { filter: 'audioonly' });
         queueInfo(message);
         musicInfo_Lookup(message);
-        server.dispatcher = connection.playStream(stream, {volume: server.volume});
+        server.dispatcher = connection.play(stream, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
     }
 
     /* stream dispatcher */
-    server.dispatcher.on('end', function() {
+    server.dispatcher.on('finish', function() {
         /* delete old embedMessage */
         if (server.embedMessage != undefined)
             server.embedMessage.delete();
@@ -717,7 +718,7 @@ function musicInfo_Lookup(message) {
         message.channel.send({embed: {
             author: {
                 name: 'Paimon-chan\'s Embedded Info',
-                icon_url: client.user.avatarURL,
+                icon_url: client.user.avatarURL(),
                 url: sauce
             },
             title: cached[0].title,
@@ -730,10 +731,10 @@ function musicInfo_Lookup(message) {
             }],
             timestamp: new Date(),
             footer:{
-                icon_url: client.user.avatarURL,
+                icon_url: client.user.avatarURL(),
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(newMessage => newMessage.delete(10000));
+        }}).then(newMessage => newMessage.delete({timeout: 10000, reason: 'fewer text clutter.'}));
     }
     else
         return message.channel.send('Local Music does not support Info-Lookup');
@@ -773,7 +774,7 @@ async function queueInfo(message, qNum = 10) {
     message.channel.send({embed: {
         author: {
             name: 'Paimon-chan\'s Embedded Info',
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             url: sauce
         },
         description: `[Server: ${message.guild.name}]\n\tvolume: ${(server.volume*100)}%`,
@@ -789,7 +790,7 @@ async function queueInfo(message, qNum = 10) {
         ],
         timestamp: new Date(),
         footer: {
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             text: '© Rich Embedded Frameworks'
         }
     }}).then(newMessage => server.embedMessage = newMessage);
@@ -799,7 +800,7 @@ function vol_music(message, num) {
     var server = servers[message.guild.id];
     if (num == undefined) {
         console.log(`[Server: ${message.guild.id}] Current volume: ${server.volume*100}%`);
-        return message.channel.send(`Current volume: ${server.volume*100}%`).then(newMessage => newMessage.delete(5000));
+        return message.channel.send(`Current volume: ${server.volume*100}%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
@@ -812,15 +813,15 @@ function vol_music(message, num) {
         if (server.volume <= 1) {
             server.dispatcher.setVolume(server.volume);
             console.log(`[Server: ${message.guild.id}] Volume set to ${percentage}%`);
-            message.channel.send(`Volume set to ${percentage}%`).then(newMessage => newMessage.delete(5000));
+            message.channel.send(`Volume set to ${percentage}%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
         }
         else {
             console.log(`[Server: ${message.guild.id}] Cannot set volume greater than 100%`);
-            message.channel.send(`Cannot set volume greater than 100%`).then(newMessage => newMessage.delete(5000));
+            message.channel.send(`Cannot set volume greater than 100%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
         }
     }
     else {
-        message.channel.send('Music is not playing.').then(newMessage => newMessage.delete(5000));
+        message.channel.send('Music is not playing.').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
     }
 }
 
@@ -828,10 +829,10 @@ function loop_music(message, switcher) {
     var server = servers[message.guild.id];
     if (switcher == undefined) {
         if (server.loop) {
-            return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete(5000));
+            return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
         }
         else {
-            return message.channel.send('Loop Mode Status: OFF').then(newMessage => newMessage.delete(5000));
+            return message.channel.send('Loop Mode Status: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
         }
     }
 
@@ -857,10 +858,10 @@ function set_cached_audio_mode (message, switcher) {
     var server = servers[message.guild.id];
     if (switcher == undefined) {
         if (server.cached_audio_mode) {
-            return message.channel.send('Audio Caching: ON').then(newMessage => newMessage.delete(5000));
+            return message.channel.send('Audio Caching: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
         }
         else {
-            return message.channel.send('Audio Caching: OFF').then(newMessage => newMessage.delete(5000));
+            return message.channel.send('Audio Caching: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
         }
     }
 
@@ -885,7 +886,7 @@ function set_cached_audio_mode (message, switcher) {
 function pause_music(message) {
     let server = servers[message.guild.id];
     if (server.dispatcher != undefined) {
-        server.dispatcher.pause();
+        server.dispatcher.pause(true);
         message.channel.send('Music paused.');
     }
     else {
@@ -987,7 +988,7 @@ async function clean_messages(message, numline) {
     *  Fetch the given number of messages to sweeps: numline+1 to include the execution command
     *  Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
     */
-    var bulkMessages = ((numline == undefined) ? await message.channel.fetchMessages() : await message.channel.fetchMessages( {limit: ++numline}));
+    var bulkMessages = ((numline == undefined) ? await message.channel.messages.fetch() : await message.channel.messages.fetch( {limit: ++numline} ));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
     servers[message.guild.id].embedMessage = undefined;
     console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
@@ -1080,10 +1081,7 @@ function create_genshin_table(message) {
     }
 
     /* update JSON Data */
-    setTimeout(function(err) {
-        if (err) throw err;
-        save_as_JSON(array_Obj, path);
-    }, 1000);
+    save_as_JSON(array_Obj, path);
 
     /* display message */
     console.log('Finished creating Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '].');
@@ -1107,7 +1105,7 @@ function showtable(message) {
             return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
-                        icon_url: message.member.user.avatarURL,
+                        icon_url: message.member.user.avatarURL(),
                         url: sauce
                     },
                     fields: [{
@@ -1125,7 +1123,7 @@ function showtable(message) {
                     ],
                     timestamp: new Date(),
                     footer: {
-                        icon_url: client.user.avatarURL,
+                        icon_url: client.user.avatarURL(),
                         text: '© Rich Embedded Frameworks'
                     }
             }});
@@ -1164,7 +1162,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                 return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
-                        icon_url: message.member.user.avatarURL,
+                        icon_url: message.member.user.avatarURL(),
                         url: sauce
                     },
                     fields: [{
@@ -1182,7 +1180,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                     ],
                     timestamp: new Date(),
                     footer: {
-                        icon_url: client.user.avatarURL,
+                        icon_url: client.user.avatarURL(),
                         text: '© Rich Embedded Frameworks'
                     }
                 }});
@@ -1199,7 +1197,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                 return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
-                        icon_url: message.member.user.avatarURL,
+                        icon_url: message.member.user.avatarURL(),
                         url: sauce
                     },
                     fields: [{
@@ -1217,7 +1215,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                     ],
                     timestamp: new Date(),
                     footer: {
-                        icon_url: client.user.avatarURL,
+                        icon_url: client.user.avatarURL(),
                         text: '© Rich Embedded Frameworks'
                     }
                 }});
@@ -1312,10 +1310,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         }
 
         /* save data back to json */
-        setTimeout(function(err) {
-            if (err) throw err;
-            save_as_JSON(array_Obj, path);
-        }, 1000);
+        save_as_JSON(array_Obj, path);
         
         /* display message */
         console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
@@ -1325,7 +1320,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         return message.channel.send({embed: {
             author: {
                 name: message.member.user.tag,
-                icon_url: message.member.user.avatarURL,
+                icon_url: message.member.user.avatarURL(),
                 url: sauce
             },
             fields: [{
@@ -1343,10 +1338,10 @@ function wishCount(message, bannerType, commandType, nInc) {
             ],
             timestamp: new Date(),
             footer: {
-                icon_url: client.user.avatarURL,
+                icon_url: client.user.avatarURL(),
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(newMessage => newMessage.delete(5000));
+        }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
     }
 }
 
@@ -1402,10 +1397,7 @@ function wishReset(message, bannerType) {
     }
 
     /* save data back to json */
-    setTimeout(function(err) {
-        if (err) throw err;
-        save_as_JSON(array_Obj, path);
-    }, 1000);
+    save_as_JSON(array_Obj, path);
 
     /* display message */
     console.log('Genshin Gacha Table for user: [tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] updated!');
@@ -1415,7 +1407,7 @@ function wishReset(message, bannerType) {
     return message.channel.send({embed: {
         author: {
             name: message.member.user.tag,
-            icon_url: message.member.user.avatarURL,
+            icon_url: message.member.user.avatarURL(),
             url: sauce
         },
         fields: [{
@@ -1433,13 +1425,13 @@ function wishReset(message, bannerType) {
         ],
         timestamp: new Date(),
         footer: {
-            icon_url: client.user.avatarURL,
+            icon_url: client.user.avatarURL(),
             text: '© Rich Embedded Frameworks'
         }
-    }}).then(newMessage => newMessage.delete(5000));
+    }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
 }
 
-function add_superAccess(message, userTag) {
+async function add_superAccess(message, userTag) {
     if (userTag == undefined) {
         return message.channel.send(`${message.author}.`
         +"\nThis command will let [@userTag] use SuperAccess-commands."
@@ -1452,7 +1444,7 @@ function add_superAccess(message, userTag) {
     }
 
     /* Check adminship, then push user_id as admin */
-    var this_guild = client.guilds.get(message.guild.id);
+    var this_guild = message.guild;
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
         var path = './json_data/admins.json';
@@ -1468,30 +1460,41 @@ function add_superAccess(message, userTag) {
                     return item.server_id === message.guild.id;
                 });
         }
-        
+
+        /* grant admin role to user */
+        var admin_role = this_guild.roles.cache.find(role => role.name.match(/admin|mod/gi));
+        try {
+            if (admin_role != undefined) {
+                /* check if user already have this role, if not then add it */
+                let get_adminRoles = guildmember.roles.cache.find(role => role.name.match(/admin|mod/gi));
+                if (get_adminRoles == undefined)
+                    await guildmember.roles.add(admin_role);
+            }
+        } catch (error) {
+            console.log(`${error}: I probably do not have 'Manage Role' permission.`);
+            message.channel.send(`${error}: I probably do not have 'Manage Role' permission.`);
+        }
+
         /* Check if this server already has this user as admin, if not then add it */
         if (!filter_Obj.admins.includes(userTag)) {
             if (guildmember.user.bot) {
                 console.log(`${message.author.tag} tried to grant 'SuperAccess' permission to a bot!`)
                 return message.channel.send(`Bots don't need 'SuperAccess'!`);
             }
+
+            /* grant 'SuperAccess' */
             servers_Obj.servers[index].admins.push(userTag);
             servers_Obj.servers[index].admins.sort();
             /* update JSON Data */
-            setTimeout(function(err) {
-                if (err) throw err;
-                save_as_JSON(servers_Obj, path);
-            }, 1000);
-            /* grant admin role to user */
-            var admin_role = this_guild.roles.find(role => role.name.match(/admin|Admin/g));
-            guildmember.addRole(admin_role);
+            save_as_JSON(servers_Obj, path);
+
             /* reply */
             message.channel.send('Admin successfully added!');
             console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
             guildmember.user.send({embed: {
                 author: {
                     name: 'Paimon-chan\'s Embedded Info',
-                    icon_url: client.user.avatarURL,
+                    icon_url: client.user.avatarURL(),
                     url: sauce
                 },
                 title: "SUPER ACCESS COMMANDS",
@@ -1512,7 +1515,7 @@ function add_superAccess(message, userTag) {
                 ],
                 timestamp: new Date(),
                 footer: {
-                    icon_url: client.user.avatarURL,
+                    icon_url: client.user.avatarURL(),
                     text: '© Rich Embedded Frameworks'
                 }
             }});
@@ -1526,7 +1529,7 @@ function add_superAccess(message, userTag) {
     }
 }
 
-function remove_superAccess(message, userTag) {
+async function remove_superAccess(message, userTag) {
     if (userTag == undefined) {
         return message.channel.send(`${message.author}.`
         +"\nThis command will remove [@userTag] from SuperAccess-commands."
@@ -1539,7 +1542,7 @@ function remove_superAccess(message, userTag) {
     }
 
     /* Check adminship, then push user_id as admin */
-    var this_guild = client.guilds.get(message.guild.id);
+    var this_guild = message.guild;
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
         var path = './json_data/admins.json';
@@ -1556,6 +1559,20 @@ function remove_superAccess(message, userTag) {
                 });
         }
         
+        /* remove admin role from user */
+        var admin_role = this_guild.roles.cache.find(role => role.name.match(/admin|mod/gi));
+        try {
+            if (admin_role != undefined) {
+                /* check if user have this role, if not then remove it */
+                let get_adminRoles = guildmember.roles.cache.find(role => role.name.match(/admin|mod/gi));
+                if (get_adminRoles != undefined)
+                    await guildmember.roles.remove(admin_role);
+            }
+        } catch (error) {
+            console.log(`${error}: I probably do not have 'Manage Role' permission.`);
+            message.channel.send(`${error}: I probably do not have 'Manage Role' permission.`);
+        }
+
         /* Check if this server already has this user as admin, if found then remove it */
         if (filter_Obj.admins.includes(userTag)) {
             /* exceptions */
@@ -1571,21 +1588,13 @@ function remove_superAccess(message, userTag) {
                 console.log(`${message.author.tag} tried to remove 'SuperAccess' permission from server admin!`);
                 return message.channel.send(`You cannot remove 'SuperAccess' from [Server Admin: ${this_guild.owner}]!`);
             }
+
             /* remove from 'SuperAccess' */
-            let temp_index = servers_Obj.servers[index].admins.indexOf(userTag);
-            servers_Obj.servers[index].admins.splice(temp_index, 1);
-            /* update JSON Data */
-            setTimeout(function(err) {
-                if (err) throw err;
-                save_as_JSON(servers_Obj, path);
-            }, 1000);
-            /* grant admin role to user */
-            var admin_role = this_guild.roles.find(role => role.name.match(/admin|Admin/g));
-            try {
-                guildmember.removeRole(admin_role);
-            } catch (error) {
-                console.log(error);
-            }
+            let admin_index = servers_Obj.servers[index].admins.indexOf(userTag);
+            servers_Obj.servers[index].admins.splice(admin_index, 1);
+            /* update JSON Data  */
+            save_as_JSON(servers_Obj, path);
+
             /* reply */
             message.channel.send('Admin successfully removed!');
             console.log(`Admin successfully removed! ${guildmember.user} no longer has access to SuperAccess-commands!`);
@@ -1618,10 +1627,7 @@ function is_superAccess(message) {
             ]
         };
         /* update JSON Data */
-        setTimeout(function(err) {
-            if (err) throw err;
-            save_as_JSON(servers_Obj, path);
-        }, 1000);
+        save_as_JSON(servers_Obj, path);
         console.log(`New ${path.replace(/\/|\./g,'')} json-file created!`);
     }
     /** 
@@ -1655,10 +1661,8 @@ function is_superAccess(message) {
         index += objLength(servers_Obj.servers);
     }
     /* update JSON Data */
-    setTimeout(function(err) {
-        if (err) throw err;
-        save_as_JSON(servers_Obj, path);
-    }, 1000);
+    save_as_JSON(servers_Obj, path);
+
     /* check for adminship */
     if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
         console.log('[tag: ' + message.member.user.tag + ' | uid: ' + message.author + '] tried to access an admin command.');
@@ -1692,8 +1696,9 @@ function readTextFile(filepath)
 function save_as_JSON(JSON_Obj, path) {
     /* save data back to json */
     var tableString = JSON.stringify(JSON_Obj, undefined, 2);
-    filestream.writeFile(path, tableString, 'utf-8', function(err) {
-        if (err) throw err;
+    filestream.writeFileSync(path, tableString, 'ascii', function (err) {
+        if (err)
+            throw err;
     });
 }
 
@@ -1725,17 +1730,14 @@ function sec_Convert(sec_string) {
 function update_genshin_userTag(array_Obj, cached_index) {
     var path = './json_data/genshin_wish_tables.json';
     var uniqueID = array_Obj.users[cached_index].uid;
-    var current_userTag = client.users.get(uniqueID).tag;
+    var current_userTag = client.users.cache.get(uniqueID).tag;
     var cached_userTag = array_Obj.users[cached_index].username;
 
     if (cached_userTag !== current_userTag) {
         array_Obj.users[cached_index].username = current_userTag;
     }
     /* update JSON Data */
-    setTimeout(function(err) {
-        if (err) throw err;
-        save_as_JSON(array_Obj, path);
-    }, 1000);
+    save_as_JSON(array_Obj, path);
 }
 
 function guildLink(message) {
@@ -1748,8 +1750,7 @@ function emergency_food_time(message) {
     /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
     .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
-    
-    /* fix error: 'Request to use token, but token was unavailable to the client' */
+
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
