@@ -202,11 +202,6 @@ client.on("message", async message => {
         case "loop":
             loop_music(message, args[0]);
             break;
-        case "caching":
-            set_cached_audio_mode(message, args[0]);
-            break;
-        case "dlmusic":
-            download_music(message);
         case "pause":
             pause_music(message);
             break;
@@ -265,7 +260,7 @@ client.on("message", async message => {
             wishReset(message, args[0]);
             break;
         default:
-            /* super commands, etc... */
+            /* Super Access Commands, etc... */
             if (command.match(/clean|clear/gi)) {
                 if (is_superAccess(message)) {
                     return clean_messages(message, args[0]);
@@ -273,6 +268,14 @@ client.on("message", async message => {
             } else if (command.match(/shutdown|kill/gi)) {
                 if (is_superAccess(message)) {
                     return emergency_food_time(message);
+                }
+            } else if (command.match(/caching/)) {
+                if (is_superAccess(message)) {
+                    set_cached_audio_mode(message, args[0]);
+                }
+            } else if (command.match(/dlmusic/)) {
+                if (is_superAccess(message)) {
+                    download_music(message);
                 }
             } else if (command.match(/add/gi)) {
                 const command2 = args.shift();
@@ -341,12 +344,8 @@ function userHelp(message) {
             value: "Fetch details of current song."
           },
           {
-            name: "?Pause|Resume|Skip|Stop|Shuffle",
+            name: "?Pause|Resume|Skip|Stop|Shuffle|Loop",
             value: "Music Control Logic."
-          },
-          {
-            name: "?Loop|Caching|Dlmusic",
-            value: "Extra Music Control Logic."
           },
           {
             name: "?Vol [Percent]",
@@ -403,6 +402,10 @@ function userHelp(message) {
           {
             name: "?Clean|Clear",
             value: "Paimon will clean up your mess!"
+          },
+          {
+            name: "?Caching|Dlmusic",
+            value: "Extra Music Control Logic."
           }
         ],
         timestamp: new Date(),
@@ -989,24 +992,6 @@ async function clean_messages(message, numline) {
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
     servers[message.guild.id].embedMessage = undefined;
     console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
-}
-
-function emergency_food_time(message) {
-    /* channel reply */
-    message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
-    .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
-    
-    /* fix error: 'Request to use token, but token was unavailable to the client' */
-    setTimeout(function(err) {
-        if (err) throw err;
-        client.destroy();
-    }, 1000);
-}
-
-function guildLink(message) {
-    message.reply("I welcome you to Ensemble HQ!"
-                     +`\nhttps://ensemble-hq.herokuapp.com/`)
-    .then(console.log(`${message.member.user.tag} requested for MapleStory guild link.`));
 }
 
 function vSens(message, gameCode, sens) {
@@ -1751,6 +1736,24 @@ function update_genshin_userTag(array_Obj, cached_index) {
     setTimeout(function(err) {
         if (err) throw err;
         save_as_JSON(array_Obj, path);
+    }, 1000);
+}
+
+function guildLink(message) {
+    message.reply("I welcome you to Ensemble HQ!"
+                     +`\nhttps://ensemble-hq.herokuapp.com/`)
+    .then(console.log(`${message.member.user.tag} requested for MapleStory guild link.`));
+}
+
+function emergency_food_time(message) {
+    /* channel reply */
+    message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
+    .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
+    
+    /* fix error: 'Request to use token, but token was unavailable to the client' */
+    setTimeout(function(err) {
+        if (err) throw err;
+        client.destroy();
     }, 1000);
 }
 
