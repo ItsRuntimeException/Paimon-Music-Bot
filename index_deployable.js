@@ -547,6 +547,22 @@ async function queueLogic(message, search_string) {
     }
 }
 
+function download_music(message) {
+    var cached_path = './stream_fetched_audio/';
+    if (!filestream.existsSync(cached_path)){
+        filestream.mkdirSync(cached_path);
+    }
+
+    console.log(`[Server: ${message.guild.id}] [tag: ${message.member.user.tag} | uid: ${message.author}] requested to download cached music.`);
+    if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
+        message.channel.send({files:[`${cached_path}${server.cached_video_info[0].title}.mp3`]});
+    }
+    else {
+        console.log('Unable to download music, current music is not cached!');
+        message.channel.send('Unable to download music, current music is not cached!');
+    }
+}
+
 async function play_music_cached(message) {
     var server = servers[message.guild.id];
     var connection = await message.member.voice.channel.join();
@@ -1432,7 +1448,7 @@ function wishReset(message, bannerType) {
     }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
 }
 
-async function add_superAccess(message, userTag) {
+function add_superAccess(message, userTag) {
     if (userTag == undefined) {
         return message.channel.send(`${message.author}.`
         +"\nThis command will let [@userTag] use SuperAccess-commands."
@@ -1476,7 +1492,7 @@ async function add_superAccess(message, userTag) {
             save_as_JSON(servers_Obj, path);
 
             /* reply */
-            message.channel.send('Successfully added!');
+            message.channel.send('Admin successfully added!');
             console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
             guildmember.user.send({embed: {
                 author: {
@@ -1508,7 +1524,7 @@ async function add_superAccess(message, userTag) {
             }});
         }
         else {
-            message.channel.send(`This user already have 'SuperAccess' permission!`);
+            message.channel.send('Admin already exist!');
         }
     }
     else {
@@ -1516,7 +1532,7 @@ async function add_superAccess(message, userTag) {
     }
 }
 
-async function remove_superAccess(message, userTag) {
+function remove_superAccess(message, userTag) {
     if (userTag == undefined) {
         return message.channel.send(`${message.author}.`
         +"\nThis command will remove [@userTag] from SuperAccess-commands."
@@ -1569,7 +1585,7 @@ async function remove_superAccess(message, userTag) {
             save_as_JSON(servers_Obj, path);
 
             /* reply */
-            message.channel.send('Successfully removed!');
+            message.channel.send('Admin successfully removed!');
             console.log(`Admin successfully removed! ${guildmember.user} no longer has access to SuperAccess-commands!`);
         }
         else {
@@ -1723,7 +1739,8 @@ function emergency_food_time(message) {
     /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
     .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
-
+    
+    /* fix error: 'Request to use token, but token was unavailable to the client' */
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
