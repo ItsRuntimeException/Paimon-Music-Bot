@@ -55,21 +55,23 @@ Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'Supe
 
 Command | param | Description
 | :--- | :--- | :---
-?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
-?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
-?clean \[int?Optional\] | numLines | Clean channel messages.
 ?caching \[string?Optional\] | on \| off | 'FWTP'-method, very bad & slow performance!
 ?dlmusic | N/A | Download music from pre-cached music file.
+?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
+?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
+?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
 
+**Audio Caching/Downloading:**
 
-**Test Run:**
+ <img src="examples/superAccess_music_caching.png" width="728">
 
- <img src="examples/superAccess_example_1.png" width="728">
+**Add new SuperAccess member:**
 
 admins.json (Before) | admins.json (After)
 | :---: | :---:
 <img src="examples/superAccess_before.png" width="364"> | <img src="examples/superAccess_after.png" width="364">
+<img src="examples/superAccess_example_1.png" width="728">
 
 # Genshin Impact #
 Command | bannerType | pityType | Operation | Description
