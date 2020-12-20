@@ -1475,7 +1475,7 @@ async function add_superAccess(message, userTag) {
             save_as_JSON(servers_Obj, path);
 
             /* reply */
-            message.channel.send('Admin successfully added!');
+            message.channel.send('Successfully added!');
             console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
             guildmember.user.send({embed: {
                 author: {
@@ -1507,7 +1507,7 @@ async function add_superAccess(message, userTag) {
             }});
         }
         else {
-            message.channel.send('Admin already exist!');
+            message.channel.send(`This user already have 'SuperAccess' permission!`);
         }
     }
     else {
@@ -1568,7 +1568,7 @@ async function remove_superAccess(message, userTag) {
             save_as_JSON(servers_Obj, path);
 
             /* reply */
-            message.channel.send('Admin successfully removed!');
+            message.channel.send('Successfully removed!');
             console.log(`Admin successfully removed! ${guildmember.user} no longer has access to SuperAccess-commands!`);
         }
         else {

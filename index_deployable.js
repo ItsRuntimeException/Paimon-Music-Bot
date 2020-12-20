@@ -1476,7 +1476,7 @@ async function add_superAccess(message, userTag) {
             save_as_JSON(servers_Obj, path);
 
             /* reply */
-            message.channel.send('Admin successfully added!');
+            message.channel.send('Successfully added!');
             console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
             guildmember.user.send({embed: {
                 author: {
@@ -1508,7 +1508,7 @@ async function add_superAccess(message, userTag) {
             }});
         }
         else {
-            message.channel.send('Admin already exist!');
+            message.channel.send(`This user already have 'SuperAccess' permission!`);
         }
     }
     else {
@@ -1569,7 +1569,7 @@ async function remove_superAccess(message, userTag) {
             save_as_JSON(servers_Obj, path);
 
             /* reply */
-            message.channel.send('Admin successfully removed!');
+            message.channel.send('Successfully removed!');
             console.log(`Admin successfully removed! ${guildmember.user} no longer has access to SuperAccess-commands!`);
         }
         else {
@@ -1723,8 +1723,7 @@ function emergency_food_time(message) {
     /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
     .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
-    
-    /* fix error: 'Request to use token, but token was unavailable to the client' */
+
     setTimeout(function(err) {
         if (err) throw err;
         client.destroy();
