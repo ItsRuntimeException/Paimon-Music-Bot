@@ -45,7 +45,7 @@ client.on("message", async message => {
                 queue: [],
                 cached_video_info: [],
                 cached_audio_mode: false,
-                volume: 0.05,
+                volume: 0.10,
                 skipAmount: 1,
                 loop: false,
                 skip: false,
@@ -587,63 +587,9 @@ async function play_music_cached(message) {
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${audio_title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         
         /* cached_audio dispatcher */
-        server.dispatcher.on('finish', function() {
-            /* delete old embedMessage */
-            if (server.embedMessage != undefined)
-                server.embedMessage.delete();
-            /* music 'end' logic */
-            if (server.skip) {
-                if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-                    filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-                        if (err) return console.log(err);
-                        console.log('file deleted successfully');
-                    });
-                }
-                server.skip = false;
-                var count = 0;
-                for (var i = 0; i < server.skipAmount; i++) {
-                    if (server.queue.length > 0) {
-                        server.queue.shift();
-                        server.cached_video_info.shift();
-                        count++;
-                    }
-                    else
-                        break; /* stop unnecessary iteration */
-                }
-                console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
-                message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
-            }
-            else if (server.loop) {
-                console.log('Loop Mode: ON, replaying song.');
-            }
-            else
-                if (server.queue.length > 0) {
-                    if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-                        filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-                            if (err) return console.log(err);
-                            console.log('file deleted successfully');
-                        });
-                    }
-                    server.queue.shift();
-                    server.cached_video_info.shift();
-                }
-
-            if (server.queue.length > 0) {
-                if (server.local)
-                    play_music(message, soundPath);
-                else {
-                    if (server.cached_audio_mode)
-                        play_music_cached(message);
-                    else
-                        play_music(message);
-                }
-            }
-            else if (server.queue.length == 0) {
-                server.dispatcher.destroy();
-                server.dispatcher = undefined;
-                leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
-            }
-        });
+        server.dispatcher.on('finish',
+            music_loop_logic(message, cached_path, '',audio_title)
+        );
     });
 }
 
@@ -673,62 +619,9 @@ async function play_music(message, soundPath = '') {
     }
 
     /* stream dispatcher */
-    server.dispatcher.on('finish', function() {
-        /* delete old embedMessage */
-        if (server.embedMessage != undefined)
-            server.embedMessage.delete();
-        /* music 'end' logic */
-        if (server.skip) {
-            if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-                filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-                    if (err) return console.log(err);
-                    console.log('file deleted successfully');
-                });
-            }
-            server.skip = false;
-            var count = 0;
-            for (var i = 0; i < server.skipAmount; i++) {
-                if (server.queue.length > 0) {
-                    server.queue.shift();
-                    server.cached_video_info.shift();
-                    count++;
-                }
-                else
-                    break; /* stop unnecessary iteration */
-            }
-            console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
-            message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
-        }
-        else if (server.loop) {
-            console.log('Loop Mode: ON, replaying song.');
-        }
-        else
-            if (server.queue.length > 0) {
-                if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-                    filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-                        if (err) return console.log(err);
-                        console.log('file deleted successfully');
-                    });
-                }
-                server.queue.shift();
-                server.cached_video_info.shift();
-            }
-
-        if (server.queue.length > 0) {
-            if (server.local)
-                play_music(message, soundPath);
-            else {
-                if (server.cached_audio_mode)
-                    play_music_cached(message);
-                else
-                    play_music(message);
-            }
-        }
-        else if (server.queue.length == 0) {
-            server.dispatcher = undefined;
-            leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
-        }
-    });
+    server.dispatcher.on('finish', 
+        music_loop_logic(message, cached_path, soundPath, audio_title)
+    );
 }
 
 function musicInfo_Lookup(message) {
@@ -1613,6 +1506,64 @@ function sec_Convert(sec_string) {
         time_string = `${hours} hrs : ` + time_string;
     }
     return time_string;
+}
+
+function music_loop_logic(message, cached_path, soundPath, audio_title) {
+    /* delete old embedMessage */
+    if (server.embedMessage != undefined)
+        server.embedMessage.delete();
+
+    /* music 'end' logic */
+    if (server.skip) {
+        if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+            filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
+                if (err) return console.log(err);
+                console.log('file deleted successfully');
+            });
+        }
+        server.skip = false;
+        var count = 0;
+        for (var i = 0; i < server.skipAmount; i++) {
+            if (server.queue.length > 0) {
+                server.queue.shift();
+                server.cached_video_info.shift();
+                count++;
+            }
+            else
+                break; /* stop unnecessary iteration */
+        }
+        console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+        message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+    }
+    else if (server.loop) {
+        console.log('Loop Mode: ON, replaying song.');
+    }
+    else
+        if (server.queue.length > 0) {
+            if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+                filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
+                    if (err) return console.log(err);
+                    console.log('file deleted successfully');
+                });
+            }
+            server.queue.shift();
+            server.cached_video_info.shift();
+        }
+
+    if (server.queue.length > 0) {
+        if (server.local)
+            play_music(message, soundPath);
+        else {
+            if (server.cached_audio_mode)
+                play_music_cached(message);
+            else
+                play_music(message);
+        }
+    }
+    else if (server.queue.length == 0) {
+        server.dispatcher = undefined;
+        leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
+    }
 }
 
 function update_genshin_userTag(array_Obj, cached_index) {
