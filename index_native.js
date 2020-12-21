@@ -847,11 +847,15 @@ function stop_music(message) {
 function resetVoice(message) {
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
-    if (filestream.existsSync(`${cached_path}${server.cached_video_info[0].title}.mp3`)) {
-        filestream.unlinkSync(`${cached_path}${server.cached_video_info[0].title}.mp3`, function (err) {
-            if (err) return console.log(err);
-            console.log('file deleted successfully');
-        });
+    /* clear cached audio file if it exists */
+    if (server.cached_video_info[0] != undefined) {
+	let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
+    	if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+               filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
+               if (err) return console.log(err);
+               console.log('file deleted successfully');
+           });
+        }
     }
     /* clear server.queue & set server.dispatcher = undefined */
     while (server.queue.length > 0) {
