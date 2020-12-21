@@ -417,7 +417,7 @@ function userHelp(message) {
 ///////////////////////////////////////////////////////////////////////////// MAIN FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 async function join(message) {
-    const { voiceChannel } = message.member;
+    const voiceChannel = await message.member.voice.channel;
     if (!voiceChannel) {
         return message.reply("please join a voice channel first!");
     }
@@ -862,6 +862,7 @@ function resetVoice(message) {
         server.queue.shift();
         server.cached_video_info.shift();
     }
+    server.dispatcher.destroy();
     server.dispatcher = undefined;
     server.queue = [];
     server.cached_video_info = [];
