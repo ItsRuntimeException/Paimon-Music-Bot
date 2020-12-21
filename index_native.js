@@ -862,6 +862,7 @@ function resetVoice(message) {
         server.queue.shift();
         server.cached_video_info.shift();
     }
+    server.dispatcher.destroy();
     server.dispatcher = undefined;
     server.queue = [];
     server.cached_video_info = [];
