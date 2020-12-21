@@ -665,8 +665,13 @@ async function queueInfo(message, qNum = 10) {
     var playString = 'None';
 
     /* delete old embedMessage */
-    if (server.embedMessage != undefined)
-        server.embedMessage.delete();
+    if (server.embedMessage != undefined) {
+        try {
+            server.embedMessage.delete();
+        } catch (error) {
+            // false positive, report nothing
+        }
+    }
     
     /* playString */
     if (server.queue[0] != undefined) {
@@ -1527,8 +1532,13 @@ function sec_Convert(sec_string) {
 function music_loop_logic(message, cached_path, soundPath, audio_title) {
     var server = servers[message.guild.id];
     /* delete old embedMessage */
-    if (server.embedMessage != undefined)
-        server.embedMessage.delete();
+    if (server.embedMessage != undefined) {
+        try {
+            server.embedMessage.delete();
+        } catch (error) {
+            // false positive, report nothing
+        }
+    }
 
     /* music 'end' logic */
     if (server.skip) {
