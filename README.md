@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: December 19, 2020***
+***Personal Project; Last Updated: December 21, 2020***
 # [Discord Bot] Paimon-chan #
 A Discord bot with various functionalities I desired to have.<br/>
 <img src="moji/PaimonRub.gif" width="128" height="128">
@@ -55,7 +55,7 @@ Can be used if 'SuperAccess' is granted by the owner \| exisiting admin w/ 'Supe
 
 Command | param | Description
 | :--- | :--- | :---
-?caching \[string?Optional\] | on \| off | Preload audio data into a file, then stream it.
+?caching \[string?Optional\] | on \| off | Preload audio data into a file, then stream it (Lower stream-quality?).
 ?dlmusic | N/A | Download music from pre-cached music file.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?shutdown | N/A | Shutdown the bot from the server.
