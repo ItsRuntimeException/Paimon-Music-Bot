@@ -160,8 +160,8 @@ client.on("message", async message => {
             }
             break;
         case "shuffle":
-            var server = servers[message.guild.id];
             console.log(`[Server: ${message.guild.id}] Queue Shuffle Requested.`);
+            var server = servers[message.guild.id];
             /* Fisher–Yates Shuffle Algorithm */
             var n = server.queue.length;
             var que_index = 1; /* currentSong playing is always at [0] -> [currentSong, 1, 2, 3, ..., n] */
@@ -210,12 +210,15 @@ client.on("message", async message => {
             loop_music(message, args[0]);
             break;
         case "pause":
+            console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to pause music.`);
             pause_music(message);
             break;
         case "resume":
+            console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to resume music.`);
             resume_music(message);
             break;
         case "skip":
+            console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to skip music.`);
             /* IN-CHANNEL CHECK */
             if (!message.member.voice.channel) {
                 return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
@@ -223,6 +226,7 @@ client.on("message", async message => {
             skip_music(message, args[0]);
             break;
         case "stop":
+            console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to stop music.`);
             var server = servers[message.guild.id];
             if (server.dispatcher != undefined) {
                 stop_music(message);
@@ -231,7 +235,6 @@ client.on("message", async message => {
             else {
                 message.channel.send('There is nothing to stop.');
             }
-            console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to skip music.`);
             break;
         case "leave":
             leave(message);
@@ -558,15 +561,17 @@ async function queueLogic(message, search_string) {
 }
 
 function download_music(message) {
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to download cached music.`);
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
-    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
-
+    if (server.cached_video_info[0] == undefined) {
+        return message.channel.send('There is no cache to download.');
+    }
     if (!filestream.existsSync(cached_path)){
         filestream.mkdirSync(cached_path);
     }
-
-    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to download cached music.`);
+    
+    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
     if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
         message.channel.send({files:[`${cached_path}${audio_title}.mp3`]});
     }
@@ -823,7 +828,6 @@ function pause_music(message) {
     else {
         message.channel.send('There is nothing to pause.');
     }
-    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to pause music.`);
 }
 
 function resume_music(message) {
@@ -835,7 +839,6 @@ function resume_music(message) {
     else {
         message.channel.send('There is nothing to resume.');
     }
-    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to resume music.`);
 }
 
 function skip_music(message, sNum) {
@@ -867,6 +870,7 @@ function stop_music(message) {
 }
 
 function resetVoice(message) {
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset variables!`);
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
     /* clear cached audio file if it exists */
@@ -886,7 +890,6 @@ function resetVoice(message) {
     }
     if (server.dispatcher != undefined)
         server.dispatcher.destroy();
-    
     server.dispatcher = undefined;
     server.queue = [];
     server.cached_video_info = [];
@@ -898,8 +901,6 @@ function resetVoice(message) {
     server.local = false;
     server.playToggle = false;
     server.embedMessage = undefined;
-
-    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset variables!`);
     message.channel.send('Bot Reset Complete!');
 }
 
@@ -1076,7 +1077,6 @@ function genshin_pity_calculation(message, pityType = 'normal') {
     var array_Obj = JSON.parse(text);
     for (let i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
-	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
             /* terminal logging */
@@ -1097,6 +1097,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                 console.log('Hard Pity Calculation:')
                 console.log(hard_pity_table);
                 console.log('\n');
+                message.channel.send(`${message.author}. Calculating your 5* 'normal' pity point...`);
                 return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
@@ -1132,6 +1133,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                 console.log('Soft Pity Calculation:')
                 console.log(soft_pity_table);
                 console.log('\n');
+                message.channel.send(`${message.author}. Calculating your 5* 'soft' pity point...`);
                 return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
