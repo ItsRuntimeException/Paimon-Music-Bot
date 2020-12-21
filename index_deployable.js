@@ -1569,8 +1569,10 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
         }
 
     if (server.queue.length > 0) {
-        if (server.local)
+        queueInfo(message);
+        if (server.local) {
             play_music(message, soundPath);
+        }
         else {
             if (server.cached_audio_mode)
                 play_music_cached(message);
