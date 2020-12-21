@@ -55,7 +55,6 @@ client.on("message", async message => {
             }
         }
     }
-
     if (message.mentions.has(client.user)) {
         message.reply("If you need help from Paimon, please try ?help");
     }
@@ -587,9 +586,9 @@ async function play_music_cached(message) {
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${audio_title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         
         /* cached_audio dispatcher */
-        server.dispatcher.on('finish',
-            music_loop_logic(message, cached_path, '',audio_title)
-        );
+        server.dispatcher.on('finish', function () {
+            music_loop_logic(message, cached_path, '', audio_title);
+        });
     });
 }
 
@@ -619,9 +618,9 @@ async function play_music(message, soundPath = '') {
     }
 
     /* stream dispatcher */
-    server.dispatcher.on('finish', 
-        music_loop_logic(message, cached_path, soundPath, audio_title)
-    );
+    server.dispatcher.on('finish', function () {
+        music_loop_logic(message, cached_path, soundPath, audio_title);
+    });
 }
 
 function musicInfo_Lookup(message) {
