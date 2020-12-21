@@ -10,8 +10,8 @@ A Discord bot with various functionalities I desired to have.<br/>
 1. Make sure to have npm and nodeJS installed.<br/>
 2. Run "1 install_dependencies.bat".<br/>
 3. Copy your bot-token and put it inside '.\json_data\login_tokens.json'.<br/>
-4. If you want music capabilities, please follow the instructions in 'README - Add music support.txt'.<br/>
-5. Run '2 start.bat' or you can host it online with heroku/other servers.<br/>
+4. Run '2 start.bat' or you can host it online with heroku/other servers.<br/>
+5. If you want music capabilities, please follow the instructions in 'README - Add music support.txt'.<br/>
 
 **Short list of bot-commands**
 - [Help](#Help)
