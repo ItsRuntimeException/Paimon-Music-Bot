@@ -525,9 +525,6 @@ async function queueLogic(message, search_string) {
             }
             console.log(server.queue);
         }
-        if (server.queue.length > 1) {
-            queueInfo(message);
-        }
         /* 
         *  server.queue only seems to have updated inside this function instead of client.on(...), 
         *  call play_music here to avoid playing [undefined] song.
