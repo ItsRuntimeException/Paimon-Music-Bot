@@ -670,7 +670,7 @@ async function queueInfo(message, qNum = 10) {
         try {
             server.embedMessage.delete();
         } catch (error) {
-            // false positive, report nothing
+            console.log(`${error}:\nembedMessage tried refreshing, but failed.`);
         }
     }
     
@@ -1532,15 +1532,6 @@ function sec_Convert(sec_string) {
 
 function music_loop_logic(message, cached_path, soundPath, audio_title) {
     var server = servers[message.guild.id];
-    /* delete old embedMessage */
-    if (server.embedMessage != undefined) {
-        try {
-            server.embedMessage.delete();
-        } catch (error) {
-            // false positive, report nothing
-        }
-    }
-
     /* music 'end' logic */
     if (server.skip) {
         if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
@@ -1591,6 +1582,14 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
         }
     }
     else if (server.queue.length == 0) {
+        /* delete old embedMessage */
+        if (server.embedMessage != undefined) {
+            try {
+                server.embedMessage.delete();
+            } catch (error) {
+                console.log(`${error}:\nembedMessage tried refreshing, but failed.`);
+            }
+        }
         server.dispatcher = undefined;
         leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
     }
