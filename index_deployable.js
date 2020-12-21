@@ -176,12 +176,9 @@ client.on("message", async message => {
                 server.cached_video_info[r] = temp;
             }
             if (n > 1) {
-                console.log(server.queue);
                 message.channel.send('Queue Shuffle Complete!');
-                /* delete old embedMessage */
-                if (server.embedMessage != undefined)
-                    server.embedMessage.delete();
                 queueInfo(message);
+                console.log(server.queue);
             }
             else {
                 message.channel.send('There is nothing to shuffle!');
@@ -460,6 +457,7 @@ async function queueLogic(message, search_string) {
                     server.queue.push(files[i]);
             }
             if (server.queue[0] != undefined) {
+                queueInfo(message);
                 console.log(server.queue);
                 play_music(message, soundPath);
             }
@@ -493,6 +491,7 @@ async function queueLogic(message, search_string) {
                 data: video.data,
                 thumbnail: video.thumbnail
             });
+            queueInfo(message);
             console.log(server.queue);
         }
         else if (validate_playlist) {
@@ -523,6 +522,7 @@ async function queueLogic(message, search_string) {
                     thumbnail: video.thumbnail
                 });
             }
+            queueInfo(message);
             console.log(server.queue);
         }
         /* 
@@ -577,7 +577,6 @@ async function play_music_cached(message) {
         var stream = audio_ReadableStream.pipe(audio_WritableStream);
     }
     stream.on('finish', function () {
-        queueInfo(message);
         musicInfo_Lookup(message);
         server.dispatcher = connection.play(`${cached_path}${audio_title}.mp3`, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${audio_title}\nDuration: ${server.cached_video_info[0].duration}\n`);
@@ -602,13 +601,11 @@ async function play_music(message, soundPath = '') {
             let songName = server.queue[0].split('.mp3')[0];
             server.dispatcher = connection.play(song, {volume: server.volume});
             console.log('[Local-Mode][Server: '+message.guild.id+'] Now Playing: ' + songName);
-            queueInfo(message);
         }
     }
     else {
         /* PLAY MUSIC VIA STREAM_MODE */
         var stream = ytdl(server.queue[0], { filter: 'audioonly' });
-        queueInfo(message);
         musicInfo_Lookup(message);
         server.dispatcher = connection.play(stream, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
@@ -654,6 +651,10 @@ async function queueInfo(message, qNum = 10) {
     var cached = server.cached_video_info;
     var queueString = '';
     var playString = 'None';
+
+    /* delete old embedMessage */
+    if (server.embedMessage != undefined)
+        server.embedMessage.delete();
 
     /* playString */
     if (server.queue[0] != undefined) {

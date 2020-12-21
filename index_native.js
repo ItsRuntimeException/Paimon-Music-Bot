@@ -176,16 +176,15 @@ client.on("message", async message => {
                 server.cached_video_info[r] = temp;
             }
             if (n > 1) {
-                console.log(server.queue);
                 message.channel.send('Queue Shuffle Complete!');
                 queueInfo(message);
+                console.log(server.queue);
             }
             else {
                 message.channel.send('There is nothing to shuffle!');
             }
             break;
         case "queue":
-		
             queueInfo(message, args[0]);
             break;
         case "musicinfo":
@@ -458,7 +457,7 @@ async function queueLogic(message, search_string) {
                     server.queue.push(files[i]);
             }
             if (server.queue[0] != undefined) {
-		queueInfo(message);
+		        queueInfo(message);
                 console.log(server.queue);
                 play_music(message, soundPath);
             }
@@ -492,7 +491,7 @@ async function queueLogic(message, search_string) {
                 data: video.data,
                 thumbnail: video.thumbnail
             });
-	    queueInfo(message);
+	        queueInfo(message);
             console.log(server.queue);
         }
         else if (validate_playlist) {
@@ -523,7 +522,7 @@ async function queueLogic(message, search_string) {
                     thumbnail: video.thumbnail
                 });
             }
-	    queueInfo(message);
+	        queueInfo(message);
             console.log(server.queue);
         }
         /* 
