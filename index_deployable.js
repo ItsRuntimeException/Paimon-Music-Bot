@@ -55,6 +55,7 @@ client.on("message", async message => {
             }
         }
     }
+
     if (message.mentions.has(client.user)) {
         message.reply("If you need help from Paimon, please try ?help");
     }
@@ -185,10 +186,20 @@ client.on("message", async message => {
             }
             break;
         case "queue":
-            queueInfo(message, args[0]);
+            if (server.queue[0] != undefined) {
+                queueInfo(message, args[0]);
+            }
+            else {
+                message.channel.send('There is nothing playing.');
+            }
             break;
         case "musicinfo":
-            musicInfo_Lookup(message);
+            if (server.queue[0] != undefined) {
+                musicInfo_Lookup(message);
+            }
+            else {
+                message.channel.send('There is nothing to lookup.');
+            }
             break;
         case "vol":
             vol_music(message, args[0]);
@@ -655,7 +666,7 @@ async function queueInfo(message, qNum = 10) {
     /* delete old embedMessage */
     if (server.embedMessage != undefined)
         server.embedMessage.delete();
-
+    
     /* playString */
     if (server.queue[0] != undefined) {
         if (ytdl.validateURL(server.queue[0])) /* check link validity */

@@ -185,10 +185,20 @@ client.on("message", async message => {
             }
             break;
         case "queue":
-            queueInfo(message, args[0]);
+            if (server.queue[0] != undefined) {
+                queueInfo(message, args[0]);
+            }
+            else {
+                message.channel.send('There is nothing playing.');
+            }
             break;
         case "musicinfo":
-            musicInfo_Lookup(message);
+            if (server.queue[0] != undefined) {
+                musicInfo_Lookup(message);
+            }
+            else {
+                message.channel.send('There is nothing to lookup.');
+            }
             break;
         case "vol":
             vol_music(message, args[0]);
@@ -457,7 +467,7 @@ async function queueLogic(message, search_string) {
                     server.queue.push(files[i]);
             }
             if (server.queue[0] != undefined) {
-		        queueInfo(message);
+                queueInfo(message);
                 console.log(server.queue);
                 play_music(message, soundPath);
             }
@@ -491,7 +501,7 @@ async function queueLogic(message, search_string) {
                 data: video.data,
                 thumbnail: video.thumbnail
             });
-	        queueInfo(message);
+            queueInfo(message);
             console.log(server.queue);
         }
         else if (validate_playlist) {
@@ -522,7 +532,7 @@ async function queueLogic(message, search_string) {
                     thumbnail: video.thumbnail
                 });
             }
-	        queueInfo(message);
+            queueInfo(message);
             console.log(server.queue);
         }
         /* 
@@ -651,7 +661,7 @@ async function queueInfo(message, qNum = 10) {
     var cached = server.cached_video_info;
     var queueString = '';
     var playString = 'None';
-    
+
     /* delete old embedMessage */
     if (server.embedMessage != undefined)
         server.embedMessage.delete();
