@@ -89,7 +89,7 @@ client.on("message", async message => {
                     +"\n\nLink example:\n"
                         +"\t\tyoutube.com/watch?v=oHg5SJYRHA0"
                     +"\n\nKeywords example:\n"
-                        +"\t\tPekora bgm music 1 hour").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
+                        +"\t\tPekora bgm music 1 hour").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
             }
             /* IN-CHANNEL CHECK */
             if (!message.member.voice.channel) {
@@ -122,7 +122,7 @@ client.on("message", async message => {
                     +"\nThis command plays local_folder music, given a specified category."
                     +"\n\nUsage: " + "?playLocal [Category]"
                     +"\n\nCategory example:\n"
-                        +"\t\tAnime | Persona3 | Persona4 | Persona5").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
+                        +"\t\tAnime | Persona3 | Persona4 | Persona5").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
             }
 
             var server = servers[message.guild.id];
@@ -165,7 +165,7 @@ client.on("message", async message => {
             /* Fisher–Yates Shuffle Algorithm */
             var n = server.queue.length;
             var que_index = 1; /* currentSong playing is always at [0] -> [currentSong, 1, 2, 3, ..., n] */
-            for (var i = n-1; i > que_index; i--) {
+            for (let i = n-1; i > que_index; i--) {
                 /* random index */
                 let r = rand(que_index,i);
                 /* swap */
@@ -451,6 +451,7 @@ async function leave(message) {
 
 async function queueLogic(message, search_string) {
     var server = servers[message.guild.id];
+    var video = undefined;
     if (server.local) {
         let soundPath = search_string;
         /* create directory if not exist */
@@ -464,7 +465,7 @@ async function queueLogic(message, search_string) {
                 console.log(err);
                 return;
             }
-            for (var i = 0; i < files.length; i++) {
+            for (let i = 0; i < files.length; i++) {
                 /* push into queue if filetype matches '.mp3' format */
                 if (files[i].match(/.mp3/gi))
                     server.queue.push(files[i]);
@@ -490,7 +491,10 @@ async function queueLogic(message, search_string) {
         if (!validate_playlist) {
             /* PRELOAD */
             try {
-                var video = await youtube.searchVideos(search_string);
+                if (validateURL)
+                    video = await youtube.getVideo(search_string);
+                else
+                    video = await youtube.searchVideos(search_string);
             } catch (error) {
                 console.log(error);
                 return message.channel.send('Something went wrong!\n\n' + error);
@@ -517,7 +521,7 @@ async function queueLogic(message, search_string) {
                 return message.channel.send('Something went wrong!\n\n' + error);
             }
             /* LOAD PLAYLIST VIDEOS */
-            for (var i = 0; i < yt_playlist.length; i++) {
+            for (let i = 0; i < yt_playlist.length; i++) {
                 /* PRELOAD */
                 try {
                     var video = await youtube.getVideo(yt_playlist[i].url);
@@ -682,8 +686,8 @@ async function queueInfo(message, qNum = 10) {
             playString = server.queue[0].split('.mp3')[0];
     }
     /* queueString */
-    for (var i = 1; i < server.queue.length; i++) {
-        if (qNum <= 25) {
+    for (let i = 1; i < server.queue.length; i++) {
+        if (qNum <= 15) {
             if (i <= qNum) {
                 /* check link validity */
                 if (ytdl.validateURL(server.queue[i]))
@@ -695,7 +699,7 @@ async function queueInfo(message, qNum = 10) {
             else break;
         }
         else {
-            return message.channel.send('Max queue display is 20 songs!');
+            return message.channel.send('Max queue display is 15 songs!');
         }
     }
     /* send new embed */
@@ -923,7 +927,7 @@ async function clean_messages(message, numline) {
     *  Fetch the given number of messages to sweeps: numline+1 to include the execution command
     *  Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
     */
-    var bulkMessages = ((numline == undefined) ? await message.channel.messages.fetch() : await message.channel.messages.fetch( {limit: ++numline} ));
+    var bulkMessages = ((numline == undefined) ? await message.channel.messages.fetch() : await message.channel.messages.fetch( {limit: (numline+1)} ));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
     servers[message.guild.id].embedMessage = undefined;
     console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
@@ -941,7 +945,7 @@ function vSens(message, gameCode, sens) {
                 +"\t\t[C]: CSGO\n"
                 +"\t\t[O]: OVERWATCH"
             +"\n\nSensitivity:\n"
-                +"\t\t[A Decimal Number]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));;
+                +"\t\t[A Decimal Number]").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
     }
 
     gameCode = gameCode.toLowerCase();
@@ -999,7 +1003,7 @@ function create_genshin_table(message) {
     }
     if (objLength(array_Obj.users) > 0) {
         /* this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates. */
-        for (var i = 0; i < objLength(array_Obj.users); i++) {
+        for (let i = 0; i < objLength(array_Obj.users); i++) {
             /* this user table already exist. */
             if (array_Obj.users[i].uid === message.author.id) {
                 /* check if this user has recently changed his/her userTag. */
@@ -1027,7 +1031,7 @@ function create_genshin_table(message) {
 function showtable(message) {
     var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
-    for (var i = 0; i < objLength(array_Obj.users); i++) {
+    for (let i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
 	        message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
             /* check if this user has recently changed his/her userTag. */
@@ -1071,7 +1075,7 @@ function showtable(message) {
 function genshin_pity_calculation(message, pityType = 'normal') {
     var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
-    for (var i = 0; i < objLength(array_Obj.users); i++) {
+    for (let i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
 	    message.channel.send(`${message.author}. Calculating your 5-star pity point...`);
             /* check if this user has recently changed his/her userTag. */
@@ -1192,7 +1196,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         var path = './json_data/genshin_wish_tables.json';
         var text = readTextFile(path);
         var array_Obj = JSON.parse(text);
-        for (var i = 0; i < objLength(array_Obj.users); i++) {
+        for (let i = 0; i < objLength(array_Obj.users); i++) {
             if (array_Obj.users[i].uid === message.author.id) {
                 /* check if this user has recently changed his/her userTag. */
                 update_genshin_userTag(array_Obj, i);
@@ -1297,7 +1301,7 @@ function wishReset(message, bannerType) {
     var path = './json_data/genshin_wish_tables.json';
     var text = readTextFile(path);
     var array_Obj = JSON.parse(text);
-    for (var i = 0; i < objLength(array_Obj.users); i++) {
+    for (let i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
@@ -1382,7 +1386,6 @@ function add_superAccess(message, userTag) {
     var this_guild = message.guild;
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
-        var path = './json_data/admins.json';
         /* create file if not exist , then get Object and index */
         try_create_admins_JSON(message.guild);
         var servers_Obj = get_Object_Index_Pair(message.guild)[0];
@@ -1512,11 +1515,11 @@ function sec_Convert(sec_string) {
     var hours = Math.floor(minutes / 60);
 
     /* re-factor minutes and seconds */
-    for (var i = 0; i < hours; i++) {
+    for (let i = 0; i < hours; i++) {
         minutes -= 60;
         seconds -= 3600;
     }
-    for (var i = 0; i < minutes; i++) {
+    for (let i = 0; i < minutes; i++) {
         seconds -= 60;
     }
 
@@ -1542,7 +1545,7 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
         }
         server.skip = false;
         var count = 0;
-        for (var i = 0; i < server.skipAmount; i++) {
+        for (let i = 0; i < server.skipAmount; i++) {
             if (server.queue.length > 0) {
                 server.queue.shift();
                 server.cached_video_info.shift();
@@ -1551,8 +1554,8 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
             else
                 break; /* stop unnecessary iteration */
         }
-        console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
-        message.channel.send(`Skipped ${((server.queue) ? server.skipAmount : count)} songs.`);
+        console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue.length > 0) ? server.skipAmount : count)} songs.`);
+        message.channel.send(`Skipped ${((server.queue.length > 0) ? server.skipAmount : count)} songs.`);
     }
     else if (server.loop) {
         console.log('Loop Mode: ON, replaying song.');
@@ -1618,7 +1621,7 @@ function try_create_admins_JSON(guild) {
     /* create file if not exist */
     var path = './json_data/admins.json';
     if (!filestream.existsSync(path)) {
-        servers_Obj = {
+        let servers_Obj = {
             servers: [
                 {
                     server_id : guild.id,
@@ -1640,7 +1643,7 @@ function get_Object_Index_Pair(guild) {
     */
     var filter_Obj = undefined;
     var path = './json_data/admins.json';
-    servers_Obj = JSON.parse(readTextFile(path));
+    let servers_Obj = JSON.parse(readTextFile(path));
     var index = -1;
     if (servers_Obj.servers.some(item => item.server_id === guild.id)) {
         /* try to find if this server is already in the json data */
