@@ -1697,8 +1697,12 @@ function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = un
             description: `${((message == undefined) ? 'Thank you for letting me join the server!\nPaimon' : message.author.tag)} have granted you 'SuperAccess'.\n${guildmember.user}, You can now use SuperAccess-commands!`,
             fields: [
               {
-                name: "?add Super|SuperAccess",
-                value: "Add a person as one of paimon's masters!"
+                name: "?add Super|SuperAccess [@userTag]",
+                value: "Add a user as one of paimon's masters!"
+              },
+              {
+                name: "?remove Super|SuperAccess [@userTag]",
+                value: "Remove a user from one of paimon's masters!"
               },
               {
                 name: "?Shutdown|Kill",
@@ -1707,6 +1711,10 @@ function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = un
               {
                 name: "?Clean|Clear",
                 value: "Paimon will clean up your mess!"
+              },
+              {
+                name: "?Caching|Dlmusic",
+                value: "Extra Music Control Logic."
               }
             ],
             timestamp: new Date(),
