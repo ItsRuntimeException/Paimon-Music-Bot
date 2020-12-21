@@ -186,6 +186,7 @@ client.on("message", async message => {
             }
             break;
         case "queue":
+            var server = servers[message.guild.id];
             if (server.queue[0] != undefined) {
                 queueInfo(message, args[0]);
             }
@@ -194,6 +195,7 @@ client.on("message", async message => {
             }
             break;
         case "musicinfo":
+            var server = servers[message.guild.id];
             if (server.queue[0] != undefined) {
                 musicInfo_Lookup(message);
             }
