@@ -547,7 +547,6 @@ async function queueLogic(message, search_string) {
         *  call play_music here to avoid playing [undefined] song.
         */
         if (server.playToggle) {
-            console.log(server.cached_audio_mode);
             if (server.cached_audio_mode == true) {
                 play_music_cached(message);
             }
