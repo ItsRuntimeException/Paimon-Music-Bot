@@ -166,7 +166,7 @@ client.on("message", async message => {
             /* Fisher–Yates Shuffle Algorithm */
             var n = server.queue.length;
             var que_index = 1; /* currentSong playing is always at [0] -> [currentSong, 1, 2, 3, ..., n] */
-            for (let i = n-1; i > que_index; i--) {
+            for (var i = n-1; i > que_index; i--) {
                 /* random index */
                 let r = rand(que_index,i);
                 /* swap */
@@ -469,7 +469,7 @@ async function queueLogic(message, search_string) {
                 console.log(err);
                 return;
             }
-            for (let i = 0; i < files.length; i++) {
+            for (var i = 0; i < files.length; i++) {
                 /* push into queue if filetype matches '.mp3' format */
                 if (files[i].match(/.mp3/gi))
                     server.queue.push(files[i]);
@@ -525,7 +525,7 @@ async function queueLogic(message, search_string) {
                 return message.channel.send('Something went wrong!\n\n' + error);
             }
             /* LOAD PLAYLIST VIDEOS */
-            for (let i = 0; i < yt_playlist.length; i++) {
+            for (var i = 0; i < yt_playlist.length; i++) {
                 /* PRELOAD */
                 try {
                     var video = await youtube.getVideo(yt_playlist[i].url);
@@ -691,7 +691,7 @@ async function queueInfo(message, qNum = 10) {
             playString = server.queue[0].split('.mp3')[0];
     }
     /* queueString */
-    for (let i = 1; i < server.queue.length; i++) {
+    for (var i = 1; i < server.queue.length; i++) {
         if (qNum <= 15) {
             if (i <= qNum) {
                 /* check link validity */
@@ -1004,7 +1004,7 @@ function create_genshin_table(message) {
     }
     if (objLength(array_Obj.users) > 0) {
         /* this is inefficient if the # of users gets too large, would be nice to convert it into a database to filter duplicates. */
-        for (let i = 0; i < objLength(array_Obj.users); i++) {
+        for (var i = 0; i < objLength(array_Obj.users); i++) {
             /* this user table already exist. */
             if (array_Obj.users[i].uid === message.author.id) {
                 /* check if this user has recently changed his/her userTag. */
@@ -1032,7 +1032,7 @@ function create_genshin_table(message) {
 function showtable(message) {
     var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
-    for (let i = 0; i < objLength(array_Obj.users); i++) {
+    for (var i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
 	        message.channel.send(`${message.author}. Your Genshin Gacha Table is being fetched...`);
             /* check if this user has recently changed his/her userTag. */
@@ -1076,7 +1076,7 @@ function showtable(message) {
 function genshin_pity_calculation(message, pityType = 'normal') {
     var text = readTextFile('./json_data/genshin_wish_tables.json');
     var array_Obj = JSON.parse(text);
-    for (let i = 0; i < objLength(array_Obj.users); i++) {
+    for (var i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
@@ -1098,7 +1098,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                 console.log('Hard Pity Calculation:')
                 console.log(hard_pity_table);
                 console.log('\n');
-                message.channel.send(`${message.author}. Calculating your 5* 'normal' pity point...`);
+                message.channel.send(`${message.author}. Calculating your 5* 'NORMAL' pity...`);
                 return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
@@ -1134,7 +1134,7 @@ function genshin_pity_calculation(message, pityType = 'normal') {
                 console.log('Soft Pity Calculation:')
                 console.log(soft_pity_table);
                 console.log('\n');
-                message.channel.send(`${message.author}. Calculating your 5* 'soft' pity point...`);
+                message.channel.send(`${message.author}. Calculating your 5* 'SOFT' pity...`);
                 return message.channel.send({embed: {
                     author: {
                         name: message.member.user.tag,
@@ -1198,7 +1198,7 @@ function wishCount(message, bannerType, commandType, nInc) {
         var path = './json_data/genshin_wish_tables.json';
         var text = readTextFile(path);
         var array_Obj = JSON.parse(text);
-        for (let i = 0; i < objLength(array_Obj.users); i++) {
+        for (var i = 0; i < objLength(array_Obj.users); i++) {
             if (array_Obj.users[i].uid === message.author.id) {
                 /* check if this user has recently changed his/her userTag. */
                 update_genshin_userTag(array_Obj, i);
@@ -1303,7 +1303,7 @@ function wishReset(message, bannerType) {
     var path = './json_data/genshin_wish_tables.json';
     var text = readTextFile(path);
     var array_Obj = JSON.parse(text);
-    for (let i = 0; i < objLength(array_Obj.users); i++) {
+    for (var i = 0; i < objLength(array_Obj.users); i++) {
         if (array_Obj.users[i].uid === message.author.id) {
             /* check if this user has recently changed his/her userTag. */
             update_genshin_userTag(array_Obj, i);
@@ -1517,11 +1517,11 @@ function sec_Convert(sec_string) {
     var hours = Math.floor(minutes / 60);
 
     /* re-factor minutes and seconds */
-    for (let i = 0; i < hours; i++) {
+    for (var i = 0; i < hours; i++) {
         minutes -= 60;
         seconds -= 3600;
     }
-    for (let i = 0; i < minutes; i++) {
+    for (var i = 0; i < minutes; i++) {
         seconds -= 60;
     }
 
@@ -1547,7 +1547,7 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
         }
         server.skip = false;
         var count = 0;
-        for (let i = 0; i < server.skipAmount; i++) {
+        for (var i = 0; i < server.skipAmount; i++) {
             if (server.queue.length > 0) {
                 server.queue.shift();
                 server.cached_video_info.shift();
