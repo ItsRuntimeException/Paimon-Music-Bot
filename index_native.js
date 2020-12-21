@@ -78,9 +78,10 @@ client.on("message", async message => {
             var server = servers[message.guild.id];
             /* string logic: */
             var search_string = args.toString().replace(/,/g,' ');
-            /* VALIDATE ARG NOT undefined */
-            console.log(search_string);
-            /* FOUND EDGE-CASE: search_string.startsWith('?') fix -> TypeError: Cannot read property 'substr' of null */
+            /**
+             * VALIDATE ARG NOT undefined
+             * FOUND EDGE-CASE: search_string.startsWith('?') fix -> TypeError: Cannot read property 'substr' of null 
+            */
             if (search_string == '' || search_string.startsWith('?')) {
                 return message.channel.send(`${message.author}.`
                     +"\nThis command plays your specified Youtube-link or keyword searched."
