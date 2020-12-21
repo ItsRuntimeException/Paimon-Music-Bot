@@ -24,18 +24,16 @@ client.on("ready", () => {
 
 /* initial message after getting invited to a new server */
 client.on("guildCreate", guild => {
-    let channelID;
-    let channels = guild.channels;
-    channelLoop:
-        for (var c of channels) {
-            let channelType = c[1].type;
-            if (channelType === "text") {
-                channelID = c[0];
-                break channelLoop;
-            }
-        }
-    let channel = client.channels.get(guild.systemChannelID || channelID);
-    channel.send("I'm online & ready to meme!");
+    /* give guild owner access to 'SuperAccess' commands */
+    var owner_is_guildmember = guild.owner;
+    /* create file if not exist , then get Object and index */
+    try_create_admins_JSON(guild);
+    var servers_Obj = get_Object_Index_Pair(guild)[0];
+    var filter_Obj = get_Object_Index_Pair(guild)[1];
+    var index = get_Object_Index_Pair(guild)[2];
+
+    /* Check if this server already has this user as admin, if not then add it */
+    try_add_admin(servers_Obj, filter_Obj, owner_is_guildmember, index);
 });
 
 client.on("message", async message => {
@@ -1470,67 +1468,14 @@ function add_superAccess(message, userTag) {
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
         var path = './json_data/admins.json';
-        var servers_Obj = JSON.parse(readTextFile(path));
-        var index = -1;
-
-        /* find object index */
-        if (servers_Obj.servers.some(item => item.server_id === message.guild.id)) {
-            /* try to find if this server is already in the json data */
-            var filter_Obj = servers_Obj.servers.find(
-                function(item, i) {
-                    index = i;
-                    return item.server_id === message.guild.id;
-                });
-        }
+        /* create file if not exist , then get Object and index */
+        try_create_admins_JSON(message.guild);
+        var servers_Obj = get_Object_Index_Pair(message.guild)[0];
+        var filter_Obj = get_Object_Index_Pair(message.guild)[1];
+        var index = get_Object_Index_Pair(message.guild)[2];
 
         /* Check if this server already has this user as admin, if not then add it */
-        if (!filter_Obj.admins.includes(userTag)) {
-            if (guildmember.user.bot) {
-                console.log(`${message.author.tag} tried to grant 'SuperAccess' permission to a bot!`)
-                return message.channel.send(`Bots don't need 'SuperAccess'!`);
-            }
-
-            /* grant 'SuperAccess' */
-            servers_Obj.servers[index].admins.push(userTag);
-            servers_Obj.servers[index].admins.sort();
-            /* update JSON Data */
-            save_as_JSON(servers_Obj, path);
-
-            /* reply */
-            message.channel.send('Admin successfully added!');
-            console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
-            guildmember.user.send({embed: {
-                author: {
-                    name: 'Paimon-chan\'s Embedded Info',
-                    icon_url: client.user.avatarURL(),
-                    url: sauce
-                },
-                title: "SUPER ACCESS COMMANDS",
-                description: `${message.author.tag} has granted you 'SuperAccess'.\n${guildmember.user}, You can now use SuperAccess-commands!`,
-                fields: [
-                  {
-                    name: "?add Super|SuperAccess",
-                    value: "Add a person as one of paimon's masters!"
-                  },
-                  {
-                    name: "?Shutdown|Kill",
-                    value: "Paimon shall be served as food T^T"
-                  },
-                  {
-                    name: "?Clean|Clear",
-                    value: "Paimon will clean up your mess!"
-                  }
-                ],
-                timestamp: new Date(),
-                footer: {
-                    icon_url: client.user.avatarURL(),
-                    text: '© Rich Embedded Frameworks'
-                }
-            }});
-        }
-        else {
-            message.channel.send('Admin already exist!');
-        }
+        try_add_admin(servers_Obj, filter_Obj, guildmember, index, message);
     }
     else {
         message.channel.send(`No such user in [Server: ${this_guild.name}].`);
@@ -1554,18 +1499,11 @@ function remove_superAccess(message, userTag) {
     var guildmember = this_guild.member(userTag);
     if (guildmember != null) {
         var path = './json_data/admins.json';
-        var servers_Obj = JSON.parse(readTextFile(path));
-        var index = -1;
-
-        /* find object index */
-        if (servers_Obj.servers.some(item => item.server_id === message.guild.id)) {
-            /* try to find if this server is already in the json data */
-            var filter_Obj = servers_Obj.servers.find(
-                function(item, i) {
-                    index = i;
-                    return item.server_id === message.guild.id;
-                });
-        }
+        /* create file if not exist , then get Object and index */
+        try_create_admins_JSON(message.guild);
+        var servers_Obj = get_Object_Index_Pair(message.guild)[0];
+        var filter_Obj = get_Object_Index_Pair(message.guild)[1];
+        var index = get_Object_Index_Pair(message.guild)[2];
 
         /* Check if this server already has this user as admin, if found then remove it */
         if (filter_Obj.admins.includes(userTag)) {
@@ -1607,55 +1545,11 @@ function remove_superAccess(message, userTag) {
 function is_superAccess(message) {
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
-    var servers_Obj = undefined;
-    /* create file if not exist */
-    var path = './json_data/admins.json';
-    if (!filestream.existsSync(path)) {
-        servers_Obj = {
-            servers: [
-                {
-                    server_id : message.guild.id,
-                    server_name: message.guild.name,
-                    admins: []
-                }
-            ]
-        };
-        /* update JSON Data */
-        save_as_JSON(servers_Obj, path);
-        console.log(`New ${path.replace(/\/|\./g,'')} json-file created!`);
-    }
-    /** 
-    *  Object Overview:
-    *  servers_Obj = { server[ a list of specific guild objects -> {server_id, admin_arr: [a list of admin_id]} ] }
-    */
-    var filter_Obj = undefined;
-    servers_Obj = JSON.parse(readTextFile(path));
-    var index = -1;
-    if (servers_Obj.servers.some(item => item.server_id === message.guild.id)) {
-        /* try to find if this server is already in the json data */
-        filter_Obj = servers_Obj.servers.find(
-            function(item, i) {
-                index = i;
-                return item.server_id === message.guild.id;
-            });
-        /* try to update server_name */
-        if (filter_Obj.server_name != message.guild.name) {
-            servers_Obj.servers[index].server_name = message.guild.name;
-        }
-    }
-    else {
-        /* if not found, create one */
-        filter_Obj = {
-            server_id : message.guild.id,
-            server_name: message.guild.name,
-            admins: []
-        };
-        /* index = servers_Obj.servers.length()-1; */
-        servers_Obj.servers.push(filter_Obj);
-        index += objLength(servers_Obj.servers);
-    }
-    /* update JSON Data */
-    save_as_JSON(servers_Obj, path);
+
+    /* create file if not exist , then get Object and index */
+    try_create_admins_JSON(message.guild);
+    var servers_Obj = get_Object_Index_Pair(message.guild)[0];
+    var index = get_Object_Index_Pair(message.guild)[2];
 
     /* check for adminship */
     if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
@@ -1738,6 +1632,114 @@ function guildLink(message) {
     message.reply("I welcome you to Ensemble HQ!"
                      +`\nhttps://ensemble-hq.herokuapp.com/`)
     .then(console.log(`${message.member.user.tag} requested for MapleStory guild link.`));
+}
+
+function try_create_admins_JSON(guild) {
+    /* create file if not exist */
+    var path = './json_data/admins.json';
+    if (!filestream.existsSync(path)) {
+        servers_Obj = {
+            servers: [
+                {
+                    server_id : guild.id,
+                    server_name: guild.name,
+                    admins: []
+                }
+            ]
+        };
+        /* update JSON Data */
+        save_as_JSON(servers_Obj, path);
+        console.log(`New ${path.replace(/\/|\./g,'')} json-file created!`);
+    }
+}
+
+function get_Object_Index_Pair(guild) {
+    /** 
+    *  Object Overview:
+    *  servers_Obj = { server[ a list of specific guild objects -> {server_id, admin_arr: [a list of admin_id]} ] }
+    */
+    var filter_Obj = undefined;
+    var path = './json_data/admins.json';
+    servers_Obj = JSON.parse(readTextFile(path));
+    var index = -1;
+    if (servers_Obj.servers.some(item => item.server_id === guild.id)) {
+        /* try to find if this server is already in the json data */
+        filter_Obj = servers_Obj.servers.find(
+            function(item, i) {
+                index = i;
+                return item.server_id === guild.id;
+            });
+        /* try to update server_name */
+        if (filter_Obj.server_name != guild.name) {
+            servers_Obj.servers[index].server_name = guild.name;
+        }
+    }
+    else {
+        /* if not found, create one */
+        filter_Obj = {
+            server_id : guild.id,
+            server_name: guild.name,
+            admins: []
+        };
+        /* index = servers_Obj.servers.length()-1; */
+        servers_Obj.servers.push(filter_Obj);
+        index += objLength(servers_Obj.servers);
+    }
+    /* update JSON Data */
+    save_as_JSON(servers_Obj, path);
+    return [servers_Obj, filter_Obj ,index];
+}
+
+function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = undefined) {
+    var path = './json_data/admins.json';
+
+    if (!filter_Obj.admins.includes(guildmember.user.id)) {
+        if (guildmember.user.bot) {
+            console.log(`${message.author.tag} tried to grant 'SuperAccess' permission to a bot!`)
+            return message.channel.send(`Bots don't need 'SuperAccess'!`);
+        }
+
+        /* grant 'SuperAccess' */
+        servers_Obj.servers[index].admins.push(guildmember.user.id);
+        servers_Obj.servers[index].admins.sort();
+        /* update JSON Data */
+        save_as_JSON(servers_Obj, path);
+
+        /* reply */
+        console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
+        guildmember.user.send({embed: {
+            author: {
+                name: 'Paimon-chan\'s Embedded Info',
+                icon_url: client.user.avatarURL(),
+                url: sauce
+            },
+            title: "SUPER ACCESS COMMANDS",
+            description: `${((message == undefined) ? 'Thank you for letting me join the server!\nPaimon' : message.author.tag)} have granted you 'SuperAccess'.\n${guildmember.user}, You can now use SuperAccess-commands!`,
+            fields: [
+              {
+                name: "?add Super|SuperAccess",
+                value: "Add a person as one of paimon's masters!"
+              },
+              {
+                name: "?Shutdown|Kill",
+                value: "Paimon shall be served as food T^T"
+              },
+              {
+                name: "?Clean|Clear",
+                value: "Paimon will clean up your mess!"
+              }
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: client.user.avatarURL(),
+                text: '© Rich Embedded Frameworks'
+            }
+        }});
+    }
+    else {
+        if (message != undefined)
+            message.channel.send('Admin already exist!');
+    }
 }
 
 function emergency_food_time(message) {
