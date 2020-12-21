@@ -1508,6 +1508,7 @@ function sec_Convert(sec_string) {
 }
 
 function music_loop_logic(message, cached_path, soundPath, audio_title) {
+    var server = servers[message.guild.id];
     /* delete old embedMessage */
     if (server.embedMessage != undefined)
         server.embedMessage.delete();
