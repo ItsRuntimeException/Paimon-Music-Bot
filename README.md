@@ -12,7 +12,7 @@ A Discord bot with various functionalities I desired to have.<br/>
 3. Copy your bot-token and put it inside '.\json_data\login_tokens.json'.<br/>
 4. Run '2 start.bat' or you can host it online with heroku/other servers.<br/>
 
-- Finally, If you want music capabilities, please follow the instructions in 'README - Add music support.txt'.<br/>
+Finally, If you want music capabilities, please follow the instructions in 'README - Add music support.txt'.<br/>
 
 **Short list of bot-commands**
 - [Help](#Help)
