@@ -930,7 +930,6 @@ async function clean_messages(message, numline) {
     */
     var bulkMessages = ((numline == undefined) ? await message.channel.messages.fetch() : await message.channel.messages.fetch( {limit: ++numline} ));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
-    servers[message.guild.id].embedMessage = undefined;
     console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
 }
 
