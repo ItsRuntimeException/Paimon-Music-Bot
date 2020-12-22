@@ -675,14 +675,8 @@ async function queueInfo(message, qNum = 10) {
     var playString = 'None';
 
     /* delete old embedMessage */
-    if (server.embedMessage != undefined) {
-        try {
-            server.embedMessage.delete();
-        } catch (error) {
-            console.log(`${error}:\nembedMessage tried refreshing, but failed.`);
-        }
-    }
-    
+    if (server.embedMessage != undefined)
+        server.embedMessage.delete().catch((error) => {console.log(`${error}: 'Tried to delete embedMessage, but it was already deleted!`)});
     /* playString */
     if (server.queue[0] != undefined) {
         if (ytdl.validateURL(server.queue[0])) /* check link validity */
@@ -1587,13 +1581,8 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
     }
     else if (server.queue.length == 0) {
         /* delete old embedMessage */
-        if (server.embedMessage != undefined) {
-            try {
-                server.embedMessage.delete();
-            } catch (error) {
-                console.log(`${error}:\nembedMessage tried refreshing, but failed.`);
-            }
-        }
+        if (server.embedMessage != undefined)
+            server.embedMessage.delete().catch((error) => {console.log(`${error}: 'Tried to delete embedMessage, but it was already deleted!`)});
         server.dispatcher = undefined;
         leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
     }
