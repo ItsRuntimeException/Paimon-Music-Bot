@@ -927,7 +927,7 @@ async function clean_messages(message, numline) {
     *  Fetch the given number of messages to sweeps: numline+1 to include the execution command
     *  Sweep all messages that have been fetched and are not older than 14 days (due to the Discord API), catch any errors.
     */
-    var bulkMessages = ((numline == undefined) ? await message.channel.messages.fetch() : await message.channel.messages.fetch( {limit: (numline+1)} ));
+    var bulkMessages = ((numline == undefined) ? await message.channel.messages.fetch() : await message.channel.messages.fetch( {limit: ++numline} ));
     message.channel.bulkDelete(bulkMessages, true).then(console.log('message cleaning requested!'));
     servers[message.guild.id].embedMessage = undefined;
     console.log(`Cleaned ${bulkMessages.array().length-1} messages.`);
