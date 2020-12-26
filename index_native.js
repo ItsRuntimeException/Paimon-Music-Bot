@@ -1678,6 +1678,9 @@ function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = un
         save_as_JSON(servers_Obj, path);
 
         /* reply */
+        if (message != undefined) {
+            message.channel.send('Admin successfully added!');
+        }
         console.log(`Admin successfully added! ${guildmember.user} now have access to SuperAccess-commands!`);
         guildmember.user.send({embed: {
             author: {
