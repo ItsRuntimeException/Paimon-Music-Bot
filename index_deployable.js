@@ -270,6 +270,10 @@ client.on("message", async message => {
         case "greset":
             wishReset(message, args[0]);
             break;
+        case "gfile":
+            let genshin_file_path = './json_data/genshin_wish_tables.json';
+            message.channel.send({files:[genshin_file_path]});
+            break;
         default:
             /* Super Access Commands, etc... */
             if (command.match(/clean|clear/g)) {
@@ -375,7 +379,7 @@ function userHelp(message) {
             value: "MapleStory guild page."
           },
           {
-            name: "?g[Create|Showtable|Pity|Wish|Reset]",
+            name: "?g[Create|Showtable|Pity|Wish|Reset|File]",
             value: "Genshin Impact's manual \'Gacha Count-Table\'."
           },
           {
