@@ -39,7 +39,6 @@ Command | param | Description
 ?skip \[int?Optional\] | skipNum | Skip current \| skipNum of songs in queue.
 ?stop | N/A | Stop music and clear queue.
 ?loop \[string?Optional\]  | on \| off | Loop current music.
-
 ?queue \[int?Optional\]  | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
