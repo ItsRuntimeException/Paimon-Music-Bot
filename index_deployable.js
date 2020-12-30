@@ -618,7 +618,7 @@ async function play_music(message, soundPath = '') {
     var server = servers[message.guild.id];
     var connection = await message.member.voice.channel.join();
     var cached_path = './stream_fetched_audio/';
-    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
+    var audio_title = '';
 
     if (server.local) {
         /* PLAY MUSIC LOCAL */
@@ -631,6 +631,7 @@ async function play_music(message, soundPath = '') {
     }
     else {
         /* PLAY MUSIC VIA STREAM_MODE */
+        audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
         var stream = ytdl(server.queue[0], { filter: 'audioonly' });
         musicInfo_Lookup(message);
         server.dispatcher = connection.play(stream, {volume: server.volume});
