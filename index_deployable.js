@@ -130,6 +130,11 @@ client.on("message", async message => {
             if (server.dispatcher != undefined) {
                 return message.channel.send('Please wait until all local music has been finished playing OR ?Stop.');
             }
+            
+            /* IN-CHANNEL CHECK */
+            if (!message.member.voice.channel) {
+                return message.reply("please join a voice channel first!", {files: ['./moji/PaimonCookies.gif']});
+            }
             if (!server.local && server.queue.length > 0) {
                 return message.channel.send('Please finish stream playlist first!');
             }
@@ -153,11 +158,11 @@ client.on("message", async message => {
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
-                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
             }
             else {
                 console.log('playLocal: Category does not exist!');
-                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
             }
             break;
         case "shuffle":
@@ -522,7 +527,7 @@ async function queueLogic(message, search_string) {
         else if (validate_playlist) {
             /* PRELOAD PLAYLIST */
             try {
-                message.channel.send(`Fetching only up to 50 videos, please be patient if this takes awhile...`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+                message.channel.send(`Fetching only up to 50 videos, please be patient if this takes awhile...`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
                 var yt_playlist = await youtube.getPlaylist(search_string);
             } catch (error) {
                 console.log(error);
@@ -619,7 +624,7 @@ async function play_music(message, soundPath = '') {
     var connection = await message.member.voice.channel.join();
     var cached_path = './stream_fetched_audio/';
     var audio_title = '';
-
+    
     if (server.local) {
         /* PLAY MUSIC LOCAL */
         if (server.queue[0] != undefined) {
@@ -637,7 +642,7 @@ async function play_music(message, soundPath = '') {
         server.dispatcher = connection.play(stream, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
     }
-
+    
     /* stream dispatcher */
     server.dispatcher.on('finish', function () {
         music_loop_logic(message, cached_path, soundPath, audio_title);
@@ -667,7 +672,7 @@ function musicInfo_Lookup(message) {
                 icon_url: client.user.avatarURL(),
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(newMessage => newMessage.delete({timeout: 10000, reason: 'fewer text clutter.'}));
+        }}).then(newMessage => newMessage.delete({timeout: 10000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
     }
     else
         return message.channel.send('Local Music does not support Info-Lookup');
@@ -736,7 +741,7 @@ function vol_music(message, num) {
     var server = servers[message.guild.id];
     if (num == undefined) {
         console.log(`[Server: ${message.guild.id}] Current volume: ${server.volume*100}%`);
-        return message.channel.send(`Current volume: ${server.volume*100}%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+        return message.channel.send(`Current volume: ${server.volume*100}%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
     }
     var percentage = parseFloat(num);
     if (isNaN(percentage)) {
@@ -749,15 +754,15 @@ function vol_music(message, num) {
         if (server.volume <= 1) {
             server.dispatcher.setVolume(server.volume);
             console.log(`[Server: ${message.guild.id}] Volume set to ${percentage}%`);
-            message.channel.send(`Volume set to ${percentage}%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+            message.channel.send(`Volume set to ${percentage}%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
         else {
             console.log(`[Server: ${message.guild.id}] Cannot set volume greater than 100%`);
-            message.channel.send(`Cannot set volume greater than 100%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+            message.channel.send(`Cannot set volume greater than 100%`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
     }
     else {
-        message.channel.send('Music is not playing.').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+        message.channel.send('Music is not playing.').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'})).catch( (error) => {console.log(`${error}`)});
     }
 }
 
@@ -765,10 +770,10 @@ function loop_music(message, switcher) {
     var server = servers[message.guild.id];
     if (switcher == undefined) {
         if (server.loop) {
-            return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+            return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
         else {
-            return message.channel.send('Loop Mode Status: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+            return message.channel.send('Loop Mode Status: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
     }
 
@@ -794,10 +799,10 @@ function set_cached_audio_mode (message, switcher) {
     var server = servers[message.guild.id];
     if (switcher == undefined) {
         if (server.cached_audio_mode) {
-            return message.channel.send('Audio Caching: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+            return message.channel.send('Audio Caching: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
         else {
-            return message.channel.send('Audio Caching: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+            return message.channel.send('Audio Caching: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
     }
 
@@ -1280,7 +1285,7 @@ function wishCount(message, bannerType, commandType, nInc) {
                 icon_url: client.user.avatarURL(),
                 text: '© Rich Embedded Frameworks'
             }
-        }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+        }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
     }
 }
 
@@ -1367,7 +1372,7 @@ function wishReset(message, bannerType) {
             icon_url: client.user.avatarURL(),
             text: '© Rich Embedded Frameworks'
         }
-    }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}));
+    }}).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
 }
 
 function add_superAccess(message, userTag) {

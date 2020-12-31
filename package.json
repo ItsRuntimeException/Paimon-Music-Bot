@@ -9,11 +9,11 @@
   "author": "Run Lin: ",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/opus": "^0.3.3",
     "@discordjs/uws": "^10.149.0",
     "discord-youtube-api": "^0.1.0",
-    "discord.js": "12.3.1",
-    "ffmpeg-binaries": "^3.2.2",
-    "node-opus": "0.3.3",
+    "discord.js": "^12.3.1",
+    "ffmpeg-static": "^4.2.7",
     "ytdl-core": "^4.2.1",
     "ytpl": "1.0.1"
   }
