@@ -1,1 +1,1 @@
-node --trace-warnings index_native.js
+node --trace-warnings paimon-discord-bot.js

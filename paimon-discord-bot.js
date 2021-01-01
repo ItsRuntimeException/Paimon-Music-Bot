@@ -12,6 +12,20 @@ const DICE = 6;
 const BOT_TOKEN = JSON.parse(readTextFile('./json_data/login_tokens.json')).bot_token;
 const youtube = new YouTube(JSON.parse(readTextFile('./json_data/login_tokens.json')).youtube_api_key);
 
+/*********** RaspberryPi service port **************/
+const http = require('http');
+const PORT = 3000;
+const app_server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hiya! Paimon is Online!\n');
+});
+app_server.listen(PORT, () => {
+  console.log(`Paimon is  running on port ${PORT}.`);
+});
+/**************************************************/
+
+
 /* music variables */
 var servers = {};
 
@@ -122,7 +136,7 @@ client.on("message", async message => {
                     +"\nThis command plays local_folder music, given a specified category."
                     +"\n\nUsage: " + "?playLocal [Category]"
                     +"\n\nCategory example:\n"
-                        +"\t\tAnime | Persona3 | Persona4 | Persona5").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+                        +"\t\tAnime | Persona | Ghibli | VN").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
             }
 
             var server = servers[message.guild.id];
@@ -145,15 +159,13 @@ client.on("message", async message => {
                 queueLogic(message, './anime_music/');
             }
             else if (search_string.match(/persona/gi)) {
-                if (!search_string.match(/[3-5]/g)) {
-                    message.channel.send('Please specify: 3|4|5');
-                }
-                else if (search_string.match(/3/gi))
-                    queueLogic(message, './persona3_music/');
-                else if (search_string.match(/4/gi))
-                    queueLogic(message, './persona4_music/');
-                else if (search_string.match(/5/gi))
-                    queueLogic(message, './persona5_music/');
+                queueLogic(message, './persona_music/');
+            }
+            else if (search_string.match(/vn|visual novel|visualnovel/gi)) {
+                queueLogic(message, './vn_music/');
+            }
+            else if (search_string.match(/ghibli/gi)) {
+                queueLogic(message, './ghibli_music/');
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
