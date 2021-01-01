@@ -298,7 +298,10 @@ client.on("message", async message => {
                 }
             } else if (command.match(/shutdown|kill/g)) {
                 if (is_superAccess(message)) {
-                    return emergency_food_time(message);
+                    /* only bot-owner may shutdown the bot */
+                    if(is_Owner(message)) {
+                        return emergency_food_time(message);
+                    }
                 }
             } else if (command.match(/caching/g)) {
                 if (is_superAccess(message)) {
@@ -1489,6 +1492,19 @@ function is_superAccess(message) {
     if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
         console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an admin command.`);
         message.channel.send(`${message.author}. Only Paimon's masters may access this command! `, {files: [ moji_array[rand] ]});
+        return false;
+    }
+    return true;
+}
+
+function is_Owner(message) {
+    var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
+    var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
+
+    /* check for ownership */
+    if (message.author.id != client.owner.id) {
+        console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an owner command.`);
+        message.channel.send(`${message.author}. Only Paimon's 'owner' may access this command! `, {files: [ moji_array[rand] ]});
         return false;
     }
     return true;

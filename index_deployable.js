@@ -123,7 +123,7 @@ client.on("message", async message => {
                     +"\nThis command plays local_folder music, given a specified category."
                     +"\n\nUsage: " + "?playLocal [Category]"
                     +"\n\nCategory example:\n"
-                        +"\t\tAnime | Persona3 | Persona4 | Persona5").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+                        +"\t\tAnime | Persona | Ghibli | VN").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
             }
 
             var server = servers[message.guild.id];
@@ -146,15 +146,13 @@ client.on("message", async message => {
                 queueLogic(message, './anime_music/');
             }
             else if (search_string.match(/persona/gi)) {
-                if (!search_string.match(/[3-5]/g)) {
-                    message.channel.send('Please specify: 3|4|5');
-                }
-                else if (search_string.match(/3/gi))
-                    queueLogic(message, './persona3_music/');
-                else if (search_string.match(/4/gi))
-                    queueLogic(message, './persona4_music/');
-                else if (search_string.match(/5/gi))
-                    queueLogic(message, './persona5_music/');
+                queueLogic(message, './persona_music/');
+            }
+            else if (search_string.match(/vn|visual novel|visualnovel/gi)) {
+                queueLogic(message, './vn_music/');
+            }
+            else if (search_string.match(/ghibli/gi)) {
+                queueLogic(message, './ghibli_music/');
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
@@ -287,7 +285,10 @@ client.on("message", async message => {
                 }
             } else if (command.match(/shutdown|kill/g)) {
                 if (is_superAccess(message)) {
-                    return emergency_food_time(message);
+                    /* only bot-owner may shutdown the bot */
+                    if(is_Owner(message)) {
+                        return emergency_food_time(message);
+                    }
                 }
             } else if (command.match(/caching/g)) {
                 if (is_superAccess(message)) {
@@ -1478,6 +1479,19 @@ function is_superAccess(message) {
     if (!servers_Obj.servers[index].admins.includes(message.author.id)) {
         console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an admin command.`);
         message.channel.send(`${message.author}. Only Paimon's masters may access this command! `, {files: [ moji_array[rand] ]});
+        return false;
+    }
+    return true;
+}
+
+function is_Owner(message) {
+    var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
+    var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
+
+    /* check for ownership */
+    if (message.author.id != client.owner.id) {
+        console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an owner command.`);
+        message.channel.send(`${message.author}. Only Paimon's 'owner' may access this command! `, {files: [ moji_array[rand] ]});
         return false;
     }
     return true;
