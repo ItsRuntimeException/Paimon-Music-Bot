@@ -790,7 +790,7 @@ function loop_music(message, mode_string) {
         case 'on':
             server.loop = mode_string.toLowerCase();
             console.log(`[Server: ${message.guild.id}] Loop Mode is turned ON: ${server.loop.toUpperCase()}`);
-            message.channel.send('Loop Mode is turned ON');
+            message.channel.send(`Loop Mode is turned ON: ${server.loop.toUpperCase()}`);
             break;
         case 'off':
             server.loop = switcher;
