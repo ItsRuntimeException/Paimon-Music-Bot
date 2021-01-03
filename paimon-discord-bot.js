@@ -905,7 +905,7 @@ function resetVoice(message) {
     server.dispatcher = undefined;
     server.queue = [];
     server.cached_video_info = [];
-    server.volume = 0.50;
+    server.volume = 0.10;
     server.loop = 'off';
     server.skip = false;
     server.skipAmount = 1;
