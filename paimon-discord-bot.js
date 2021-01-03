@@ -1589,8 +1589,8 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
          * if 'list' we push back to the queue
         */
         if (server.loop === 'list') {
-            let current_song = server.queue.shift();
-            server.queue.push(current_song);
+            server.queue.push(server.queue.shift());
+            server.cached_video_info.push(server.cached_video_info.shift());
         }
     }
     else
