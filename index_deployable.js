@@ -43,6 +43,7 @@ client.on("message", async message => {
         if (!servers[message.guild.id]) {
             servers[message.guild.id] = {
                 dispatcher: undefined,
+                connection: undefined,
                 queue: [],
                 cached_video_info: [],
                 cached_audio_mode: false,
@@ -593,10 +594,10 @@ function download_music(message) {
 
 async function play_music_cached(message) {
     var server = servers[message.guild.id];
-    var connection = await message.member.voice.channel.join();
-    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
-
+    if (server.connection == undefined)
+        server.connection = await message.member.voice.channel.join();
     /* PLAY MUSIC VIA CACHED_MODE */
+    let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
     var cached_path = './stream_fetched_audio/';
     if (!filestream.existsSync(cached_path)){
         filestream.mkdirSync(cached_path);
@@ -609,7 +610,7 @@ async function play_music_cached(message) {
     }
     stream.on('finish', function () {
         musicInfo_Lookup(message);
-        server.dispatcher = connection.play(`${cached_path}${audio_title}.mp3`, {volume: server.volume});
+        server.dispatcher = server.connection.play(`${cached_path}${audio_title}.mp3`, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${audio_title}\nDuration: ${server.cached_video_info[0].duration}\n`);
         
         /* cached_audio dispatcher */
@@ -621,16 +622,16 @@ async function play_music_cached(message) {
 
 async function play_music(message, soundPath = '') {
     var server = servers[message.guild.id];
-    var connection = await message.member.voice.channel.join();
+    if (server.connection == undefined)
+        server.connection = await message.member.voice.channel.join();
     var cached_path = './stream_fetched_audio/';
     var audio_title = '';
-    
     if (server.local) {
         /* PLAY MUSIC LOCAL */
         if (server.queue[0] != undefined) {
             let song = soundPath + server.queue[0];
             let songName = server.queue[0].split('.mp3')[0];
-            server.dispatcher = connection.play(song, {volume: server.volume});
+            server.dispatcher = server.connection.play(song, {volume: server.volume});
             console.log('[Local-Mode][Server: '+message.guild.id+'] Now Playing: ' + songName);
         }
     }
@@ -639,7 +640,7 @@ async function play_music(message, soundPath = '') {
         audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
         var stream = ytdl(server.queue[0], { filter: 'audioonly' });
         musicInfo_Lookup(message);
-        server.dispatcher = connection.play(stream, {volume: server.volume});
+        server.dispatcher = server.connection.play(stream, {volume: server.volume});
         console.log(`[Stream-Mode][Server: ${message.guild.id}] Now Playing: ${server.cached_video_info[0].title}\nDuration: ${server.cached_video_info[0].duration}\n`);
     }
     
@@ -904,6 +905,7 @@ function resetVoice(message) {
     if (server.dispatcher != undefined)
         server.dispatcher.destroy();
     server.dispatcher = undefined;
+    server.connection = undefined;
     server.queue = [];
     server.cached_video_info = [];
     server.volume = 0.10;
