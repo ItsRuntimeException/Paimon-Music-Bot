@@ -40,20 +40,7 @@ client.on("message", async message => {
     /* initialize music queue */
     if (message.guild != null) {
         if (!servers[message.guild.id]) {
-            servers[message.guild.id] = {
-                dispatcher: undefined,
-                connection: undefined,
-                queue: [],
-                cached_video_info: [],
-                cached_audio_mode: false,
-                volume: 0.10,
-                skipAmount: 1,
-                loop: 'off',
-                skip: false,
-                local: false,
-                playToggle: false,
-                embedMessage: undefined
-            }
+            servers[message.guild.id] = JSON.parse('./json_data/default_server_data.json');
         }
     }
 
@@ -896,26 +883,11 @@ function resetVoice(message) {
            });
         }
     }
-    /* clear server.queue & set server.dispatcher = undefined */
-    while (server.queue.length > 0) {
-        server.queue.shift();
-        server.cached_video_info.shift();
-    }
+    /* destroy & reset */
     if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
     }
-    server.dispatcher = undefined;
-    server.connection = undefined;
-    server.queue = [];
-    server.cached_video_info = [];
-    server.volume = 0.10;
-    server.loop = 'off';
-    server.skip = false;
-    server.skipAmount = 1;
-    server.cached_audio_mode = false;
-    server.local = false;
-    server.playToggle = false;
-    server.embedMessage = undefined;
+    server = JSON.parse('./json_data/default_server_data.json');
     message.channel.send('Bot Reset Complete!');
 }
 

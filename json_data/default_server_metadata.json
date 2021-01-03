@@ -1,0 +1,14 @@
+{
+    "dispatcher": null,
+    "connection": null,
+    "queue": [],
+    "cached_video_info": [],
+    "cached_audio_mode": false,
+    "volume": 0.10,
+    "skipAmount": 1,
+    "loop": "off",
+    "skip": false,
+    "local": false,
+    "playToggle": false,
+    "embedMessage": null
+}
