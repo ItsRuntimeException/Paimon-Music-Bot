@@ -902,8 +902,9 @@ function resetVoice(message) {
         server.queue.shift();
         server.cached_video_info.shift();
     }
-    if (server.dispatcher != undefined)
+    if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
+    }
     server.dispatcher = undefined;
     server.connection = undefined;
     server.queue = [];
@@ -1621,11 +1622,13 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
                 play_music(message);
         }
     }
+    /* critical logic */
     else if (server.queue.length == 0) {
         /* delete old embedMessage */
         if (server.embedMessage != undefined)
             server.embedMessage.delete().catch((error) => {console.log(`${error}: 'Tried to delete embedMessage, but it was already deleted!`)});
         server.dispatcher = undefined;
+        server.connection = undefined;
         leave(message); /* leave: leave channel -> stop: server.dispatcher = undefined & flush queue */
     }
 }
