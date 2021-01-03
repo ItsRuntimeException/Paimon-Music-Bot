@@ -15,7 +15,7 @@
     "discord.js": "^12.3.1",
     "ffmpeg-static": "^4.2.7",
     "http": "0.0.1-security",
-    "ytdl-core": "^4.2.1",
+    "ytdl-core": "4.4.0",
     "ytpl": "1.0.1"
   }
 }
