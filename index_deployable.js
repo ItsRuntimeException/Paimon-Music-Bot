@@ -11,7 +11,7 @@ const DICE = 6;
 /* set up envrionment token for heroku deployment */
 const TOKEN = process.env.BOT_TOKEN;
 const HOST_DIR = process.env.URL;
-const ownerID = process.env.ownerID;
+const BOT_OWNERID = process.env.OWNER_ID;
 const youtube = new YouTube(process.env.YOUTUBE_API_KEY); /* Personal Youtube-API key */
 
 /* music variables */
@@ -1496,7 +1496,7 @@ function is_Owner(message) {
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
     
     /* check for ownership */
-    if (message.author.id != ownerID) {
+    if (message.author.id != BOT_OWNERID) {
         console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an owner command.`);
         message.channel.send(`${message.author}. Only Paimon's 'owner' may access this command! `, {files: [ moji_array[rand] ]});
         return false;
