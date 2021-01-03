@@ -40,7 +40,7 @@ client.on("message", async message => {
     /* initialize music queue */
     if (message.guild != null) {
         if (!servers[message.guild.id]) {
-            servers[message.guild.id] = JSON.parse('./json_data/default_server_data.json');
+            servers[message.guild.id] = JSON.parse('./json_data/default_server_metadata.json');
         }
     }
 
@@ -887,7 +887,7 @@ function resetVoice(message) {
     if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
     }
-    server = JSON.parse('./json_data/default_server_data.json');
+    server = JSON.parse('./json_data/default_server_metadata.json');
     message.channel.send('Bot Reset Complete!');
 }
 
