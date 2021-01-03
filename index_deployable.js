@@ -11,6 +11,7 @@ const DICE = 6;
 /* set up envrionment token for heroku deployment */
 const TOKEN = process.env.BOT_TOKEN;
 const HOST_DIR = process.env.URL;
+const ownerID = process.env.ownerID;
 const youtube = new YouTube(process.env.YOUTUBE_API_KEY); /* Personal Youtube-API key */
 
 /* music variables */
@@ -47,7 +48,7 @@ client.on("message", async message => {
                 cached_audio_mode: false,
                 volume: 0.10,
                 skipAmount: 1,
-                loop: false,
+                loop: 'off',
                 skip: false,
                 local: false,
                 playToggle: false,
@@ -284,11 +285,9 @@ client.on("message", async message => {
                     return clean_messages(message, args[0]);
                 }
             } else if (command.match(/shutdown|kill/g)) {
-                if (is_superAccess(message)) {
-                    /* only bot-owner may shutdown the bot */
-                    if(is_Owner(message)) {
-                        return emergency_food_time(message);
-                    }
+                /* only bot-owner may shutdown the bot */
+                if (is_Owner(message)) {
+                    return emergency_food_time(message);
                 }
             } else if (command.match(/caching/g)) {
                 if (is_superAccess(message)) {
@@ -602,7 +601,7 @@ async function play_music_cached(message) {
     if (!filestream.existsSync(cached_path)){
         filestream.mkdirSync(cached_path);
     }
-    if (!server.loop || !filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+    if (server.loop === 'off' || !filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
         var audio_WritableStream = filestream.createWriteStream(`${cached_path}${audio_title}.mp3`)
         var audio_ReadableStream = ytdl(server.queue[0], { filter: 'audioonly' });
         console.log(`Caching audio file to ${cached_path}; hopefully less lag`);
@@ -767,31 +766,39 @@ function vol_music(message, num) {
     }
 }
 
-function loop_music(message, switcher) {
+function loop_music(message, mode_string) {
     var server = servers[message.guild.id];
-    if (switcher == undefined) {
-        if (server.loop) {
-            return message.channel.send('Loop Mode Status: ON').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
-        }
-        else {
+    var switcher = 'off';
+    if (mode_string == undefined) {
+        if (server.loop === switcher) {
             return message.channel.send('Loop Mode Status: OFF').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
         }
+        else {
+            return message.channel.send(`Loop Mode Status: ${server.loop.toUpperCase()}`).then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
+        }
     }
-
-    switcher = switcher.toLowerCase();
+    /* this line below will check for conflicting mode */
+    else if ( mode_string.match(/single/gi) && mode_string.match(/list/gi) ) {
+        return message.channel.send('Please only specify one mode...').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
+    }
+    /* this line below will check for either-or */
+    else if ( mode_string.match(/single/gi) || mode_string.match(/list/gi) ) {
+        switcher = 'on';
+    }
+    /* finally execute the flip-switch */
     switch (switcher) {
         case 'on':
-            server.loop = true;
-            console.log(`[Server: ${message.guild.id}] Loop Mode is turned ON`);
+            server.loop = mode_string.toLowerCase();
+            console.log(`[Server: ${message.guild.id}] Loop Mode is turned ON: ${server.loop.toUpperCase()}`);
             message.channel.send('Loop Mode is turned ON');
             break;
         case 'off':
-            server.loop = false;
+            server.loop = switcher;
             console.log(`[Server: ${message.guild.id}] Loop Mode is turned OFF`);
             message.channel.send('Loop Mode is turned OFF');
             break;
         default:
-            message.channel.send('Usage: ?loop ON|OFF');
+            message.channel.send('Usage: ?loop [SINGLE | LIST | OFF]');
             break;
     }
 }
@@ -900,7 +907,7 @@ function resetVoice(message) {
     server.queue = [];
     server.cached_video_info = [];
     server.volume = 0.50;
-    server.loop = false;
+    server.loop = 'off';
     server.skip = false;
     server.skipAmount = 1;
     server.cached_audio_mode = false;
@@ -1487,9 +1494,9 @@ function is_superAccess(message) {
 function is_Owner(message) {
     var moji_array = ['moji/PaimonAngry.png', 'moji/PaimonNani.png', 'moji/PaimonCookies.gif', 'moji/PaimonLunch.jpg', 'moji/PaimonNoms.gif', 'moji/PaimonSqueezy.jpg', 'moji/PaimonThonks.jpg'];
     var rand = Math.floor(Math.random() * Math.floor(objLength(moji_array)));
-
+    
     /* check for ownership */
-    if (message.author.id != client.owner.id) {
+    if (message.author.id != ownerID) {
         console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] tried to access an owner command.`);
         message.channel.send(`${message.author}. Only Paimon's 'owner' may access this command! `, {files: [ moji_array[rand] ]});
         return false;
@@ -1554,7 +1561,7 @@ function sec_Convert(sec_string) {
 
 function music_loop_logic(message, cached_path, soundPath, audio_title) {
     var server = servers[message.guild.id];
-    /* music 'end' logic */
+    /* primary loop logic */
     if (server.skip) {
         if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
             filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
@@ -1576,8 +1583,16 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
         console.log(`[Server: ${message.guild.id}] Skipped ${((server.queue.length > 0) ? server.skipAmount : count)} songs.`);
         message.channel.send(`Skipped ${((server.queue.length > 0) ? server.skipAmount : count)} songs.`);
     }
-    else if (server.loop) {
-        console.log('Loop Mode: ON, replaying song.');
+    else if (server.loop !== 'off') {
+        console.log(`Loop Mode Status: ${server.loop}`);
+        /*
+         * if 'single' we don't have to deque anything 
+         * if 'list' we push back to the queue
+        */
+        if (server.loop === 'list') {
+            let current_song = server.queue.shift();
+            server.queue.push(current_song);
+        }
     }
     else
         if (server.queue.length > 0) {
@@ -1590,7 +1605,8 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
             server.queue.shift();
             server.cached_video_info.shift();
         }
-
+    
+    /* secondary loop logic */
     if (server.queue.length > 0) {
         queueInfo(message);
         if (server.local) {
@@ -1754,11 +1770,7 @@ function emergency_food_time(message) {
     /* channel reply */
     message.channel.send('Nooooooooooo! Paimon is turning into fooooooood!', {files:['moji/PaimonLunch.jpg']})
     .then(console.log(`${message.member.user.tag} killed Paimon as food~`));
-
-    setTimeout(function(err) {
-        if (err) throw err;
-        client.destroy();
-    }, 1000);
+    client.destroy();
 }
 
 client.login(TOKEN);

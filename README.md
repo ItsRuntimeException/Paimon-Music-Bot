@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: January 1, 2021***
+***Personal Project; Last Updated: January 2, 2021***
 # [Discord Bot] Paimon-chan #
 A Discord bot with various functionalities I desired to have.<br/>
 <img src="moji/PaimonRub.gif" width="128" height="128">
@@ -38,7 +38,7 @@ Command | param | Description
 ?resume | N/A | Resume current paused music.
 ?skip \[int?Optional\] | skipNum | Skip current \| skipNum of songs in queue.
 ?stop | N/A | Stop music and clear queue.
-?loop \[string?Optional\]  | on \| off | Loop current music.
+?loop \[string?Optional\]  | single \| list \| off | Music looping.
 ?queue \[int?Optional\]  | queue_display_size | Display current queue.
 ?shuffle | N/A | Shuffle queue.
 
