@@ -40,7 +40,7 @@ client.on("message", async message => {
     /* initialize music queue */
     if (message.guild != null) {
         if (!servers[message.guild.id]) {
-            servers[message.guild.id] = JSON.parse('./json_data/default_server_metadata.json');
+            servers[message.guild.id] = JSON.parse(readTextFile('./json_data/default_server_metadata.json'));
         }
     }
 
@@ -870,7 +870,7 @@ function stop_music(message) {
 }
 
 function resetVoice(message) {
-    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset variables!`);
+    console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset server metadata!`);
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
     /* clear cached audio file if it exists */
@@ -887,7 +887,8 @@ function resetVoice(message) {
     if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
     }
-    server = JSON.parse('./json_data/default_server_metadata.json');
+    server = JSON.parse(readTextFile('./json_data/default_server_metadata.json'));
+    console.log(server);
     message.channel.send('Bot Reset Complete!');
 }
 
