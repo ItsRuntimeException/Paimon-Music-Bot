@@ -4,15 +4,20 @@
   "version": "1.2.2",
   "homepage": "https://github.com/ItsRuntimeException/Paimon-chan#readme",
   "description": "Paimon discord bot will do various tasks from music-playing to recording your genshin impact roll-counts",
-  "keywords": ["paimon", "genshin impact", "banner counter", "music bot"],
+  "keywords": [
+    "paimon",
+    "genshin impact",
+    "banner counter",
+    "music bot"
+  ],
   "author": "Run Lin",
   "license": "ISC",
   "scripts": {
     "test": "node paimon-discord-bot.js"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/ItsRuntimeException/Paimon-chan.git"
+    "type": "git",
+    "url": "https://github.com/ItsRuntimeException/Paimon-chan.git"
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
