@@ -1,6 +1,6 @@
 {
   "name": "paimon-bot-master",
-  "version": "1.1.5",
+  "version": "1.2.2",
   "description": "Paimon is Paimon",
   "main": "paimon-discord-bot.js",
   "scripts": {
