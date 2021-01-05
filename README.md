@@ -20,9 +20,9 @@ A Discord bot with various functionalities I desired to have.<br/>
 - [Genshin Impact](#Genshin-Impact)
 - [ETC](#Other-Commands)
 
-**Invite me**
-
-<img src="examples/scan_me.png" width="128" height="128">
+**Invite me** | **Raspberry-Pi Hosting Overview** |
+| :---: | :---: 
+<img src="examples/scan_me.png" width="128" height="128"> | <img src="examples/raspi_server.jpg" width="200">
 
 # Help #
 Display a list of bot commands and its usage.
