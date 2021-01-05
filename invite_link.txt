@@ -1,2 +1,0 @@
-## This is the link to invite the bot into a discord server ##
-https://discord.com/api/oauth2/authorize?client_id=786082713404047410&permissions=0&scope=bot
