@@ -1,4 +1,4 @@
-***Personal Project; Last Updated: January 3, 2021***
+***Personal Project; Last Updated: January 4, 2021***
 # [Discord Bot] Paimon-chan #
 A Discord bot with various functionalities I desired to have.<br/>
 <img src="moji/PaimonRub.gif" width="128" height="128">
