@@ -80,6 +80,7 @@ admins.json (Before) | admins.json (After)
 # Genshin Impact #
 Command | bannerType | pityType | Operation | Description
 | :--- | :--- | :--- | :--- | :---
+?gFile | N/A | N/A | N/A | Request a raw .json of everyone's table.
 ?gCreate | N/A | N/A | N/A | Create a default Genshin Impact Gacha Table.
 ?gShowtable | N/A | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
 ?gPity<br/>\[pityType: string?Optional\] | N/A | Normal<br/>Soft | N/A | Display the calculated wishes (or primogem) until your next 5-star pity item.
