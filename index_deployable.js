@@ -888,6 +888,10 @@ function resetVoice(message) {
     if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
     }
+    while (server.queue.length > 0){
+        server.queue.shift();
+        server.cached_video_info.shift();
+    }
     server = JSON.parse(readTextFile('./json_data/default_server_metadata.json'));
     console.log(server);
     message.channel.send('Bot Reset Complete!');
