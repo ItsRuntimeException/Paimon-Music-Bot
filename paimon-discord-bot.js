@@ -591,7 +591,7 @@ async function play_music_cached(message) {
     if (server.loop === 'off' || !filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
         var audio_WritableStream = filestream.createWriteStream(`${cached_path}${audio_title}.mp3`)
         var audio_ReadableStream = ytdl(server.queue[0], { filter: 'audioonly' });
-        console.log(`Caching audio file to ${cached_path}; hopefully less lag`);
+        console.log(`Caching audio file to '${cached_path}'`);
         var stream = audio_ReadableStream.pipe(audio_WritableStream);
     }
     stream.on('finish', function () {
@@ -873,11 +873,14 @@ function resetVoice(message) {
     console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset server metadata!`);
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
-    if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-        filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-            if (err) return console.log(err);
-            console.log('cached audio deleted successfully');
-        });
+    if (server.cached_video_info[0] != undefined) {
+        let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
+        if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+            filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
+                if (err) return console.log(err);
+                console.log('cached audio deleted successfully');
+            });
+        }
     }
     /* destroy & reset */
     if (server.dispatcher != undefined) {
