@@ -874,15 +874,12 @@ function resetVoice(message) {
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
     /* clear cached audio file if it exists */
-    if (server.cached_video_info[0] != undefined) {
-	let audio_title = server.cached_video_info[0].title.replace(/[/:*?"<>|\\]/g, '_');
-    	if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-               filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-               if (err) return console.log(err);
-               console.log('file deleted successfully');
-           });
+    filestream.readdirSync(cached_path, function (err, files) {
+        if (err) {
+            return console.log(err);
         }
-    }
+        filestream.unlinkSync(`${cached_path}${files}`);
+    });
     /* destroy & reset */
     if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
@@ -1542,12 +1539,18 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
     var server = servers[message.guild.id];
     /* primary loop logic */
     if (server.skip) {
+        /* clear cached audio file if it exists
         if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
             filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                 if (err) return console.log(err);
                 console.log('file deleted successfully');
             });
         }
+        */
+        filestream.readdirSync(cached_path, function (err, files) {
+            if (err) return console.log(err);
+            filestream.unlinkSync(`${cached_path}${files}`);
+        });
         server.skip = false;
         var count = 0;
         for (var i = 0; i < server.skipAmount; i++) {
@@ -1575,12 +1578,18 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
     }
     else
         if (server.queue.length > 0) {
+            /*
             if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
                 filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                     if (err) return console.log(err);
                     console.log('file deleted successfully');
                 });
             }
+            */
+            filestream.readdirSync(cached_path, function (err, files) {
+                if (err) return console.log(err);
+                filestream.unlinkSync(`${cached_path}${files}`);
+            });
             server.queue.shift();
             server.cached_video_info.shift();
         }
