@@ -1538,13 +1538,13 @@ function sec_Convert(sec_string) {
 function music_loop_logic(message, cached_path, soundPath, audio_title) {
     var server = servers[message.guild.id];
     /* primary loop logic */
+    if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+        filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
+            if (err) return console.log(err);
+            console.log('cached audio deleted successfully');
+        });
+    }
     if (server.skip) {
-        if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
-            filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
-                if (err) return console.log(err);
-                console.log('cached audio deleted successfully');
-            });
-        }
         server.skip = false;
         var count = 0;
         for (var i = 0; i < server.skipAmount; i++) {
