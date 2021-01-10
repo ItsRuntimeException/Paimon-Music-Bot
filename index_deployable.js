@@ -874,13 +874,12 @@ function resetVoice(message) {
     console.log(`[Server: ${message.guild.id}][tag: ${message.member.user.tag}] requested to reset server metadata!`);
     var server = servers[message.guild.id];
     var cached_path = './stream_fetched_audio/';
-    /* clear cached audio file if it exists */
-    filestream.readdirSync(cached_path, function (err, files) {
-        if (err) {
-            return console.log(err);
-        }
-        filestream.unlinkSync(`${cached_path}${files}`);
-    });
+    if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
+        filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
+            if (err) return console.log(err);
+            console.log('cached audio deleted successfully');
+        });
+    }
     /* destroy & reset */
     if (server.dispatcher != undefined) {
         server.dispatcher.destroy();
@@ -1540,18 +1539,12 @@ function music_loop_logic(message, cached_path, soundPath, audio_title) {
     var server = servers[message.guild.id];
     /* primary loop logic */
     if (server.skip) {
-        /* clear cached audio file if it exists
         if (filestream.existsSync(`${cached_path}${audio_title}.mp3`)) {
             filestream.unlinkSync(`${cached_path}${audio_title}.mp3`, function (err) {
                 if (err) return console.log(err);
-                console.log('file deleted successfully');
+                console.log('cached audio deleted successfully');
             });
         }
-        */
-        filestream.readdirSync(cached_path, function (err, files) {
-            if (err) return console.log(err);
-            filestream.unlinkSync(`${cached_path}${files}`);
-        });
         server.skip = false;
         var count = 0;
         for (var i = 0; i < server.skipAmount; i++) {
