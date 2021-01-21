@@ -21,11 +21,10 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
-    "@discordjs/uws": "^10.149.0",
     "discord-youtube-api": "^0.1.0",
     "discord.js": "^12.3.1",
     "ffmpeg-static": "^4.2.7",
     "ytdl-core": "^4.4.4",
-    "ytpl": "1.0.1"
+    "ytpl": "^2.0.4"
   }
 }
