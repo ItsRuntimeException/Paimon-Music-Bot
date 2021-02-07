@@ -276,6 +276,11 @@ client.on("message", async message => {
                 if (is_Owner(message)) {
                     return emergency_food_time(message);
                 }
+            } else if (command.match(/guild/g)) {
+                /* only bot-owner may check bot servers */
+                if (is_Owner(message)) {
+                    return display_num_guilds(message);
+                }
             } else if (command.match(/caching/g)) {
                 if (is_superAccess(message)) {
                     set_cached_audio_mode(message, args[0]);
@@ -401,6 +406,10 @@ function userHelp(message) {
           {
             name: "?remove Super|SuperAccess [@userTag]",
             value: "Remove a user from one of paimon's masters!"
+          },
+          {
+            name: "?Guild",
+            value: "Request the number of servers Paimon's currently running in."
           },
           {
             name: "?Shutdown|Kill",
@@ -1750,6 +1759,11 @@ function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = un
         if (message != undefined)
             message.channel.send('Admin already exist!');
     }
+}
+
+function display_num_guilds(message) {
+    let num_guilds = client.guilds.cache.size;
+    message.channel.send(`Paimon's currently running in ${num_guilds} ${((num_guilds > 1) ? 'servers' : 'server')}!`);
 }
 
 function emergency_food_time(message) {
