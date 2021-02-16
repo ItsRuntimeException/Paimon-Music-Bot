@@ -111,7 +111,7 @@ client.on("message", async message => {
                     +"\nThis command plays local_folder music, given a specified category."
                     +"\n\nUsage: " + "?playLocal [Category]"
                     +"\n\nCategory example:\n"
-                        +"\t\tAnime | Futurefunk | Ghibli | VN").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+                        +"\t\tAnime | Funk | Ghibli | VN").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
             }
 
             var server = servers[message.guild.id];
@@ -133,8 +133,8 @@ client.on("message", async message => {
             if (search_string.match(/anime/gi)) {
                 queueLogic(message, './anime_music/');
             }
-            else if (search_string.match(/futurefunk/gi)) {
-                queueLogic(message, './futurefunk_music/');
+            else if (search_string.match(/funk/gi)) {
+                queueLogic(message, './funk_music/');
             }
             else if (search_string.match(/vn|visual novel|visualnovel/gi)) {
                 queueLogic(message, './vn_music/');
@@ -144,11 +144,11 @@ client.on("message", async message => {
             }
             else if (search_string == undefined) {
                 console.log('playLocal: User did not specify category');
-                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
+                return message.channel.send('Please specify Category! (Anime, Funk, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
             }
             else {
                 console.log('playLocal: Category does not exist!');
-                return message.channel.send('Please specify Category! (Anime, Persona, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
+                return message.channel.send('Please specify Category! (Anime, Funk, etc...)').then(newMessage => newMessage.delete({timeout: 5000, reason: 'fewer text clutter.'}).catch( (error) => {console.log(`${error}`)} ));
             }
             break;
         case "shuffle":
@@ -409,7 +409,7 @@ function userHelp(message) {
           },
           {
             name: "?Guild",
-            value: "Request the number of servers Paimon's currently running in."
+            value: "Request servers info that Paimon's currently running in."
           },
           {
             name: "?Shutdown|Kill",
@@ -1668,7 +1668,7 @@ function get_Object_Index_Pair(guild) {
     */
     var filter_Obj = undefined;
     var path = './json_data/admins.json';
-    let servers_Obj = JSON.parse(readTextFile(path));
+    var servers_Obj = JSON.parse(readTextFile(path));
     var index = -1;
     if (servers_Obj.servers.some(item => item.server_id === guild.id)) {
         /* try to find if this server is already in the json data */
@@ -1764,6 +1764,28 @@ function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = un
 function display_num_guilds(message) {
     let num_guilds = client.guilds.cache.size;
     message.channel.send(`Paimon's currently running in ${num_guilds} ${((num_guilds > 1) ? 'servers' : 'server')}!`);
+    
+    let guild_names = '';
+    client.guilds.cache.forEach(guild => {
+        console.log(`server name: ${guild.name} | id: ${guild.id}`);
+        guild_names += guild.name + '\n';
+        /* Update admins.json to remove cached guilds. */
+        var path = './json_data/admins.json';
+        var servers_Obj = JSON.parse(readTextFile(path));
+        var server_index = -1;
+        if (servers_Obj.servers.some(item => item.server_id === guild.id)) {
+            /* try to find if this server is already in the json data */
+            servers_Obj.servers.find(function(item, i) {
+                server_index = i;
+                return item.server_id === guild.id;
+            });
+        }
+        /* if server not found anymore, delete the cache from .json file */
+        if (server_index == -1) {
+            servers_Obj.servers.splice(server_index, 1);
+            save_as_JSON(servers_Obj, path);
+        }
+    }).then(message.channel.send(`servers: ${guild_names}`));
 }
 
 function emergency_food_time(message) {
