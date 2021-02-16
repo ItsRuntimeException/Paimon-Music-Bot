@@ -276,10 +276,10 @@ client.on("message", async message => {
                 if (is_Owner(message)) {
                     return emergency_food_time(message);
                 }
-            } else if (command.match(/guild/g)) {
+            } else if (command.match(/server/g)) {
                 /* only bot-owner may check bot servers */
                 if (is_Owner(message)) {
-                    return display_num_guilds(message);
+                    return display_guilds_info(message);
                 }
             } else if (command.match(/caching/g)) {
                 if (is_superAccess(message)) {
@@ -408,7 +408,7 @@ function userHelp(message) {
             value: "Remove a user from one of paimon's masters!"
           },
           {
-            name: "?Guild",
+            name: "?Server",
             value: "Request servers info that Paimon's currently running in."
           },
           {
@@ -1761,14 +1761,18 @@ function try_add_admin(servers_Obj, filter_Obj, guildmember, index, message = un
     }
 }
 
-function display_num_guilds(message) {
+function display_guilds_info(message) {
     let num_guilds = client.guilds.cache.size;
     message.channel.send(`Paimon's currently running in ${num_guilds} ${((num_guilds > 1) ? 'servers' : 'server')}!`);
     
-    let guild_names = '';
+    let guilds_info = '';
+    let guilds_arr = [];
     client.guilds.cache.forEach(guild => {
-        console.log(`server name: ${guild.name} | id: ${guild.id}`);
-        guild_names += guild.name + '\n';
+        guilds_arr.push(guild);
+        guilds_info += 
+        `Server Name: ${guild.name}
+        Server ID: ${guild.id}
+        Server Owner: ${guild.owner.id}`+'\n\n';
         /* Update admins.json to remove cached guilds. */
         var path = './json_data/admins.json';
         var servers_Obj = JSON.parse(readTextFile(path));
@@ -1785,7 +1789,24 @@ function display_num_guilds(message) {
             servers_Obj.servers.splice(server_index, 1);
             save_as_JSON(servers_Obj, path);
         }
-    }).then(message.channel.send(`servers: ${guild_names}`));
+    });
+    console.log(guilds_info);
+    let embedInfo = new Discord.MessageEmbed()
+    .setColor('#0099ff')
+	.setTitle('Servers Info')
+	.setAuthor('Paimon-chan\'s Embedded Info', client.user.avatarURL(), sauce);
+	for (var i = 0 ; i < num_guilds; i++) {
+        embedInfo.addFields(
+            {
+              name: guilds_arr[i].name,
+              value: 'Server_ID: '+ guilds_arr[i].id+'\n'
+                    +'Owner_Tag#: '+ guilds_arr[i].owner.user.tag
+            }
+        );
+    }
+    embedInfo.setTimestamp();
+	embedInfo.setFooter('© Rich Embedded Frameworks', client.user.avatarURL());
+    message.channel.send(embedInfo);
 }
 
 function emergency_food_time(message) {

@@ -62,7 +62,7 @@ Command | param | Description
 ?caching \[string?Optional\] | on \| off | Preload audio data into a file, then stream it (Lower stream-quality?).
 ?dlmusic | N/A | Download music from pre-cached music file.
 ?clean \[int?Optional\] | numLines | Clean channel messages.
-?guild | N/A | Request servers info that Paimon's currently running in.
+?server | N/A | Request servers info that Paimon's currently running in.
 ?shutdown | N/A | Shutdown the bot from the server.
 ?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
 ?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
