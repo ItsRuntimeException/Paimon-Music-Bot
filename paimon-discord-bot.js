@@ -111,7 +111,7 @@ client.on("message", async message => {
                     +"\nThis command plays local_folder music, given a specified category."
                     +"\n\nUsage: " + "?playLocal [Category]"
                     +"\n\nCategory example:\n"
-                        +"\t\tAnime | Persona | Ghibli | VN").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
+                        +"\t\tAnime | Futurefunk | Ghibli | VN").then(console.log(`${message.member.user.tag} requested for a specific bot functions.`));
             }
 
             var server = servers[message.guild.id];
@@ -133,8 +133,8 @@ client.on("message", async message => {
             if (search_string.match(/anime/gi)) {
                 queueLogic(message, './anime_music/');
             }
-            else if (search_string.match(/persona/gi)) {
-                queueLogic(message, './persona_music/');
+            else if (search_string.match(/futurefunk/gi)) {
+                queueLogic(message, './futurefunk_music/');
             }
             else if (search_string.match(/vn|visual novel|visualnovel/gi)) {
                 queueLogic(message, './vn_music/');
