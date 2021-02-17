@@ -1773,22 +1773,6 @@ function display_guilds_info(message) {
         `Server Name: ${guild.name}
         Server ID: ${guild.id}
         Server Owner: ${guild.owner.id}`+'\n\n';
-        /* Update admins.json to remove cached guilds. */
-        var path = './json_data/admins.json';
-        var servers_Obj = JSON.parse(readTextFile(path));
-        var server_index = -1;
-        if (servers_Obj.servers.some(item => item.server_id === guild.id)) {
-            /* try to find if this server is already in the json data */
-            servers_Obj.servers.find(function(item, i) {
-                server_index = i;
-                return item.server_id === guild.id;
-            });
-        }
-        /* if server not found anymore, delete the cache from .json file */
-        if (server_index == -1) {
-            servers_Obj.servers.splice(server_index, 1);
-            save_as_JSON(servers_Obj, path);
-        }
     });
     console.log(guilds_info);
     let embedInfo = new Discord.MessageEmbed()
