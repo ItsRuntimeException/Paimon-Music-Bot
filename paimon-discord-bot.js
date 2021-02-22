@@ -249,7 +249,7 @@ client.on("message", async message => {
         case "gcreate":
             create_genshin_table(message);
             break;
-        case "gshowtable":
+        case "gtable":
             showtable(message);
             break;
         case "gpity":
@@ -333,54 +333,54 @@ function userHelp(message) {
         title: "COMMANDS",
         description: `[Currently Hosting from ${process.cwd()}]\nMusic Support Enabled!`,
         fields: [{
-            name: "?Help",
+            name: "?help",
             value: "Display a general list of commands."
           },
           {
-            name: "?Join|Leave",
+            name: "?join|leave",
             value: "Paimon will join/leave your voice channel!"
           },
           {
-            name: "?Play [YouTube-Link|Keyword]",
+            name: "?play [YouTube-Link|Keyword]",
             value: "1: Play audio from the user's provided link.\n2: Perform a search on the user's provided keyword."
           },
-          { name: "?PlayLocal [Category]",
+          { name: "?playlocal [Category]",
             value: "Play host's local audio files."
           },
           {
-            name: "?Queue",
+            name: "?queue",
             value: "Display server's current music queue."
           },
           {
-            name: "?MusicInfo",
+            name: "?musicinfo",
             value: "Fetch details of current song."
           },
           {
-            name: "?Pause|Resume|Skip|Stop|Shuffle|Loop",
+            name: "?pause|resume|skip|stop|shuffle|loop",
             value: "Music Control Logic."
           },
           {
-            name: "?Vol [Percent]",
+            name: "?vol [Percent]",
             value:"Set the current music volume."
           },
           {
-            name: "?Source",
+            name: "?source",
             value: "Paimon's delicious sauce code~"
           },
           {
-            name: "?Roll",
+            name: "?roll",
             value: "Random Number between 1-6."
           },
           {
-            name: "?MapleStory",
+            name: "?maplestory",
             value: "MapleStory guild page."
           },
           {
-            name: "?g[Create|Showtable|Pity|Wish|Reset|File]",
+            name: "?g[create|table|pity|wish|reset|file]",
             value: "Genshin Impact's manual \'Gacha Count-Table\'."
           },
           {
-            name: "?Valorant [GameCode] [Sensitivity]",
+            name: "?valorant [GameCode] [Sensitivity]",
             value: "Convert other games' sensitivity ↦ Valorant's."
           }
         ],
@@ -400,27 +400,27 @@ function userHelp(message) {
         description: `Can be used if 'SuperAccess' is granted by the owner | exisiting admin w/ 'SuperAcess'`,
         fields: [
           {
-            name: "?add Super|SuperAccess [@userTag]",
+            name: "?add super|superaccess [@userTag]",
             value: "Add a user as one of paimon's masters!"
           },
           {
-            name: "?remove Super|SuperAccess [@userTag]",
+            name: "?remove super|superaccess [@userTag]",
             value: "Remove a user from one of paimon's masters!"
           },
           {
-            name: "?Server",
+            name: "?server",
             value: "Request servers info that Paimon's currently running in."
           },
           {
-            name: "?Shutdown|Kill",
+            name: "?shutdown|kill",
             value: "Paimon shall be served as food T^T"
           },
           {
-            name: "?Clean|Clear",
+            name: "?clean|clear",
             value: "Paimon will clean up your mess!"
           },
           {
-            name: "?Caching|Dlmusic",
+            name: "?caching|dlmusic",
             value: "Extra Music Control Logic."
           }
         ],

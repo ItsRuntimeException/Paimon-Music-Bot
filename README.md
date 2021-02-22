@@ -29,14 +29,14 @@ Display a list of bot commands and its usage.
 
 Example Usage |
 | :---
-?Help
+?help
 
 # Music Support #
 Command | param | Description
 | :--- | :--- | :---
 ?play \[string\] | Youtube-URL<br/>Keywords | Play music from youtube.
-?playLocal \[string\] | Category | Play music from local_folder.
-?musicInfo | N/A | Fetch details of current song.
+?playlocal \[string\] | Category | Play music from local_folder.
+?musicinfo | N/A | Fetch details of current song.
 ?vol \[int?Optional\] | server.volume | Change the volume of the server's dispatcher.
 ?pause | N/A | Pause music from playing.
 ?resume | N/A | Resume current paused music.
@@ -81,12 +81,12 @@ admins.json (Before) | admins.json (After)
 # Genshin Impact #
 Command | bannerType | pityType | Operation | Description
 | :--- | :--- | :--- | :--- | :---
-?gFile | N/A | N/A | N/A | Request a raw .json of everyone's table.
-?gCreate | N/A | N/A | N/A | Create a default Genshin Impact Gacha Table.
-?gShowtable | N/A | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
-?gPity<br/>\[pityType: string?Optional\] | N/A | Normal<br/>Soft | N/A | Display the calculated wishes (or primogem) until your next 5-star pity item.
-?gWish<br/>\[bannerType: string\]<br/>\[Operation\]<br/>\[int\] | Standard<br/>Weapon<br/>Event | N/A | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
-?gReset<br/>\[bannerType: string\] | Standard<br/>Weapon<br/>Event | N/A | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
+?gfile | N/A | N/A | N/A | Request a raw .json of everyone's table.
+?gcreate | N/A | N/A | N/A | Create a default Genshin Impact Gacha Table.
+?gtable | N/A | N/A | N/A | Display the user's current Genshin Impact Gacha Table.
+?gpity<br/>\[pityType: string?Optional\] | N/A | Normal<br/>Soft | N/A | Display the calculated wishes (or primogem) until your next 5-star pity item.
+?gwish<br/>\[bannerType: string\]<br/>\[Operation\]<br/>\[int\] | Standard<br/>Weapon<br/>Event | N/A | Add<br/>Replace | Manually modify the specified count of bannerType in the user's Genshin Gacha Table.
+?greset<br/>\[bannerType: string\] | Standard<br/>Weapon<br/>Event | N/A | N/A | Manually reset the specified count of bannerType in the user's Genshin Gacha Table.
 
 **Test Run:**
 
