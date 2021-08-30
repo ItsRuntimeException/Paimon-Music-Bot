@@ -1,10 +1,10 @@
 ***Personal Project; Last Updated: January 5, 2021***
 # [Discord Bot] Paimon-chan #
 A Discord bot with various functionalities I desired to have.<br/>
-<img src="moji/PaimonRub.gif" width="128" height="128">
-<img src="moji/PaimonPeeks.gif" width="128" height="128">
-<img src="moji/PaimonSpins.gif" width="128" height="128">
-<img src="moji/PaimonCookies.gif" width="128" height="128">
+<!-- <img src="moji/PaimonRub.gif" width="128" height="128"> -->
+<img src="moji/PaimonPeeks.gif" width="128" height="128"> -->
+<!-- <img src="moji/PaimonSpins.gif" width="128" height="128"> -->
+<!-- <img src="moji/PaimonCookies.gif" width="128" height="128"> -->
 
 **Steps**
 1. Make sure to have npm and nodeJS installed.<br/>
