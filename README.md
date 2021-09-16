@@ -64,8 +64,8 @@ Command | param | Description
 ?clean \[int?Optional\] | numLines | Clean channel messages.
 ?server | N/A | Request servers info that Paimon's currently running in.
 ?shutdown | N/A | Shutdown the bot from the server.
-?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
-?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
+?add super \[param\]<br/>?add superAccess \[param\] | @userTag | Add a specified user from SuperAccess-commands.
+?remove super \[param\]<br/>?remove superAccess \[param\] | @userTag | Remove a specified user from SuperAccess-commands.
 
 **Audio Caching/Downloading:**
 
