@@ -1,8 +1,9 @@
 ***Personal Project; Last Updated: September 17, 2021***
 
-**Update**
+**Update**\
 I'll be occasionally working on this to add more features in the future.
-- Planned Feature: Adding pre-list saving and loading via .txt or .json format. Now you can play your favorite list without going back to that youtube playlist link.
+Planned Feature
+- Adding pre-list saving and loading via .txt or .json format, so you can play your current favorite music without going back to that youtube playlist link.
 
 # [Discord Bot] Paimon-chan #
 A Discord bot with various functionalities I desired to have.<br/>
