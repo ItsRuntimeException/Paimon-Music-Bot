@@ -3,7 +3,7 @@
 **Update**\
 I'll be occasionally working on this to add more features in the future.
 
-**Planned Feature**\
+**Planned Feature**
 - Adding pre-list saving and loading via .txt or .json format, so you can play your current favorite music without going back to that youtube playlist link.
 
 # [Discord Bot] Paimon-chan #
