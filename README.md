@@ -5,8 +5,8 @@
 **Planned Feature**
 - Adding pre-list saving and loading via .txt or .json format, so you can play your current favorite music without going back to that youtube playlist link.
 
-# [Discord Bot] Paimon-chan #
-A Discord bot with various functionalities I desired to have.<br/>
+# [Discord Bot] Paimon #
+A Discord bot with various functionalities.<br/>
 <!-- <img src="moji/PaimonRub.gif" width="128" height="128"> -->
 <img src="moji/PaimonPeeks.gif" width="128" height="128">
 <!-- <img src="moji/PaimonSpins.gif" width="128" height="128"> -->
